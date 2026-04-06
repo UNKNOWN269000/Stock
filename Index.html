@@ -284,6 +284,956 @@
     lucide.createIcons();
 
     // Configuration & Data
+    const profiles = ["Flat Bar 20x5", "Square Tube 40x40", "Round Tube 25mm", "T-Section 30x30", "L-Angle 50x50", "U-Channel 20x20", "Rectangular Tube 80x40"];
+    let sessionData = [];
+    let editId = null;
+
+    // Form Management
+    function resetForm() {
+        document.getElementById('entryForm').reset();
+        document.getElementById('extDate').valueAsDate = new Date();
+        document.getElementById('totalWeight').value = "0.00";
+        document.getElementById('otherShiftGroup').style.display = 'none';
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('modalTitle').innerText = "Bucket Production Entry";
+        document.getElementById('submitBtn').innerText = "Add Entry";
+        editId = null;
+    }
+
+    function toggleMenu() {
+        document.getElementById("menu").classList.toggle("active");
+        document.getElementById("mainOverlay").classList.toggle("active");
+    }
+
+    function openModal() {
+        resetForm();
+        document.getElementById("addModal").classList.add("active");
+        document.getElementById("mainOverlay").classList.add("active");
+    }
+
+    function closeModal() {
+        document.getElementById("addModal").classList.remove("active");
+        if (!document.getElementById("menu").classList.contains("active")) {
+            document.getElementById("mainOverlay").classList.remove("active");
+        }
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+        if (!document.getElementById("menu").classList.contains("active")) {
+            document.getElementById("mainOverlay").classList.remove("active");
+        }
+    }
+
+    function closeAll() {
+        document.getElementById("menu").classList.remove("active");
+        closeModal();
+        closeConfirmModal();
+    }
+
+    function checkShift() {
+        const shiftVal = document.getElementById('shift').value;
+        document.getElementById('otherShiftGroup').style.display = (shiftVal === 'Other') ? 'block' : 'none';
+    }
+
+    function calcWeight() {
+        const qty = parseFloat(document.getElementById('qty').value) || 0;
+        const weight = parseFloat(document.getElementById('unitWeight').value) || 0;
+        const length = parseFloat(document.getElementById('length').value) || 0;
+        const total = qty * weight * length;
+        document.getElementById('totalWeight').value = total.toFixed(2);
+    }
+
+    function filterProfiles() {
+        const input = document.getElementById('profileSearch').value.toUpperCase();
+        const results = document.getElementById('searchResults');
+        results.innerHTML = '';
+        if(!input) { results.style.display = 'none'; return; }
+        
+        const filtered = profiles.filter(p => p.toUpperCase().includes(input));
+        if(filtered.length > 0) {
+            results.style.display = 'block';
+            filtered.forEach(p => {
+                const div = document.createElement('div');
+                div.innerText = p;
+                div.onclick = () => { 
+                    document.getElementById('profileSearch').value = p; 
+                    results.style.display = 'none'; 
+                };
+                results.appendChild(div);
+            });
+        } else {
+            results.style.display = 'none';
+        }
+    }
+
+    function editEntry(id) {
+        const item = sessionData.find(i => i.id === id);
+        if(!item) return;
+
+        editId = id;
+        document.getElementById('modalTitle').innerText = "Edit Bucket Entry";
+        document.getElementById('submitBtn').innerText = "Update Entry";
+
+        document.getElementById('bucketNo').value = item.bucket;
+        document.getElementById('extDate').value = item.date;
+        document.getElementById('batchNo').value = item.batch === '-' ? '' : item.batch;
+        document.getElementById('type').value = item.type;
+        document.getElementById('profileSearch').value = item.profile;
+        document.getElementById('dieNo').value = item.die === '-' ? '' : item.die;
+        document.getElementById('length').value = item.len;
+        document.getElementById('qty').value = item.qty;
+        document.getElementById('unitWeight').value = item.uW;
+        document.getElementById('surface').value = item.surf;
+        document.getElementById('totalWeight').value = item.totalW;
+
+        const shiftSelect = document.getElementById('shift');
+        if (['Day', 'Night'].includes(item.shift)) {
+            shiftSelect.value = item.shift;
+            document.getElementById('otherShiftGroup').style.display = 'none';
+        } else {
+            shiftSelect.value = 'Other';
+            document.getElementById('otherShiftGroup').style.display = 'block';
+            document.getElementById('otherShiftText').value = item.shift;
+        }
+
+        document.getElementById("addModal").classList.add("active");
+        document.getElementById("mainOverlay").classList.add("active");
+    }
+
+    function saveEntry() {
+        const bucket = document.getElementById('bucketNo').value;
+        const profile = document.getElementById('profileSearch').value;
+        
+        if(!bucket || !profile) {
+            alert("Please fill in Bucket Number and Profile.");
+            return;
+        }
+
+        const formData = {
+            id: editId || Date.now(),
+            bucket: bucket,
+            date: document.getElementById('extDate').value,
+            shift: document.getElementById('shift').value === 'Other' ? document.getElementById('otherShiftText').value : document.getElementById('shift').value,
+            batch: document.getElementById('batchNo').value || '-',
+            type: document.getElementById('type').value,
+            profile: profile,
+            die: document.getElementById('dieNo').value || '-',
+            len: document.getElementById('length').value || 0,
+            qty: document.getElementById('qty').value || 0,
+            uW: document.getElementById('unitWeight').value || 0,
+            surf: document.getElementById('surface').value,
+            totalW: document.getElementById('totalWeight').value
+        };
+
+        if(editId) {
+            const index = sessionData.findIndex(i => i.id === editId);
+            sessionData[index] = formData;
+            editId = null;
+        } else {
+            sessionData.push(formData);
+        }
+
+        renderEntries();
+        closeModal();
+    }
+
+    function removeEntry(id) {
+        if(confirm("Are you sure you want to delete this entry?")) {
+            sessionData = sessionData.filter(item => item.id !== id);
+            renderEntries();
+        }
+    }
+
+    function renderEntries() {
+        const display = document.getElementById('displayArea');
+        display.innerHTML = '';
+
+        if(sessionData.length === 0) {
+            display.innerHTML = '<div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>';
+            return;
+        }
+
+        [...sessionData].reverse().forEach(item => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'data-entry';
+            entryDiv.innerHTML = `
+                <i data-lucide="edit-3" class="edit-btn" onclick="editEntry(${item.id})"></i>
+                <i data-lucide="trash-2" class="delete-btn" onclick="removeEntry(${item.id})"></i>
+                <div class="data-grid">
+                    <div class="data-item"><b>Bucket No</b><span>${item.bucket}</span></div>
+                    <div class="data-item"><b>Date</b><span>${item.date}</span></div>
+                    <div class="data-item"><b>Shift</b><span>${item.shift}</span></div>
+                    <div class="data-item"><b>Batch No</b><span>${item.batch}</span></div>
+                    <div class="data-item"><b>Type</b><span>${item.type}</span></div>
+                    <div class="data-item"><b>Profile</b><span>${item.profile}</span></div>
+                    <div class="data-item"><b>Die No</b><span>${item.die}</span></div>
+                    <div class="data-item"><b>Dimensions</b><span>${item.len}m x ${item.qty}</span></div>
+                    <div class="data-item"><b>Unit Wt</b><span>${item.uW}</span></div>
+                    <div class="data-item"><b>Surface</b><span>${item.surf}</span></div>
+                    <div class="data-item" style="border-top: 1px solid #30363d; grid-column: span 2; padding-top: 10px; margin-top: 5px;">
+                        <b style="color:var(--accent-green)">Calculated Net Weight</b>
+                        <span style="font-size: 1.3rem; color:var(--accent-green)">${item.totalW} kg</span>
+                    </div>
+                </div>
+            `;
+            display.appendChild(entryDiv);
+        });
+        lucide.createIcons();
+    }
+
+    // FINAL SUBMISSION LOGIC
+    function finalSubmit() {
+        if(sessionData.length === 0) {
+            alert("No entries to submit. Please add a bucket first.");
+            return;
+        }
+
+        const totalKg = sessionData.reduce((acc, curr) => acc + parseFloat(curr.totalW), 0).toFixed(2);
+        const msg = `You are about to submit <b>${sessionData.length} buckets</b> with a total weight of <b>${totalKg} kg</b> to the database.`;
+        
+        document.getElementById('confirmMessage').innerHTML = msg;
+        document.getElementById('confirmModal').classList.add('active');
+        document.getElementById('mainOverlay').classList.add('active');
+    }
+
+    function executeSubmit() {
+        closeConfirmModal();
+        document.getElementById('successOverlay').classList.add('active');
+        
+        setTimeout(() => {
+            sessionData = [];
+            location.reload(); 
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>        }
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
+        .overlay.active { display: block; }
+
+        /* MAIN UI */
+        .container { padding: 90px 15px 20px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .page-header { text-align: center; margin-bottom: 25px; width: 100%; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .page-header h3 { color: var(--text-muted); font-weight: 400; font-size: 0.9rem; }
+        
+        .card {
+            width: 100%; max-width: 850px; background: var(--bg-card);
+            border-radius: 24px; border: 1px solid var(--border-color);
+            padding: 20px; display: flex; flex-direction: column; gap: 20px;
+            min-height: 200px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .inner-frame {
+            width: 100%; min-height: 100px; background: var(--bg-inner);
+            border-radius: 15px; border: 1px dashed #444c56; padding: 12px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .data-entry {
+            background: #1c2128; border-radius: 12px; padding: 15px;
+            border-left: 5px solid var(--accent-green); position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .data-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 12px; font-size: 0.85rem;
+        }
+        .data-item b { display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; margin-bottom: 2px; }
+        .data-item span { color: white; font-weight: 500; word-break: break-all; }
+
+        /* MOBILE SPECIFIC OVERRIDES */
+        @media (max-width: 600px) {
+            .container { padding: 80px 0 20px; }
+            .card { border-radius: 0; border-left: none; border-right: none; padding: 15px; }
+            .page-header h1 { font-size: 1.5rem; }
+            .data-grid { grid-template-columns: repeat(2, 1fr); }
+            .submit-footer { padding: 15px; }
+            .final-submit-btn { border-radius: 12px; padding: 15px; font-size: 1rem; }
+        }
+
+        /* SUBMIT FOOTER */
+        .submit-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(13, 15, 20, 0.9); backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border-color); padding: 20px;
+            display: flex; justify-content: center; z-index: 1000;
+        }
+
+        .final-submit-btn {
+            width: 100%; max-width: 850px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #064e3b; border: none; padding: 18px; font-size: 1.1rem; font-weight: 800;
+            border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: 0.3s; box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+            text-transform: uppercase;
+        }
+        .final-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(74, 222, 128, 0.5); }
+
+        /* MODALS (Common Styling) */
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 95%; max-width: 500px; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            padding: 25px; z-index: 3000; display: none; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
+        }
+        .modal.active { display: block; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop { from { transform: translate(-50%, -45%) scale(0.9); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+        /* FORM STYLES */
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .form-group input, .form-group select {
+            padding: 12px; background: var(--bg-inner); border: 1px solid var(--border-color);
+            border-radius: 8px; color: white; outline: none; transition: 0.2s; font-size: 16px;
+        }
+        .form-group input:focus { border-color: var(--accent-green); }
+
+        .search-results {
+            background: #1f2937; border: 1px solid var(--border-color);
+            border-radius: 8px; display: none; max-height: 150px; overflow-y: auto;
+            margin-top: 5px;
+        }
+        .search-results div { padding: 10px; cursor: pointer; border-bottom: 1px solid #30363d; }
+        .search-results div:hover { background: var(--accent-green); color: black; }
+
+        .modal-footer { margin-top: 25px; display: flex; gap: 10px; }
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; flex: 1; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-save { background: var(--accent-green); color: #064e3b; }
+        .btn-cancel { background: #374151; color: white; }
+        .btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+        /* CONFIRM THEME POPUP */
+        .confirm-icon-box { width: 60px; height: 60px; border-radius: 50%; background: rgba(74, 222, 128, 0.1); color: var(--accent-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
+        .confirm-title { text-align: center; margin-bottom: 10px; font-size: 1.4rem; }
+        .confirm-text { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4; }
+
+        .add-main-btn {
+            background: var(--bg-inner); color: var(--accent-green); border: 1px solid var(--accent-green);
+            padding: 16px 40px; font-size: 1rem; font-weight: 700;
+            border-radius: 12px; cursor: pointer; align-self: center; transition: 0.2s; width: 100%;
+        }
+        .add-main-btn:hover { background: var(--accent-green); color: #064e3b; }
+
+        /* ACTION BUTTONS ON DATA ENTRY */
+        .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+        .edit-btn { position: absolute; top: 15px; right: 50px; color: var(--accent-green); cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
+        .edit-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* SUCCESS OVERLAY */
+        .success-overlay {
+            position: fixed; inset: 0; background: rgba(9, 11, 15, 0.98);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 5000; text-align: center; padding: 20px;
+        }
+        .success-overlay.active { display: flex; }
+
+        .checkmark-wrapper { width: 100px; height: 100px; position: relative; margin-bottom: 20px; }
+        .checkmark-circle { 
+            stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10;
+            stroke: var(--accent-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark-check { 
+            transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
+            stroke: var(--accent-green); stroke-width: 5; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="company-name">ULTRA ALUMINIUM</div>
+</div>
+
+<div class="side-menu" id="menu">
+    <div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800;">MAIN MENU</div>
+    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    <a href="#" style="color:var(--accent-green); text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px; background: rgba(74, 222, 128, 0.1); border-radius: 10px;"><i data-lucide="factory"></i> Production Entry</a>
+    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="database"></i> Records</a>
+</div>
+
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
+
+<div class="modal" id="confirmModal">
+    <div class="confirm-icon-box"><i data-lucide="upload-cloud"></i></div>
+    <h3 class="confirm-title">Ready to Submit?</h3>
+    <p class="confirm-text" id="confirmMessage">You are about to transmit 0 bucket entries to the database.</p>
+    <div class="modal-footer">
+        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit Now</button>
+        <button class="btn btn-cancel" onclick="closeConfirmModal()">Review Again</button>
+    </div>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+    <div class="checkmark-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+    </div>
+    <h2 style="color: var(--accent-green); font-size: 1.8rem;">Submission Successful</h2>
+    <p style="color: var(--text-muted);">Data has been transmitted to the production database.</p>
+</div>
+
+<div class="modal" id="addModal">
+    <div class="modal-header" style="margin-bottom: 20px;"><h3 id="modalTitle">Bucket Production Entry</h3></div>
+    <form id="entryForm" onsubmit="event.preventDefault(); saveEntry();">
+        <div class="form-group"><label>Bucket No</label><input type="text" id="bucketNo" required></div>
+        <div class="form-group"><label>Extrusion Date</label><input type="date" id="extDate" required></div>
+        <div class="form-group">
+            <label>Shift</label>
+            <select id="shift" onchange="checkShift()">
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="form-group" id="otherShiftGroup" style="display:none;"><label>Specify Shift</label><input type="text" id="otherShiftText"></div>
+        <div class="form-group"><label>Billet Batch No</label><input type="number" id="batchNo"></div>
+        <div class="form-group">
+            <label>Type</label>
+            <select id="type">
+                <option value="ULR">ULR</option>
+                <option value="PRM">PRM</option>
+                <option value="ULR PRM">ULR PRM</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Profile (Search)</label>
+            <input type="text" id="profileSearch" oninput="filterProfiles()" placeholder="Search profiles..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        <div class="form-group"><label>Die No</label><input type="number" id="dieNo"></div>
+        <div class="form-group"><label>Length (m)</label><input type="number" step="0.01" id="length" oninput="calcWeight()"></div>
+        <div class="form-group"><label>Qty</label><input type="number" id="qty" oninput="calcWeight()"></div>
+        <div class="form-group"><label>Unit Weight (kg/m)</label><input type="number" step="0.001" id="unitWeight" oninput="calcWeight()"></div>
+        <div class="form-group">
+            <label>Surface</label>
+            <select id="surface">
+                <option value="AN">AN</option>
+                <option value="PC">PC</option>
+                <option value="MF">MF</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Bucket Weight (kg)</label><input type="text" id="totalWeight" style="color:var(--accent-green); font-weight:bold; font-size: 1.1rem; border-color: var(--accent-green);" readonly value="0.00"></div>
+        
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-save" id="submitBtn">Add Entry</button>
+            <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Bucket Income</h1>
+        <h3>Extrusion Department</h3>
+    </div>
+
+    <div class="card">
+        <button class="add-main-btn" onclick="openModal()">+ Add New Bucket</button>
+        <div class="inner-frame" id="displayArea">
+            <div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>
+        </div>
+    </div>
+</div>
+
+<div class="submit-footer">
+    <button class="final-submit-btn" onclick="finalSubmit()">
+        <i data-lucide="check-circle"></i>
+        Final Submit Production
+    </button>
+</div>
+
+<script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Configuration & Data
+    const profiles = ["Flat Bar 20x5", "Square Tube 40x40", "Round Tube 25mm", "T-Section 30x30", "L-Angle 50x50", "U-Channel 20x20", "Rectangular Tube 80x40"];
+    let sessionData = [];
+    let editId = null;
+
+    // Form Management
+    function resetForm() {
+        document.getElementById('entryForm').reset();
+        document.getElementById('extDate').valueAsDate = new Date();
+        document.getElementById('totalWeight').value = "0.00";
+        document.getElementById('otherShiftGroup').style.display = 'none';
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('modalTitle').innerText = "Bucket Production Entry";
+        document.getElementById('submitBtn').innerText = "Add Entry";
+        editId = null;
+    }
+
+    function toggleMenu() {
+        document.getElementById("menu").classList.toggle("active");
+        document.getElementById("mainOverlay").classList.toggle("active");
+    }
+
+    function openModal() {
+        resetForm();
+        document.getElementById("addModal").classList.add("active");
+        document.getElementById("mainOverlay").classList.add("active");
+    }
+
+    function closeModal() {
+        document.getElementById("addModal").classList.remove("active");
+        if (!document.getElementById("menu").classList.contains("active")) {
+            document.getElementById("mainOverlay").classList.remove("active");
+        }
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+        if (!document.getElementById("menu").classList.contains("active")) {
+            document.getElementById("mainOverlay").classList.remove("active");
+        }
+    }
+
+    function closeAll() {
+        document.getElementById("menu").classList.remove("active");
+        closeModal();
+        closeConfirmModal();
+    }
+
+    function checkShift() {
+        const shiftVal = document.getElementById('shift').value;
+        document.getElementById('otherShiftGroup').style.display = (shiftVal === 'Other') ? 'block' : 'none';
+    }
+
+    function calcWeight() {
+        const qty = parseFloat(document.getElementById('qty').value) || 0;
+        const weight = parseFloat(document.getElementById('unitWeight').value) || 0;
+        const length = parseFloat(document.getElementById('length').value) || 0;
+        const total = qty * weight * length;
+        document.getElementById('totalWeight').value = total.toFixed(2);
+    }
+
+    function filterProfiles() {
+        const input = document.getElementById('profileSearch').value.toUpperCase();
+        const results = document.getElementById('searchResults');
+        results.innerHTML = '';
+        if(!input) { results.style.display = 'none'; return; }
+        
+        const filtered = profiles.filter(p => p.toUpperCase().includes(input));
+        if(filtered.length > 0) {
+            results.style.display = 'block';
+            filtered.forEach(p => {
+                const div = document.createElement('div');
+                div.innerText = p;
+                div.onclick = () => { 
+                    document.getElementById('profileSearch').value = p; 
+                    results.style.display = 'none'; 
+                };
+                results.appendChild(div);
+            });
+        } else {
+            results.style.display = 'none';
+        }
+    }
+
+    function editEntry(id) {
+        const item = sessionData.find(i => i.id === id);
+        if(!item) return;
+
+        editId = id;
+        document.getElementById('modalTitle').innerText = "Edit Bucket Entry";
+        document.getElementById('submitBtn').innerText = "Update Entry";
+
+        document.getElementById('bucketNo').value = item.bucket;
+        document.getElementById('extDate').value = item.date;
+        document.getElementById('batchNo').value = item.batch === '-' ? '' : item.batch;
+        document.getElementById('type').value = item.type;
+        document.getElementById('profileSearch').value = item.profile;
+        document.getElementById('dieNo').value = item.die === '-' ? '' : item.die;
+        document.getElementById('length').value = item.len;
+        document.getElementById('qty').value = item.qty;
+        document.getElementById('unitWeight').value = item.uW;
+        document.getElementById('surface').value = item.surf;
+        document.getElementById('totalWeight').value = item.totalW;
+
+        const shiftSelect = document.getElementById('shift');
+        if (['Day', 'Night'].includes(item.shift)) {
+            shiftSelect.value = item.shift;
+            document.getElementById('otherShiftGroup').style.display = 'none';
+        } else {
+            shiftSelect.value = 'Other';
+            document.getElementById('otherShiftGroup').style.display = 'block';
+            document.getElementById('otherShiftText').value = item.shift;
+        }
+
+        document.getElementById("addModal").classList.add("active");
+        document.getElementById("mainOverlay").classList.add("active");
+    }
+
+    function saveEntry() {
+        const bucket = document.getElementById('bucketNo').value;
+        const profile = document.getElementById('profileSearch').value;
+        
+        if(!bucket || !profile) {
+            alert("Please fill in Bucket Number and Profile.");
+            return;
+        }
+
+        const formData = {
+            id: editId || Date.now(),
+            bucket: bucket,
+            date: document.getElementById('extDate').value,
+            shift: document.getElementById('shift').value === 'Other' ? document.getElementById('otherShiftText').value : document.getElementById('shift').value,
+            batch: document.getElementById('batchNo').value || '-',
+            type: document.getElementById('type').value,
+            profile: profile,
+            die: document.getElementById('dieNo').value || '-',
+            len: document.getElementById('length').value || 0,
+            qty: document.getElementById('qty').value || 0,
+            uW: document.getElementById('unitWeight').value || 0,
+            surf: document.getElementById('surface').value,
+            totalW: document.getElementById('totalWeight').value
+        };
+
+        if(editId) {
+            const index = sessionData.findIndex(i => i.id === editId);
+            sessionData[index] = formData;
+            editId = null;
+        } else {
+            sessionData.push(formData);
+        }
+
+        renderEntries();
+        closeModal();
+    }
+
+    function removeEntry(id) {
+        if(confirm("Are you sure you want to delete this entry?")) {
+            sessionData = sessionData.filter(item => item.id !== id);
+            renderEntries();
+        }
+    }
+
+    function renderEntries() {
+        const display = document.getElementById('displayArea');
+        display.innerHTML = '';
+
+        if(sessionData.length === 0) {
+            display.innerHTML = '<div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>';
+            return;
+        }
+
+        [...sessionData].reverse().forEach(item => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'data-entry';
+            entryDiv.innerHTML = `
+                <i data-lucide="edit-3" class="edit-btn" onclick="editEntry(${item.id})"></i>
+                <i data-lucide="trash-2" class="delete-btn" onclick="removeEntry(${item.id})"></i>
+                <div class="data-grid">
+                    <div class="data-item"><b>Bucket No</b><span>${item.bucket}</span></div>
+                    <div class="data-item"><b>Date</b><span>${item.date}</span></div>
+                    <div class="data-item"><b>Shift</b><span>${item.shift}</span></div>
+                    <div class="data-item"><b>Batch No</b><span>${item.batch}</span></div>
+                    <div class="data-item"><b>Type</b><span>${item.type}</span></div>
+                    <div class="data-item"><b>Profile</b><span>${item.profile}</span></div>
+                    <div class="data-item"><b>Die No</b><span>${item.die}</span></div>
+                    <div class="data-item"><b>Dimensions</b><span>${item.len}m x ${item.qty}</span></div>
+                    <div class="data-item"><b>Unit Wt</b><span>${item.uW}</span></div>
+                    <div class="data-item"><b>Surface</b><span>${item.surf}</span></div>
+                    <div class="data-item" style="border-top: 1px solid #30363d; grid-column: span 2; padding-top: 10px; margin-top: 5px;">
+                        <b style="color:var(--accent-green)">Calculated Net Weight</b>
+                        <span style="font-size: 1.3rem; color:var(--accent-green)">${item.totalW} kg</span>
+                    </div>
+                </div>
+            `;
+            display.appendChild(entryDiv);
+        });
+        lucide.createIcons();
+    }
+
+    // FINAL SUBMISSION LOGIC
+    function finalSubmit() {
+        if(sessionData.length === 0) {
+            alert("No entries to submit. Please add a bucket first.");
+            return;
+        }
+
+        const totalKg = sessionData.reduce((acc, curr) => acc + parseFloat(curr.totalW), 0).toFixed(2);
+        const msg = `You are about to submit <b>${sessionData.length} buckets</b> with a total weight of <b>${totalKg} kg</b> to the database.`;
+        
+        document.getElementById('confirmMessage').innerHTML = msg;
+        document.getElementById('confirmModal').classList.add('active');
+        document.getElementById('mainOverlay').classList.add('active');
+    }
+
+    function executeSubmit() {
+        closeConfirmModal();
+        document.getElementById('successOverlay').classList.add('active');
+        
+        setTimeout(() => {
+            sessionData = [];
+            location.reload(); 
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>        }
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
+        .overlay.active { display: block; }
+
+        /* MAIN UI */
+        .container { padding: 90px 15px 20px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .page-header { text-align: center; margin-bottom: 25px; width: 100%; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .page-header h3 { color: var(--text-muted); font-weight: 400; font-size: 0.9rem; }
+        
+        .card {
+            width: 100%; max-width: 850px; background: var(--bg-card);
+            border-radius: 24px; border: 1px solid var(--border-color);
+            padding: 20px; display: flex; flex-direction: column; gap: 20px;
+            min-height: 200px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .inner-frame {
+            width: 100%; min-height: 100px; background: var(--bg-inner);
+            border-radius: 15px; border: 1px dashed #444c56; padding: 12px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .data-entry {
+            background: #1c2128; border-radius: 12px; padding: 15px;
+            border-left: 5px solid var(--accent-green); position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .data-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 12px; font-size: 0.85rem;
+        }
+        .data-item b { display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; margin-bottom: 2px; }
+        .data-item span { color: white; font-weight: 500; word-break: break-all; }
+
+        /* MOBILE SPECIFIC OVERRIDES */
+        @media (max-width: 600px) {
+            .container { padding: 80px 0 20px; }
+            .card { border-radius: 0; border-left: none; border-right: none; padding: 15px; }
+            .page-header h1 { font-size: 1.5rem; }
+            .data-grid { grid-template-columns: repeat(2, 1fr); }
+            .submit-footer { padding: 15px; }
+            .final-submit-btn { border-radius: 12px; padding: 15px; font-size: 1rem; }
+        }
+
+        /* SUBMIT FOOTER */
+        .submit-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(13, 15, 20, 0.9); backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border-color); padding: 20px;
+            display: flex; justify-content: center; z-index: 1000;
+        }
+
+        .final-submit-btn {
+            width: 100%; max-width: 850px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #064e3b; border: none; padding: 18px; font-size: 1.1rem; font-weight: 800;
+            border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: 0.3s; box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
+            text-transform: uppercase;
+        }
+        .final-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(74, 222, 128, 0.5); }
+
+        /* MODALS (Common Styling) */
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 95%; max-width: 500px; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            padding: 25px; z-index: 3000; display: none; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
+        }
+        .modal.active { display: block; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop { from { transform: translate(-50%, -45%) scale(0.9); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+        /* FORM STYLES */
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .form-group input, .form-group select {
+            padding: 12px; background: var(--bg-inner); border: 1px solid var(--border-color);
+            border-radius: 8px; color: white; outline: none; transition: 0.2s; font-size: 16px;
+        }
+        .form-group input:focus { border-color: var(--accent-green); }
+
+        .search-results {
+            background: #1f2937; border: 1px solid var(--border-color);
+            border-radius: 8px; display: none; max-height: 150px; overflow-y: auto;
+            margin-top: 5px;
+        }
+        .search-results div { padding: 10px; cursor: pointer; border-bottom: 1px solid #30363d; }
+        .search-results div:hover { background: var(--accent-green); color: black; }
+
+        .modal-footer { margin-top: 25px; display: flex; gap: 10px; }
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; flex: 1; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-save { background: var(--accent-green); color: #064e3b; }
+        .btn-cancel { background: #374151; color: white; }
+        .btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+        /* CONFIRM THEME POPUP */
+        .confirm-icon-box { width: 60px; height: 60px; border-radius: 50%; background: rgba(74, 222, 128, 0.1); color: var(--accent-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
+        .confirm-title { text-align: center; margin-bottom: 10px; font-size: 1.4rem; }
+        .confirm-text { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4; }
+
+        .add-main-btn {
+            background: var(--bg-inner); color: var(--accent-green); border: 1px solid var(--accent-green);
+            padding: 16px 40px; font-size: 1rem; font-weight: 700;
+            border-radius: 12px; cursor: pointer; align-self: center; transition: 0.2s; width: 100%;
+        }
+        .add-main-btn:hover { background: var(--accent-green); color: #064e3b; }
+
+        /* ACTION BUTTONS ON DATA ENTRY */
+        .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
+        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+        .edit-btn { position: absolute; top: 15px; right: 50px; color: var(--accent-green); cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
+        .edit-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        /* SUCCESS OVERLAY */
+        .success-overlay {
+            position: fixed; inset: 0; background: rgba(9, 11, 15, 0.98);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 5000; text-align: center; padding: 20px;
+        }
+        .success-overlay.active { display: flex; }
+
+        .checkmark-wrapper { width: 100px; height: 100px; position: relative; margin-bottom: 20px; }
+        .checkmark-circle { 
+            stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10;
+            stroke: var(--accent-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark-check { 
+            transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
+            stroke: var(--accent-green); stroke-width: 5; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="company-name">ULTRA ALUMINIUM</div>
+</div>
+
+<div class="side-menu" id="menu">
+    <div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800;">MAIN MENU</div>
+    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    <a href="#" style="color:var(--accent-green); text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px; background: rgba(74, 222, 128, 0.1); border-radius: 10px;"><i data-lucide="factory"></i> Production Entry</a>
+    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="database"></i> Records</a>
+</div>
+
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
+
+<div class="modal" id="confirmModal">
+    <div class="confirm-icon-box"><i data-lucide="upload-cloud"></i></div>
+    <h3 class="confirm-title">Ready to Submit?</h3>
+    <p class="confirm-text" id="confirmMessage">You are about to transmit 0 bucket entries to the database.</p>
+    <div class="modal-footer">
+        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit Now</button>
+        <button class="btn btn-cancel" onclick="closeConfirmModal()">Review Again</button>
+    </div>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+    <div class="checkmark-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+    </div>
+    <h2 style="color: var(--accent-green); font-size: 1.8rem;">Submission Successful</h2>
+    <p style="color: var(--text-muted);">Data has been transmitted to the production database.</p>
+</div>
+
+<div class="modal" id="addModal">
+    <div class="modal-header" style="margin-bottom: 20px;"><h3 id="modalTitle">Bucket Production Entry</h3></div>
+    <form id="entryForm" onsubmit="event.preventDefault(); saveEntry();">
+        <div class="form-group"><label>Bucket No</label><input type="text" id="bucketNo" required></div>
+        <div class="form-group"><label>Extrusion Date</label><input type="date" id="extDate" required></div>
+        <div class="form-group">
+            <label>Shift</label>
+            <select id="shift" onchange="checkShift()">
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="form-group" id="otherShiftGroup" style="display:none;"><label>Specify Shift</label><input type="text" id="otherShiftText"></div>
+        <div class="form-group"><label>Billet Batch No</label><input type="number" id="batchNo"></div>
+        <div class="form-group">
+            <label>Type</label>
+            <select id="type">
+                <option value="ULR">ULR</option>
+                <option value="PRM">PRM</option>
+                <option value="ULR PRM">ULR PRM</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Profile (Search)</label>
+            <input type="text" id="profileSearch" oninput="filterProfiles()" placeholder="Search profiles..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        <div class="form-group"><label>Die No</label><input type="number" id="dieNo"></div>
+        <div class="form-group"><label>Length (m)</label><input type="number" step="0.01" id="length" oninput="calcWeight()"></div>
+        <div class="form-group"><label>Qty</label><input type="number" id="qty" oninput="calcWeight()"></div>
+        <div class="form-group"><label>Unit Weight (kg/m)</label><input type="number" step="0.001" id="unitWeight" oninput="calcWeight()"></div>
+        <div class="form-group">
+            <label>Surface</label>
+            <select id="surface">
+                <option value="AN">AN</option>
+                <option value="PC">PC</option>
+                <option value="MF">MF</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Bucket Weight (kg)</label><input type="text" id="totalWeight" style="color:var(--accent-green); font-weight:bold; font-size: 1.1rem; border-color: var(--accent-green);" readonly value="0.00"></div>
+        
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-save" id="submitBtn">Add Entry</button>
+            <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Bucket Income</h1>
+        <h3>Extrusion Department</h3>
+    </div>
+
+    <div class="card">
+        <button class="add-main-btn" onclick="openModal()">+ Add New Bucket</button>
+        <div class="inner-frame" id="displayArea">
+            <div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>
+        </div>
+    </div>
+</div>
+
+<div class="submit-footer">
+    <button class="final-submit-btn" onclick="finalSubmit()">
+        <i data-lucide="check-circle"></i>
+        Final Submit Production
+    </button>
+</div>
+
+<script>
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Configuration & Data
     const profiles = [""06 CH 09", "08 CH 09", "09 CH 09", "09 RP 07", "10 CH 09", "10 CR 02", "10 CR 03", 
         "10 CT 01", "10 GB 01", "10 GB 02", "10 MS 03", "10 MS 04", "10 PC 01", "10 PC 02", 
         "10 PC 03", "10 PC 04", "10 PC 05", "10 PC 06", "10 PC 07", "10 PC 08", "10 PC 09", 
