@@ -39,6 +39,30 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
         .overlay.active { display: block; }
 
+        /* MENU ITEMS & DROPDOWN */
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 10px; padding: 15px; cursor: pointer; transition: 0.2s; border-radius: 10px;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(74, 222, 128, 0.1); }
+        
+        .dropdown-container { display: flex; flex-direction: column; }
+        .dropdown-trigger { justify-content: space-between; }
+        .dropdown-content { 
+            display: none; flex-direction: column; padding-left: 35px; 
+            background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;
+        }
+        .dropdown-content.show { display: flex; }
+        .sub-menu-item {
+            color: var(--text-muted); text-decoration: none; padding: 12px;
+            font-size: 0.9rem; transition: 0.2s; display: block;
+        }
+        .sub-menu-item:hover { color: var(--accent-green); }
+        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; }
+        .chevron-icon { transition: transform 0.3s; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
         /* MAIN UI */
         .container { padding: 90px 15px 20px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .page-header { text-align: center; margin-bottom: 25px; width: 100%; }
@@ -100,7 +124,7 @@
         }
         .final-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(74, 222, 128, 0.5); }
 
-        /* MODALS (Common Styling) */
+        /* MODALS */
         .modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 95%; max-width: 500px; background: var(--bg-card);
@@ -120,6 +144,9 @@
         }
         .form-group input:focus { border-color: var(--accent-green); }
 
+        .checkbox-group { flex-direction: row; align-items: center; gap: 10px; cursor: pointer; }
+        .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
         .search-results {
             background: #1f2937; border: 1px solid var(--border-color);
             border-radius: 8px; display: none; max-height: 150px; overflow-y: auto;
@@ -132,27 +159,12 @@
         .btn { padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; flex: 1; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-save { background: var(--accent-green); color: #064e3b; }
         .btn-cancel { background: #374151; color: white; }
-        .btn:hover { opacity: 0.9; transform: scale(0.98); }
 
-        /* CONFIRM THEME POPUP */
-        .confirm-icon-box { width: 60px; height: 60px; border-radius: 50%; background: rgba(74, 222, 128, 0.1); color: var(--accent-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; }
-        .confirm-title { text-align: center; margin-bottom: 10px; font-size: 1.4rem; }
-        .confirm-text { text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.4; }
-
-        .add-main-btn {
-            background: var(--bg-inner); color: var(--accent-green); border: 1px solid var(--accent-green);
-            padding: 16px 40px; font-size: 1rem; font-weight: 700;
-            border-radius: 12px; cursor: pointer; align-self: center; transition: 0.2s; width: 100%;
-        }
-        .add-main-btn:hover { background: var(--accent-green); color: #064e3b; }
-
-        /* ACTION BUTTONS ON DATA ENTRY */
         .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
         .delete-btn:hover { opacity: 1; transform: scale(1.1); }
         .edit-btn { position: absolute; top: 15px; right: 50px; color: var(--accent-green); cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
         .edit-btn:hover { opacity: 1; transform: scale(1.1); }
 
-        /* SUCCESS OVERLAY */
         .success-overlay {
             position: fixed; inset: 0; background: rgba(9, 11, 15, 0.98);
             display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -170,6 +182,12 @@
             stroke: var(--accent-green); stroke-width: 5; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
         }
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+
+        .add-main-btn {
+            background: var(--bg-inner); color: var(--accent-green); border: 1px solid var(--accent-green);
+            padding: 16px 40px; font-size: 1rem; font-weight: 700;
+            border-radius: 12px; cursor: pointer; align-self: center; transition: 0.2s; width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -181,20 +199,35 @@
 
 <div class="side-menu" id="menu">
     <div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800;">MAIN MENU</div>
-    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-    <a href="#" style="color:var(--accent-green); text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px; background: rgba(74, 222, 128, 0.1); border-radius: 10px;"><i data-lucide="factory"></i> Production Entry</a>
-    <a href="#" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px; padding:15px;"><i data-lucide="database"></i> Records</a>
+    
+    <a href="#" class="menu-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    
+    <div class="dropdown-container">
+        <div class="menu-item dropdown-trigger active-link" onclick="toggleDropdown()">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i data-lucide="factory"></i> Production Entry
+            </div>
+            <i data-lucide="chevron-down" class="chevron-icon" id="chevron"></i>
+        </div>
+        <div class="dropdown-content show" id="dropdownContent">
+            <a href="#" class="sub-menu-item active-sub">• Bucket Income</a>
+            <a href="#" class="sub-menu-item">• Profile Income</a>
+            <a href="#" class="sub-menu-item">• Aging Details</a>
+        </div>
+    </div>
+
+    <a href="#" class="menu-item"><i data-lucide="database"></i> Records</a>
 </div>
 
 <div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
 
 <div class="modal" id="confirmModal">
-    <div class="confirm-icon-box"><i data-lucide="upload-cloud"></i></div>
-    <h3 class="confirm-title">Ready to Submit?</h3>
-    <p class="confirm-text" id="confirmMessage">You are about to transmit 0 bucket entries to the database.</p>
+    <div style="text-align:center; color:var(--accent-green); margin-bottom:15px;"><i data-lucide="upload-cloud" size="48"></i></div>
+    <h3 style="text-align:center; margin-bottom:10px;">Ready to Submit?</h3>
+    <p style="text-align:center; color:var(--text-muted);" id="confirmMessage"></p>
     <div class="modal-footer">
-        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit Now</button>
-        <button class="btn btn-cancel" onclick="closeConfirmModal()">Review Again</button>
+        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit</button>
+        <button class="btn btn-cancel" onclick="closeConfirmModal()">Cancel</button>
     </div>
 </div>
 
@@ -205,28 +238,29 @@
             <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
         </svg>
     </div>
-    <h2 style="color: var(--accent-green); font-size: 1.8rem;">Submission Successful</h2>
-    <p style="color: var(--text-muted);">Data has been transmitted to the production database.</p>
+    <h2 style="color: var(--accent-green);">Submission Successful</h2>
 </div>
 
 <div class="modal" id="addModal">
-    <div class="modal-header" style="margin-bottom: 20px;"><h3 id="modalTitle">Bucket Production Entry</h3></div>
+    <h3 id="modalTitle" style="margin-bottom:20px;">Bucket Production Entry</h3>
     <form id="entryForm" onsubmit="event.preventDefault(); saveEntry();">
         <div class="form-group"><label>Bucket No</label><input type="text" id="bucketNo" required></div>
         <div class="form-group"><label>Extrusion Date</label><input type="date" id="extDate" required></div>
         <div class="form-group">
             <label>Shift</label>
-            <select id="shift" onchange="checkShift()">
+            <select id="shift" onchange="checkShift()" required>
+                <option value="" disabled selected>Select Shift</option>
                 <option value="Day">Day</option>
                 <option value="Night">Night</option>
                 <option value="Other">Other</option>
             </select>
         </div>
         <div class="form-group" id="otherShiftGroup" style="display:none;"><label>Specify Shift</label><input type="text" id="otherShiftText"></div>
-        <div class="form-group"><label>Billet Batch No</label><input type="number" id="batchNo"></div>
+        <div class="form-group"><label>Billet Batch No</label><input type="number" id="batchNo" required></div>
         <div class="form-group">
             <label>Type</label>
-            <select id="type">
+            <select id="type" required>
+                <option value="" disabled selected>Select Type</option>
                 <option value="ULR">ULR</option>
                 <option value="PRM">PRM</option>
                 <option value="ULR PRM">ULR PRM</option>
@@ -234,22 +268,33 @@
         </div>
         <div class="form-group">
             <label>Profile (Search)</label>
-            <input type="text" id="profileSearch" oninput="filterProfiles()" placeholder="Search profiles..." autocomplete="off">
+            <input type="text" id="profileSearch" oninput="filterProfiles()" placeholder="Search profiles..." autocomplete="off" required>
             <div class="search-results" id="searchResults"></div>
         </div>
-        <div class="form-group"><label>Die No</label><input type="number" id="dieNo"></div>
-        <div class="form-group"><label>Length (m)</label><input type="number" step="0.01" id="length" oninput="calcWeight()"></div>
-        <div class="form-group"><label>Qty</label><input type="number" id="qty" oninput="calcWeight()"></div>
-        <div class="form-group"><label>Unit Weight (kg/m)</label><input type="number" step="0.001" id="unitWeight" oninput="calcWeight()"></div>
+        <div class="form-group"><label>Die No</label><input type="number" id="dieNo" required></div>
+        <div class="form-group"><label>Length (m)</label><input type="number" step="0.01" id="length" oninput="calcWeight()" required></div>
+        <div class="form-group"><label>Qty</label><input type="number" id="qty" oninput="calcWeight()" required></div>
+        <div class="form-group"><label>Unit Weight (kg/m)</label><input type="number" step="0.001" id="unitWeight" oninput="calcWeight()" required></div>
+        
+        <div class="form-group checkbox-group">
+            <input type="checkbox" id="hasDamage" onchange="toggleDamageField()">
+            <label for="hasDamage">Include Damage Quantity?</label>
+        </div>
+        <div class="form-group" id="damageInputGroup" style="display:none;">
+            <label>Damage Qty</label>
+            <input type="number" id="damageQty">
+        </div>
+
         <div class="form-group">
             <label>Surface</label>
-            <select id="surface">
+            <select id="surface" required>
+                <option value="" disabled selected>Select Surface</option>
                 <option value="AN">AN</option>
                 <option value="PC">PC</option>
                 <option value="MF">MF</option>
             </select>
         </div>
-        <div class="form-group"><label>Bucket Weight (kg)</label><input type="text" id="totalWeight" style="color:var(--accent-green); font-weight:bold; font-size: 1.1rem; border-color: var(--accent-green);" readonly value="0.00"></div>
+        <div class="form-group"><label>Bucket Weight (kg)</label><input type="text" id="totalWeight" style="color:var(--accent-green); font-weight:bold;" readonly value="0.00"></div>
         
         <div class="modal-footer">
             <button type="submit" class="btn btn-save" id="submitBtn">Add Entry</button>
@@ -261,7 +306,7 @@
 <div class="container">
     <div class="page-header">
         <h1>Bucket Income</h1>
-        <h3>Extrusion Section</h3>
+        <h3>Extrusion Department</h3>
     </div>
 
     <div class="card">
@@ -274,35 +319,53 @@
 
 <div class="submit-footer">
     <button class="final-submit-btn" onclick="finalSubmit()">
-        <i data-lucide="check-circle"></i>
-        Final Submit Production
+        <i data-lucide="check-circle"></i> Final Submit Production
     </button>
 </div>
 
 <script>
-    // Initialize Icons
     lucide.createIcons();
 
-    // Configuration & Data
     const profiles = ["Flat Bar 20x5", "Square Tube 40x40", "Round Tube 25mm", "T-Section 30x30", "L-Angle 50x50", "U-Channel 20x20", "Rectangular Tube 80x40"];
     let sessionData = [];
     let editId = null;
 
-    // Form Management
+    function toggleMenu() {
+        document.getElementById("menu").classList.toggle("active");
+        document.getElementById("mainOverlay").classList.toggle("active");
+    }
+
+    function toggleDropdown() {
+        const content = document.getElementById("dropdownContent");
+        const chevron = document.getElementById("chevron");
+        content.classList.toggle("show");
+        chevron.classList.toggle("rotate");
+    }
+
     function resetForm() {
         document.getElementById('entryForm').reset();
         document.getElementById('extDate').valueAsDate = new Date();
         document.getElementById('totalWeight').value = "0.00";
         document.getElementById('otherShiftGroup').style.display = 'none';
-        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('otherShiftText').required = false;
+        document.getElementById('damageInputGroup').style.display = 'none';
+        document.getElementById('damageQty').required = false;
         document.getElementById('modalTitle').innerText = "Bucket Production Entry";
         document.getElementById('submitBtn').innerText = "Add Entry";
         editId = null;
     }
 
-    function toggleMenu() {
-        document.getElementById("menu").classList.toggle("active");
-        document.getElementById("mainOverlay").classList.toggle("active");
+    function toggleDamageField() {
+        const isChecked = document.getElementById('hasDamage').checked;
+        document.getElementById('damageInputGroup').style.display = isChecked ? 'block' : 'none';
+        document.getElementById('damageQty').required = isChecked;
+    }
+
+    function checkShift() {
+        const shiftVal = document.getElementById('shift').value;
+        const isOther = shiftVal === 'Other';
+        document.getElementById('otherShiftGroup').style.display = isOther ? 'block' : 'none';
+        document.getElementById('otherShiftText').required = isOther;
     }
 
     function openModal() {
@@ -313,16 +376,12 @@
 
     function closeModal() {
         document.getElementById("addModal").classList.remove("active");
-        if (!document.getElementById("menu").classList.contains("active")) {
-            document.getElementById("mainOverlay").classList.remove("active");
-        }
+        if (!document.getElementById("menu").classList.contains("active")) document.getElementById("mainOverlay").classList.remove("active");
     }
 
     function closeConfirmModal() {
         document.getElementById('confirmModal').classList.remove('active');
-        if (!document.getElementById("menu").classList.contains("active")) {
-            document.getElementById("mainOverlay").classList.remove("active");
-        }
+        if (!document.getElementById("menu").classList.contains("active")) document.getElementById("mainOverlay").classList.remove("active");
     }
 
     function closeAll() {
@@ -331,17 +390,11 @@
         closeConfirmModal();
     }
 
-    function checkShift() {
-        const shiftVal = document.getElementById('shift').value;
-        document.getElementById('otherShiftGroup').style.display = (shiftVal === 'Other') ? 'block' : 'none';
-    }
-
     function calcWeight() {
         const qty = parseFloat(document.getElementById('qty').value) || 0;
         const weight = parseFloat(document.getElementById('unitWeight').value) || 0;
         const length = parseFloat(document.getElementById('length').value) || 0;
-        const total = qty * weight * length;
-        document.getElementById('totalWeight').value = total.toFixed(2);
+        document.getElementById('totalWeight').value = (qty * weight * length).toFixed(2);
     }
 
     function filterProfiles() {
@@ -349,79 +402,35 @@
         const results = document.getElementById('searchResults');
         results.innerHTML = '';
         if(!input) { results.style.display = 'none'; return; }
-        
         const filtered = profiles.filter(p => p.toUpperCase().includes(input));
         if(filtered.length > 0) {
             results.style.display = 'block';
             filtered.forEach(p => {
                 const div = document.createElement('div');
                 div.innerText = p;
-                div.onclick = () => { 
-                    document.getElementById('profileSearch').value = p; 
-                    results.style.display = 'none'; 
-                };
+                div.onclick = () => { document.getElementById('profileSearch').value = p; results.style.display = 'none'; };
                 results.appendChild(div);
             });
-        } else {
-            results.style.display = 'none';
-        }
-    }
-
-    function editEntry(id) {
-        const item = sessionData.find(i => i.id === id);
-        if(!item) return;
-
-        editId = id;
-        document.getElementById('modalTitle').innerText = "Edit Bucket Entry";
-        document.getElementById('submitBtn').innerText = "Update Entry";
-
-        document.getElementById('bucketNo').value = item.bucket;
-        document.getElementById('extDate').value = item.date;
-        document.getElementById('batchNo').value = item.batch === '-' ? '' : item.batch;
-        document.getElementById('type').value = item.type;
-        document.getElementById('profileSearch').value = item.profile;
-        document.getElementById('dieNo').value = item.die === '-' ? '' : item.die;
-        document.getElementById('length').value = item.len;
-        document.getElementById('qty').value = item.qty;
-        document.getElementById('unitWeight').value = item.uW;
-        document.getElementById('surface').value = item.surf;
-        document.getElementById('totalWeight').value = item.totalW;
-
-        const shiftSelect = document.getElementById('shift');
-        if (['Day', 'Night'].includes(item.shift)) {
-            shiftSelect.value = item.shift;
-            document.getElementById('otherShiftGroup').style.display = 'none';
-        } else {
-            shiftSelect.value = 'Other';
-            document.getElementById('otherShiftGroup').style.display = 'block';
-            document.getElementById('otherShiftText').value = item.shift;
-        }
-
-        document.getElementById("addModal").classList.add("active");
-        document.getElementById("mainOverlay").classList.add("active");
+        } else results.style.display = 'none';
     }
 
     function saveEntry() {
-        const bucket = document.getElementById('bucketNo').value;
-        const profile = document.getElementById('profileSearch').value;
-        
-        if(!bucket || !profile) {
-            alert("Please fill in Bucket Number and Profile.");
-            return;
-        }
+        const shiftVal = document.getElementById('shift').value;
+        const hasDamage = document.getElementById('hasDamage').checked;
 
         const formData = {
             id: editId || Date.now(),
-            bucket: bucket,
+            bucket: document.getElementById('bucketNo').value,
             date: document.getElementById('extDate').value,
-            shift: document.getElementById('shift').value === 'Other' ? document.getElementById('otherShiftText').value : document.getElementById('shift').value,
-            batch: document.getElementById('batchNo').value || '-',
+            shift: shiftVal === 'Other' ? document.getElementById('otherShiftText').value : shiftVal,
+            batch: document.getElementById('batchNo').value,
             type: document.getElementById('type').value,
-            profile: profile,
-            die: document.getElementById('dieNo').value || '-',
-            len: document.getElementById('length').value || 0,
-            qty: document.getElementById('qty').value || 0,
-            uW: document.getElementById('unitWeight').value || 0,
+            profile: document.getElementById('profileSearch').value,
+            die: document.getElementById('dieNo').value,
+            len: document.getElementById('length').value,
+            qty: document.getElementById('qty').value,
+            uW: document.getElementById('unitWeight').value,
+            damage: hasDamage ? document.getElementById('damageQty').value : '-',
             surf: document.getElementById('surface').value,
             totalW: document.getElementById('totalWeight').value
         };
@@ -429,17 +438,52 @@
         if(editId) {
             const index = sessionData.findIndex(i => i.id === editId);
             sessionData[index] = formData;
-            editId = null;
-        } else {
-            sessionData.push(formData);
-        }
+        } else sessionData.push(formData);
 
         renderEntries();
         closeModal();
     }
 
+    function editEntry(id) {
+        const item = sessionData.find(i => i.id === id);
+        if(!item) return;
+        editId = id;
+        document.getElementById('modalTitle').innerText = "Edit Bucket Entry";
+        document.getElementById('submitBtn').innerText = "Update Entry";
+        document.getElementById('bucketNo').value = item.bucket;
+        document.getElementById('extDate').value = item.date;
+        document.getElementById('batchNo').value = item.batch;
+        document.getElementById('type').value = item.type;
+        document.getElementById('profileSearch').value = item.profile;
+        document.getElementById('dieNo').value = item.die;
+        document.getElementById('length').value = item.len;
+        document.getElementById('qty').value = item.qty;
+        document.getElementById('unitWeight').value = item.uW;
+        document.getElementById('surface').value = item.surf;
+        document.getElementById('totalWeight').value = item.totalW;
+        
+        if(item.damage !== '-') {
+            document.getElementById('hasDamage').checked = true;
+            document.getElementById('damageInputGroup').style.display = 'block';
+            document.getElementById('damageQty').value = item.damage;
+            document.getElementById('damageQty').required = true;
+        }
+        
+        const shiftSelect = document.getElementById('shift');
+        if (['Day', 'Night'].includes(item.shift)) {
+            shiftSelect.value = item.shift;
+        } else {
+            shiftSelect.value = 'Other';
+            document.getElementById('otherShiftGroup').style.display = 'block';
+            document.getElementById('otherShiftText').value = item.shift;
+            document.getElementById('otherShiftText').required = true;
+        }
+        document.getElementById("addModal").classList.add("active");
+        document.getElementById("mainOverlay").classList.add("active");
+    }
+
     function removeEntry(id) {
-        if(confirm("Are you sure you want to delete this entry?")) {
+        if(confirm("Delete this entry?")) {
             sessionData = sessionData.filter(item => item.id !== id);
             renderEntries();
         }
@@ -448,12 +492,10 @@
     function renderEntries() {
         const display = document.getElementById('displayArea');
         display.innerHTML = '';
-
         if(sessionData.length === 0) {
-            display.innerHTML = '<div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>';
+            display.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No data recorded.</div>';
             return;
         }
-
         [...sessionData].reverse().forEach(item => {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'data-entry';
@@ -461,38 +503,26 @@
                 <i data-lucide="edit-3" class="edit-btn" onclick="editEntry(${item.id})"></i>
                 <i data-lucide="trash-2" class="delete-btn" onclick="removeEntry(${item.id})"></i>
                 <div class="data-grid">
-                    <div class="data-item"><b>Bucket No</b><span>${item.bucket}</span></div>
+                    <div class="data-item"><b>Bucket</b><span>${item.bucket}</span></div>
                     <div class="data-item"><b>Date</b><span>${item.date}</span></div>
                     <div class="data-item"><b>Shift</b><span>${item.shift}</span></div>
-                    <div class="data-item"><b>Batch No</b><span>${item.batch}</span></div>
-                    <div class="data-item"><b>Type</b><span>${item.type}</span></div>
                     <div class="data-item"><b>Profile</b><span>${item.profile}</span></div>
-                    <div class="data-item"><b>Die No</b><span>${item.die}</span></div>
                     <div class="data-item"><b>Dimensions</b><span>${item.len}m x ${item.qty}</span></div>
-                    <div class="data-item"><b>Unit Wt</b><span>${item.uW}</span></div>
-                    <div class="data-item"><b>Surface</b><span>${item.surf}</span></div>
-                    <div class="data-item" style="border-top: 1px solid #30363d; grid-column: span 2; padding-top: 10px; margin-top: 5px;">
-                        <b style="color:var(--accent-green)">Calculated Net Weight</b>
-                        <span style="font-size: 1.3rem; color:var(--accent-green)">${item.totalW} kg</span>
+                    <div class="data-item"><b>Damage</b><span>${item.damage}</span></div>
+                    <div class="data-item" style="grid-column: span 2; border-top: 1px solid #30363d; padding-top: 10px;">
+                        <b style="color:var(--accent-green)">Net Weight</b>
+                        <span style="font-size:1.2rem; color:var(--accent-green)">${item.totalW} kg</span>
                     </div>
-                </div>
-            `;
+                </div>`;
             display.appendChild(entryDiv);
         });
         lucide.createIcons();
     }
 
-    // FINAL SUBMISSION LOGIC
     function finalSubmit() {
-        if(sessionData.length === 0) {
-            alert("No entries to submit. Please add a bucket first.");
-            return;
-        }
-
+        if(sessionData.length === 0) return alert("Add entries first.");
         const totalKg = sessionData.reduce((acc, curr) => acc + parseFloat(curr.totalW), 0).toFixed(2);
-        const msg = `You are about to submit <b>${sessionData.length} buckets</b> with a total weight of <b>${totalKg} kg</b> to the database.`;
-        
-        document.getElementById('confirmMessage').innerHTML = msg;
+        document.getElementById('confirmMessage').innerHTML = `Submit <b>${sessionData.length} buckets</b> (${totalKg} kg)?`;
         document.getElementById('confirmModal').classList.add('active');
         document.getElementById('mainOverlay').classList.add('active');
     }
@@ -500,13 +530,8 @@
     function executeSubmit() {
         closeConfirmModal();
         document.getElementById('successOverlay').classList.add('active');
-        
-        setTimeout(() => {
-            sessionData = [];
-            location.reload(); 
-        }, 3000);
+        setTimeout(() => location.reload(), 2500);
     }
 </script>
-
 </body>
-    </html>
+</html>
