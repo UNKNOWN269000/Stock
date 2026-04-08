@@ -527,11 +527,40 @@
         document.getElementById('mainOverlay').classList.add('active');
     }
 
-    function executeSubmit() {
-        closeConfirmModal();
-        document.getElementById('successOverlay').classList.add('active');
-        setTimeout(() => location.reload(), 2500);
+async function executeSubmit() {
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--rcOmfT-CqGbfmodaDliiXeQmvgPclu6lw-ji2as0BJS9TGsCKMT-AYtZ1SSmDup/exec"; // Put your URL here
+
+    // Show loading state
+    const submitBtn = document.querySelector('.btn-save');
+    submitBtn.innerText = "Processing...";
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(sessionData)
+        });
+
+        const result = await response.json();
+
+        if (result.result === "success") {
+            closeConfirmModal();
+            document.getElementById('successOverlay').classList.add('active');
+            setTimeout(() => {
+                sessionData = []; // Clear local data
+                location.reload();
+            }, 2500);
+        } else {
+            alert("Error: " + result.error);
+        }
+    } catch (error) {
+        console.error("Submission failed", error);
+        alert("Failed to connect to the server. Check your internet connection.");
+    } finally {
+        submitBtn.innerText = "Yes, Submit";
+        submitBtn.disabled = false;
     }
+}
 </script>
 </body>
 </html>
