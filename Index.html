@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultra Aluminium | Production Portal</title>
+    <title>Ultra Aluminium | Home</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg-dark: #0d0f14;
             --bg-card: #161b22;
             --bg-inner: #0d1117;
-            --accent-green: #4ade80;
+            --accent-orange: #f59e0b;
+            --accent-green: #90ee90;
             --text-main: #ffffff;
             --text-muted: #9aa0a6;
             --border-color: #30363d;
@@ -18,7 +19,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #090b0f; color: var(--text-main); line-height: 1.6; padding-bottom: 100px; overflow-x: hidden; width: 100%; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #090b0f; color: var(--text-main); line-height: 1.6; overflow-x: hidden; width: 100%; }
 
         /* HEADER */
         .header {
@@ -26,167 +27,96 @@
             background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
             border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
         }
-        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 15px; }
-        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; }
+        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 12px; display: flex; align-items: center; }
+        
+        .logo-img {
+            height: 45px; width: 45px; margin-right: 12px;
+            object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--accent-green);
+        }
+
+        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; white-space: nowrap; }
 
         /* SIDE MENU */
         .side-menu {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
             background: var(--bg-dark); border-right: 1px solid var(--border-color);
-            padding: 90px 15px 20px; transition: var(--transition); z-index: 1500;
+            padding: 80px 10px 40px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
         }
         .side-menu.active { left: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
         .overlay.active { display: block; }
 
-        /* MENU ITEMS & DROPDOWN */
         .menu-item {
             color: white; text-decoration: none; display: flex; align-items: center; 
-            gap: 10px; padding: 15px; cursor: pointer; transition: 0.2s; border-radius: 10px;
+            gap: 12px; padding: 12px; cursor: pointer; transition: 0.2s; border-radius: 10px;
+            margin-bottom: 2px; font-size: 0.95rem;
         }
         .menu-item:hover { background: rgba(255,255,255,0.05); }
-        .menu-item.active-link { color: var(--accent-green); background: rgba(74, 222, 128, 0.1); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(144, 238, 144, 0.1); font-weight: 600; }
         
+        /* DROPDOWN LOGIC */
         .dropdown-container { display: flex; flex-direction: column; }
-        .dropdown-trigger { justify-content: space-between; }
         .dropdown-content { 
-            display: none; flex-direction: column; padding-left: 35px; 
-            background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;
+            display: none; flex-direction: column; padding-left: 20px; 
+            border-left: 1px solid var(--border-color); margin-left: 22px; margin-bottom: 5px;
         }
         .dropdown-content.show { display: flex; }
+        
         .sub-menu-item {
-            color: var(--text-muted); text-decoration: none; padding: 12px;
-            font-size: 0.9rem; transition: 0.2s; display: block;
+            color: var(--text-muted); text-decoration: none; padding: 8px 12px;
+            font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; gap: 8px; border-radius: 8px;
         }
-        .sub-menu-item:hover { color: var(--accent-green); }
-        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; }
-        .chevron-icon { transition: transform 0.3s; }
+        .sub-menu-item:hover { color: var(--accent-green); background: rgba(255,255,255,0.03); }
+        
+        /* NESTED LEVEL 3 */
+        .nested-content {
+            display: none; flex-direction: column; padding-left: 15px;
+            border-left: 1px dotted var(--border-color); margin-bottom: 5px;
+        }
+        .nested-content.show { display: flex; }
+
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
         .chevron-icon.rotate { transform: rotate(180deg); }
 
-        /* MAIN UI */
-        .container { padding: 90px 15px 20px; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .page-header { text-align: center; margin-bottom: 25px; width: 100%; }
-        .page-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
-        .page-header h3 { color: var(--text-muted); font-weight: 400; font-size: 0.9rem; }
+        /* CONTAINER */
+        .container { padding: 110px 20px 40px; display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; }
         
-        .card {
-            width: 100%; max-width: 850px; background: var(--bg-card);
-            border-radius: 24px; border: 1px solid var(--border-color);
-            padding: 20px; display: flex; flex-direction: column; gap: 20px;
-            min-height: 200px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        .welcome-card {
+            width: 100%; max-width: 900px; background: linear-gradient(145deg, var(--bg-card), #1c2128);
+            border-radius: 30px; border: 1px solid var(--border-color);
+            padding: 40px 30px; text-align: center; margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        .welcome-card h1 { font-size: 2.2rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .welcome-card p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; }
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+            background: rgba(34, 197, 94, 0.1); color: #22c55e;
+            border-radius: 20px; font-size: 0.75rem; font-weight: 700;
         }
 
-        .inner-frame {
-            width: 100%; min-height: 100px; background: var(--bg-inner);
-            border-radius: 15px; border: 1px dashed #444c56; padding: 12px;
-            display: flex; flex-direction: column; gap: 12px;
+        /* QUICK ACTIONS GRID */
+        .action-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px; width: 100%; max-width: 900px;
         }
-
-        .data-entry {
-            background: #1c2128; border-radius: 12px; padding: 15px;
-            border-left: 5px solid var(--accent-green); position: relative;
-            animation: slideIn 0.3s ease;
+        .action-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 25px; border-radius: 20px; transition: var(--transition);
+            text-decoration: none; color: white; display: flex; flex-direction: column; gap: 15px;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .action-card:hover { transform: translateY(-5px); border-color: var(--accent-green); background: #1c2128; }
+        .action-card i { color: var(--accent-green); width: 32px; height: 32px; }
+        .action-card h3 { font-size: 1.2rem; }
+        .action-card p { font-size: 0.85rem; color: var(--text-muted); }
 
-        .data-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 12px; font-size: 0.85rem;
-        }
-        .data-item b { display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; margin-bottom: 2px; }
-        .data-item span { color: white; font-weight: 500; word-break: break-all; }
-
-        /* MOBILE SPECIFIC OVERRIDES */
         @media (max-width: 600px) {
-            .container { padding: 80px 0 20px; }
-            .card { border-radius: 0; border-left: none; border-right: none; padding: 15px; }
-            .page-header h1 { font-size: 1.5rem; }
-            .data-grid { grid-template-columns: repeat(2, 1fr); }
-            .submit-footer { padding: 15px; }
-            .final-submit-btn { border-radius: 12px; padding: 15px; font-size: 1rem; }
-        }
-
-        /* SUBMIT FOOTER */
-        .submit-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(13, 15, 20, 0.9); backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border-color); padding: 20px;
-            display: flex; justify-content: center; z-index: 1000;
-        }
-
-        .final-submit-btn {
-            width: 100%; max-width: 850px;
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            color: #064e3b; border: none; padding: 18px; font-size: 1.1rem; font-weight: 800;
-            border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
-            transition: 0.3s; box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3);
-            text-transform: uppercase;
-        }
-        .final-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(74, 222, 128, 0.5); }
-
-        /* MODALS */
-        .modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 95%; max-width: 500px; background: var(--bg-card);
-            border: 1px solid var(--border-color); border-radius: 20px;
-            padding: 25px; z-index: 3000; display: none; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 0 100px rgba(0,0,0,0.8);
-        }
-        .modal.active { display: block; animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes modalPop { from { transform: translate(-50%, -45%) scale(0.9); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-
-        /* FORM STYLES */
-        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
-        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-        .form-group input, .form-group select {
-            padding: 12px; background: var(--bg-inner); border: 1px solid var(--border-color);
-            border-radius: 8px; color: white; outline: none; transition: 0.2s; font-size: 16px;
-        }
-        .form-group input:focus { border-color: var(--accent-green); }
-
-        .checkbox-group { flex-direction: row; align-items: center; gap: 10px; cursor: pointer; }
-        .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-
-        .search-results {
-            background: #1f2937; border: 1px solid var(--border-color);
-            border-radius: 8px; display: none; max-height: 150px; overflow-y: auto;
-            margin-top: 5px;
-        }
-        .search-results div { padding: 10px; cursor: pointer; border-bottom: 1px solid #30363d; }
-        .search-results div:hover { background: var(--accent-green); color: black; }
-
-        .modal-footer { margin-top: 25px; display: flex; gap: 10px; }
-        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; flex: 1; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-save { background: var(--accent-green); color: #064e3b; }
-        .btn-cancel { background: #374151; color: white; }
-
-        .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
-        .delete-btn:hover { opacity: 1; transform: scale(1.1); }
-        .edit-btn { position: absolute; top: 15px; right: 50px; color: var(--accent-green); cursor: pointer; opacity: 0.6; transition: 0.2s; padding: 5px; }
-        .edit-btn:hover { opacity: 1; transform: scale(1.1); }
-
-        .success-overlay {
-            position: fixed; inset: 0; background: rgba(9, 11, 15, 0.98);
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 5000; text-align: center; padding: 20px;
-        }
-        .success-overlay.active { display: flex; }
-
-        .checkmark-wrapper { width: 100px; height: 100px; position: relative; margin-bottom: 20px; }
-        .checkmark-circle { 
-            stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10;
-            stroke: var(--accent-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-        }
-        .checkmark-check { 
-            transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
-            stroke: var(--accent-green); stroke-width: 5; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
-        }
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
-
-        .add-main-btn {
-            background: var(--bg-inner); color: var(--accent-green); border: 1px solid var(--accent-green);
-            padding: 16px 40px; font-size: 1rem; font-weight: 700;
-            border-radius: 12px; cursor: pointer; align-self: center; transition: 0.2s; width: 100%;
+            .welcome-card h1 { font-size: 1.8rem; }
+            .action-grid { grid-template-columns: 1fr; }
+            .side-menu { width: 85%; }
         }
     </style>
 </head>
@@ -194,373 +124,166 @@
 
 <div class="header">
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <img src="Src/logo.png" alt="Logo" class="logo-img">
     <div class="company-name">ULTRA ALUMINIUM</div>
 </div>
 
 <div class="side-menu" id="menu">
-    <div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800;">MAIN MENU</div>
-    
-    <a href="#" class="menu-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-    
+    <a href="../../index.html" class="menu-item active-link"><i data-lucide="home"></i> Home</a>
+
     <div class="dropdown-container">
-        <div class="menu-item dropdown-trigger active-link" onclick="toggleDropdown()">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <i data-lucide="factory"></i> Production Entry
-            </div>
-            <i data-lucide="chevron-down" class="chevron-icon" id="chevron"></i>
+        <div class="menu-item" onclick="toggleDropdown('extrusionSub', this)">
+            <i data-lucide="factory"></i> Extrusion
+            <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
-        <div class="dropdown-content show" id="dropdownContent">
-            <a href="https://bucketstock.netlify.app/" class="sub-menu-item active-sub">• Bucket Income</a>
-            <a href="https://profile-income.netlify.app/" class="sub-menu-item">• Profile Income</a>
-            <a href="https://aging-details.netlify.app/" class="sub-menu-item">• Aging Details</a>
+     <div class="dropdown-content" id="extrusionSub">
+    <a href="Extrusion/Bucket Income/index.html" class="sub-menu-item">Bucket income</a>
+    <a href="Extrusion/Profile Income/index.html" class="sub-menu-item">Profile income</a>
+    <a href="Extrusion/Aging Details/index.html" class="sub-menu-item">Aging Details</a>
+    <a href="Extrusion/Overview/index.html" class="sub-menu-item">Overview</a>
+		</div>
+    </div>
+
+    <div class="dropdown-container">
+        <div class="menu-item" onclick="toggleDropdown('millSub', this)">
+            <i data-lucide="layers"></i> Mill Finish
+            <i data-lucide="chevron-down" class="chevron-icon"></i>
+        </div>
+        <div class="dropdown-content" id="millSub">
+            <a href="#" class="sub-menu-item">Hardness Check</a>
+            <a href="#" class="sub-menu-item">Mill Finish Profile Stock</a>
+            <a href="#" class="sub-menu-item">Mill Finish Bucket Stock</a>
+            
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this)">
+                <i data-lucide="repeat" style="width:14px"></i> Transfer
+                <i data-lucide="chevron-down" class="chevron-icon"></i>
+            </div>
+            <div class="nested-content" id="millTransfer">
+                <a href="#" class="sub-menu-item">Anodizing</a>
+                <a href="#" class="sub-menu-item">Powder Coat</a>
+            </div>
+
+            <a href="#" class="sub-menu-item">Overview</a>
         </div>
     </div>
 
-    <a href="#" class="menu-item"><i data-lucide="database"></i> Records</a>
+    <div class="dropdown-container">
+        <div class="menu-item" onclick="toggleDropdown('powderSub', this)">
+            <i data-lucide="palette"></i> Powder Coat
+            <i data-lucide="chevron-down" class="chevron-icon"></i>
+        </div>
+        <div class="dropdown-content" id="powderSub">
+            <a href="#" class="sub-menu-item">Mill Finish Transfer Stock</a>
+            <a href="#" class="sub-menu-item">Production</a>
+            <a href="#" class="sub-menu-item">Pending</a>
+            
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this)">
+                <i data-lucide="alert-triangle" style="width:14px"></i> Damage
+                <i data-lucide="chevron-down" class="chevron-icon"></i>
+            </div>
+            <div class="nested-content" id="powderDamage">
+                <a href="#" class="sub-menu-item">Re-Powder</a>
+                <a href="#" class="sub-menu-item">Scrap</a>
+            </div>
+
+            <a href="#" class="sub-menu-item">Overview</a>
+        </div>
+    </div>
+
+    <div class="dropdown-container">
+        <div class="menu-item" onclick="toggleDropdown('anodizingSub', this)">
+            <i data-lucide="Zap"></i> Anodizing
+            <i data-lucide="chevron-down" class="chevron-icon"></i>
+        </div>
+        <div class="dropdown-content" id="anodizingSub">
+            <a href="#" class="sub-menu-item">Binding</a>
+            <a href="#" class="sub-menu-item">Production</a>
+            <a href="#" class="sub-menu-item">Prodection Pending</a>
+            <a href="#" class="sub-menu-item">Pending</a>
+            
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this)">
+                <i data-lucide="trash-2" style="width:14px"></i> Scrap
+                <i data-lucide="chevron-down" class="chevron-icon"></i>
+            </div>
+            <div class="nested-content" id="anodizingScrap">
+                <a href="#" class="sub-menu-item">Damage</a>
+                <a href="#" class="sub-menu-item">One Micron</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
 
-<div class="modal" id="confirmModal">
-    <div style="text-align:center; color:var(--accent-green); margin-bottom:15px;"><i data-lucide="upload-cloud" size="48"></i></div>
-    <h3 style="text-align:center; margin-bottom:10px;">Ready to Submit?</h3>
-    <p style="text-align:center; color:var(--text-muted);" id="confirmMessage"></p>
-    <div class="modal-footer">
-        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit</button>
-        <button class="btn btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-    </div>
-</div>
-
-<div class="success-overlay" id="successOverlay">
-    <div class="checkmark-wrapper">
-        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-    </div>
-    <h2 style="color: var(--accent-green);">Submission Successful</h2>
-</div>
-
-<div class="modal" id="addModal">
-    <h3 id="modalTitle" style="margin-bottom:20px;">Bucket Production Entry</h3>
-    <form id="entryForm" onsubmit="event.preventDefault(); saveEntry();">
-        <div class="form-group"><label>Bucket No</label><input type="text" id="bucketNo" required></div>
-        <div class="form-group"><label>Extrusion Date</label><input type="date" id="extDate" required></div>
-        <div class="form-group">
-            <label>Shift</label>
-            <select id="shift" onchange="checkShift()" required>
-                <option value="" disabled selected>Select Shift</option>
-                <option value="Day">Day</option>
-                <option value="Night">Night</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-        <div class="form-group" id="otherShiftGroup" style="display:none;"><label>Specify Shift</label><input type="text" id="otherShiftText"></div>
-        <div class="form-group"><label>Billet Batch No</label><input type="number" id="batchNo" required></div>
-        <div class="form-group">
-            <label>Type</label>
-            <select id="type" required>
-                <option value="" disabled selected>Select Type</option>
-                <option value="ULR">ULR</option>
-                <option value="PRM">PRM</option>
-                <option value="ULR PRM">ULR PRM</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Profile (Search)</label>
-            <input type="text" id="profileSearch" oninput="filterProfiles()" placeholder="Search profiles..." autocomplete="off" required>
-            <div class="search-results" id="searchResults"></div>
-        </div>
-        <div class="form-group"><label>Die No</label><input type="number" id="dieNo" required></div>
-        <div class="form-group"><label>Length (m)</label><input type="number" step="0.01" id="length" oninput="calcWeight()" required></div>
-        <div class="form-group"><label>Qty</label><input type="number" id="qty" oninput="calcWeight()" required></div>
-        <div class="form-group"><label>Unit Weight (kg/m)</label><input type="number" step="0.001" id="unitWeight" oninput="calcWeight()" required></div>
-        
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="hasDamage" onchange="toggleDamageField()">
-            <label for="hasDamage">Include Damage Quantity?</label>
-        </div>
-        <div class="form-group" id="damageInputGroup" style="display:none;">
-            <label>Damage Qty</label>
-            <input type="number" id="damageQty">
-        </div>
-
-        <div class="form-group">
-            <label>Surface</label>
-            <select id="surface" required>
-                <option value="" disabled selected>Select Surface</option>
-                <option value="AN">AN</option>
-                <option value="PC">PC</option>
-                <option value="MF">MF</option>
-            </select>
-        </div>
-        <div class="form-group"><label>Bucket Weight (kg)</label><input type="text" id="totalWeight" style="color:var(--accent-green); font-weight:bold;" readonly value="0.00"></div>
-        
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-save" id="submitBtn">Add Entry</button>
-            <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-        </div>
-    </form>
-</div>
-
 <div class="container">
-    <div class="page-header">
-        <h1>Bucket Income</h1>
-        <h3>Extrusion Department</h3>
-    </div>
-
-    <div class="card">
-        <button class="add-main-btn" onclick="openModal()">+ Add New Bucket</button>
-        <div class="inner-frame" id="displayArea">
-            <div id="noDataText" style="color: var(--text-muted); text-align: center; padding: 20px;">No data recorded for this session.</div>
+    <div class="welcome-card">
+        <h1>Welcome Back</h1>
+        <p>Production Management & Tracking System for Ultra Aluminium Extrusion Plant.</p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <div class="status-badge"><span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span> System Online</div>
         </div>
     </div>
-</div>
 
-<div class="submit-footer">
-    <button class="final-submit-btn" onclick="finalSubmit()">
-        <i data-lucide="check-circle"></i> Final Submit Production
-    </button>
+    <div style="width: 100%; max-width: 900px; margin-bottom: 15px;">
+        <h3 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Quick Access</h3>
+    </div>
+
+    <div class="action-grid">
+        <a href="https://aging-details.netlify.app/" class="action-card">
+            <i data-lucide="timer"></i>
+            <div>
+                <h3>Aging Details</h3>
+                <p>Record batch in/out times and manage bucket weights for the extrusion section.</p>
+            </div>
+        </a>
+
+        <a href="https://bucketstock.netlify.app/" class="action-card">
+            <i data-lucide="container"></i>
+            <div>
+                <h3>Bucket Income</h3>
+                <p>Track incoming buckets and manage inventory counts in real-time.</p>
+            </div>
+        </a>
+
+        <a href="https://profile-income.netlify.app/" class="action-card">
+            <i data-lucide="bar-chart-3"></i>
+            <div>
+                <h3>Profile Income</h3>
+                <p>Log profile production data and monitor extrusion output efficiency.</p>
+            </div>
+        </a>
+
+        <a href="#" class="action-card">
+            <i data-lucide="history"></i>
+            <div>
+                <h3>Records History</h3>
+                <p>View previous logs, batch reports, and historical production data.</p>
+            </div>
+        </a>
+    </div>
 </div>
 
 <script>
     lucide.createIcons();
 
-    const profiles = ["Flat Bar 20x5", "Square Tube 40x40", "Round Tube 25mm", "T-Section 30x30", "L-Angle 50x50", "U-Channel 20x20", "Rectangular Tube 80x40"];
-    let sessionData = [];
-    let editId = null;
-
-    function toggleMenu() {
-        document.getElementById("menu").classList.toggle("active");
-        document.getElementById("mainOverlay").classList.toggle("active");
+    function toggleDropdown(id, element) {
+        const content = document.getElementById(id);
+        const chevron = element.querySelector('.chevron-icon');
+        content.classList.toggle('show');
+        if(chevron) chevron.classList.toggle('rotate');
+        // Prevent closing the parent menu when clicking nested toggle
+        event.stopPropagation();
     }
 
-    function toggleDropdown() {
-        const content = document.getElementById("dropdownContent");
-        const chevron = document.getElementById("chevron");
-        content.classList.toggle("show");
-        chevron.classList.toggle("rotate");
+    function toggleMenu() { 
+        document.getElementById("menu").classList.toggle("active"); 
+        document.getElementById("mainOverlay").classList.toggle("active"); 
     }
 
-    function resetForm() {
-        document.getElementById('entryForm').reset();
-        document.getElementById('extDate').valueAsDate = new Date();
-        document.getElementById('totalWeight').value = "0.00";
-        document.getElementById('otherShiftGroup').style.display = 'none';
-        document.getElementById('otherShiftText').required = false;
-        document.getElementById('damageInputGroup').style.display = 'none';
-        document.getElementById('damageQty').required = false;
-        document.getElementById('modalTitle').innerText = "Bucket Production Entry";
-        document.getElementById('submitBtn').innerText = "Add Entry";
-        editId = null;
+    function closeAll() { 
+        document.getElementById("menu").classList.remove("active"); 
+        document.getElementById("mainOverlay").classList.remove("active");
     }
-
-    function toggleDamageField() {
-        const isChecked = document.getElementById('hasDamage').checked;
-        document.getElementById('damageInputGroup').style.display = isChecked ? 'block' : 'none';
-        document.getElementById('damageQty').required = isChecked;
-    }
-
-    function checkShift() {
-        const shiftVal = document.getElementById('shift').value;
-        const isOther = shiftVal === 'Other';
-        document.getElementById('otherShiftGroup').style.display = isOther ? 'block' : 'none';
-        document.getElementById('otherShiftText').required = isOther;
-    }
-
-    function openModal() {
-        resetForm();
-        document.getElementById("addModal").classList.add("active");
-        document.getElementById("mainOverlay").classList.add("active");
-    }
-
-    function closeModal() {
-        document.getElementById("addModal").classList.remove("active");
-        if (!document.getElementById("menu").classList.contains("active")) document.getElementById("mainOverlay").classList.remove("active");
-    }
-
-    function closeConfirmModal() {
-        document.getElementById('confirmModal').classList.remove('active');
-        if (!document.getElementById("menu").classList.contains("active")) document.getElementById("mainOverlay").classList.remove("active");
-    }
-
-    function closeAll() {
-        document.getElementById("menu").classList.remove("active");
-        closeModal();
-        closeConfirmModal();
-    }
-
-    function calcWeight() {
-        const qty = parseFloat(document.getElementById('qty').value) || 0;
-        const weight = parseFloat(document.getElementById('unitWeight').value) || 0;
-        const length = parseFloat(document.getElementById('length').value) || 0;
-        document.getElementById('totalWeight').value = (qty * weight * length).toFixed(2);
-    }
-
-    function filterProfiles() {
-        const input = document.getElementById('profileSearch').value.toUpperCase();
-        const results = document.getElementById('searchResults');
-        results.innerHTML = '';
-        if(!input) { results.style.display = 'none'; return; }
-        const filtered = profiles.filter(p => p.toUpperCase().includes(input));
-        if(filtered.length > 0) {
-            results.style.display = 'block';
-            filtered.forEach(p => {
-                const div = document.createElement('div');
-                div.innerText = p;
-                div.onclick = () => { document.getElementById('profileSearch').value = p; results.style.display = 'none'; };
-                results.appendChild(div);
-            });
-        } else results.style.display = 'none';
-    }
-
-    function saveEntry() {
-        const shiftVal = document.getElementById('shift').value;
-        const hasDamage = document.getElementById('hasDamage').checked;
-
-        const formData = {
-            id: editId || Date.now(),
-            bucket: document.getElementById('bucketNo').value,
-            date: document.getElementById('extDate').value,
-            shift: shiftVal === 'Other' ? document.getElementById('otherShiftText').value : shiftVal,
-            batch: document.getElementById('batchNo').value,
-            type: document.getElementById('type').value,
-            profile: document.getElementById('profileSearch').value,
-            die: document.getElementById('dieNo').value,
-            len: document.getElementById('length').value,
-            qty: document.getElementById('qty').value,
-            uW: document.getElementById('unitWeight').value,
-            damage: hasDamage ? document.getElementById('damageQty').value : '-',
-            surf: document.getElementById('surface').value,
-            totalW: document.getElementById('totalWeight').value
-        };
-
-        if(editId) {
-            const index = sessionData.findIndex(i => i.id === editId);
-            sessionData[index] = formData;
-        } else sessionData.push(formData);
-
-        renderEntries();
-        closeModal();
-    }
-
-    function editEntry(id) {
-        const item = sessionData.find(i => i.id === id);
-        if(!item) return;
-        editId = id;
-        document.getElementById('modalTitle').innerText = "Edit Bucket Entry";
-        document.getElementById('submitBtn').innerText = "Update Entry";
-        document.getElementById('bucketNo').value = item.bucket;
-        document.getElementById('extDate').value = item.date;
-        document.getElementById('batchNo').value = item.batch;
-        document.getElementById('type').value = item.type;
-        document.getElementById('profileSearch').value = item.profile;
-        document.getElementById('dieNo').value = item.die;
-        document.getElementById('length').value = item.len;
-        document.getElementById('qty').value = item.qty;
-        document.getElementById('unitWeight').value = item.uW;
-        document.getElementById('surface').value = item.surf;
-        document.getElementById('totalWeight').value = item.totalW;
-        
-        if(item.damage !== '-') {
-            document.getElementById('hasDamage').checked = true;
-            document.getElementById('damageInputGroup').style.display = 'block';
-            document.getElementById('damageQty').value = item.damage;
-            document.getElementById('damageQty').required = true;
-        }
-        
-        const shiftSelect = document.getElementById('shift');
-        if (['Day', 'Night'].includes(item.shift)) {
-            shiftSelect.value = item.shift;
-        } else {
-            shiftSelect.value = 'Other';
-            document.getElementById('otherShiftGroup').style.display = 'block';
-            document.getElementById('otherShiftText').value = item.shift;
-            document.getElementById('otherShiftText').required = true;
-        }
-        document.getElementById("addModal").classList.add("active");
-        document.getElementById("mainOverlay").classList.add("active");
-    }
-
-    function removeEntry(id) {
-        if(confirm("Delete this entry?")) {
-            sessionData = sessionData.filter(item => item.id !== id);
-            renderEntries();
-        }
-    }
-
-    function renderEntries() {
-        const display = document.getElementById('displayArea');
-        display.innerHTML = '';
-        if(sessionData.length === 0) {
-            display.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No data recorded.</div>';
-            return;
-        }
-        [...sessionData].reverse().forEach(item => {
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'data-entry';
-            entryDiv.innerHTML = `
-                <i data-lucide="edit-3" class="edit-btn" onclick="editEntry(${item.id})"></i>
-                <i data-lucide="trash-2" class="delete-btn" onclick="removeEntry(${item.id})"></i>
-                <div class="data-grid">
-                    <div class="data-item"><b>Bucket</b><span>${item.bucket}</span></div>
-                    <div class="data-item"><b>Date</b><span>${item.date}</span></div>
-                    <div class="data-item"><b>Shift</b><span>${item.shift}</span></div>
-                    <div class="data-item"><b>Profile</b><span>${item.profile}</span></div>
-                    <div class="data-item"><b>Dimensions</b><span>${item.len}m x ${item.qty}</span></div>
-                    <div class="data-item"><b>Damage</b><span>${item.damage}</span></div>
-                    <div class="data-item" style="grid-column: span 2; border-top: 1px solid #30363d; padding-top: 10px;">
-                        <b style="color:var(--accent-green)">Net Weight</b>
-                        <span style="font-size:1.2rem; color:var(--accent-green)">${item.totalW} kg</span>
-                    </div>
-                </div>`;
-            display.appendChild(entryDiv);
-        });
-        lucide.createIcons();
-    }
-
-    function finalSubmit() {
-        if(sessionData.length === 0) return alert("Add entries first.");
-        const totalKg = sessionData.reduce((acc, curr) => acc + parseFloat(curr.totalW), 0).toFixed(2);
-        document.getElementById('confirmMessage').innerHTML = `Submit <b>${sessionData.length} buckets</b> (${totalKg} kg)?`;
-        document.getElementById('confirmModal').classList.add('active');
-        document.getElementById('mainOverlay').classList.add('active');
-    }
-
-async function executeSubmit() {
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--rcOmfT-CqGbfmodaDliiXeQmvgPclu6lw-ji2as0BJS9TGsCKMT-AYtZ1SSmDup/exec"; // Put your URL here
-
-    // Show loading state
-    const submitBtn = document.querySelector('.btn-save');
-    submitBtn.innerText = "Processing...";
-    submitBtn.disabled = true;
-
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(sessionData)
-        });
-
-        const result = await response.json();
-
-        if (result.result === "success") {
-            closeConfirmModal();
-            document.getElementById('successOverlay').classList.add('active');
-            setTimeout(() => {
-                sessionData = []; // Clear local data
-                location.reload();
-            }, 2500);
-        } else {
-            alert("Error: " + result.error);
-        }
-    } catch (error) {
-        console.error("Submission failed", error);
-        alert("Failed to connect to the server. Check your internet connection.");
-    } finally {
-        submitBtn.innerText = "Yes, Submit";
-        submitBtn.disabled = false;
-    }
-}
 </script>
 </body>
 </html>
