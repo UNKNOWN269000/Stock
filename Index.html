@@ -19,57 +19,82 @@
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #090b0f; color: var(--text-main); line-height: 1.6; overflow-x: hidden; width: 100%; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: #090b0f; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden; 
+            width: 100%; 
+        }
 
         /* HEADER */
         .header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
-            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px;
+            background: rgba(13, 15, 20, 0.8); display: flex; align-items: center; padding: 0 15px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(15px);
         }
-        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 12px; display: flex; align-items: center; }
+        .menu-btn { 
+            background: transparent; border: none; color: #fff; 
+            cursor: pointer; font-size: 28px; margin-right: 12px; 
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px;
+        }
         
         .logo-img {
-            height: 45px; width: 45px; margin-right: 12px;
+            height: 40px; width: 40px; margin-right: 10px;
             object-fit: cover; border-radius: 50%;
             border: 2px solid var(--accent-green);
         }
 
-        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; white-space: nowrap; }
+        .company-name { font-size: 1rem; font-weight: 800; color: var(--accent-green); letter-spacing: 0.5px; white-space: nowrap; }
 
-        /* SIDE MENU */
+        /* MOBILE SIDE MENU */
         .side-menu {
-            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
+            position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100%;
             background: var(--bg-dark); border-right: 1px solid var(--border-color);
-            padding: 80px 10px 40px; transition: var(--transition); z-index: 1500;
-            overflow-y: auto;
+            padding: 80px 15px 40px; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 1500; overflow-y: auto;
+            transform: translateX(0);
         }
-        .side-menu.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
-        .overlay.active { display: block; }
+        .side-menu.active { transform: translateX(100%); }
+        
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(4px); display: none; z-index: 1400; 
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .overlay.active { display: block; opacity: 1; }
 
         .menu-item {
             color: white; text-decoration: none; display: flex; align-items: center; 
-            gap: 12px; padding: 12px; cursor: pointer; transition: 0.2s; border-radius: 10px;
-            margin-bottom: 2px; font-size: 0.95rem;
+            gap: 12px; padding: 14px 16px; cursor: pointer; transition: 0.2s; border-radius: 12px;
+            margin-bottom: 4px; font-size: 0.95rem; font-weight: 500;
         }
-        .menu-item:hover { background: rgba(255,255,255,0.05); }
-        .menu-item.active-link { color: var(--accent-green); background: rgba(144, 238, 144, 0.1); font-weight: 600; }
+        .menu-item:active { background: rgba(255,255,255,0.1); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(144, 238, 144, 0.1); }
         
         /* DROPDOWN LOGIC */
         .dropdown-container { display: flex; flex-direction: column; }
         .dropdown-content { 
-            display: none; flex-direction: column; padding-left: 20px; 
-            border-left: 1px solid var(--border-color); margin-left: 22px; margin-bottom: 5px;
+            display: none; flex-direction: column; padding-left: 15px; 
+            border-left: 1px solid var(--border-color); margin-left: 24px; margin-bottom: 8px;
         }
         .dropdown-content.show { display: flex; }
         
         .sub-menu-item {
-            color: var(--text-muted); text-decoration: none; padding: 8px 12px;
-            font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; gap: 8px; border-radius: 8px;
+            color: var(--text-muted); text-decoration: none; padding: 12px 16px;
+            font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 10px; border-radius: 10px;
         }
-        .sub-menu-item:hover { color: var(--accent-green); background: rgba(255,255,255,0.03); }
+        .sub-menu-item:active { color: var(--accent-green); background: rgba(255,255,255,0.05); }
         
         /* NESTED LEVEL 3 */
         .nested-content {
@@ -78,56 +103,71 @@
         }
         .nested-content.show { display: flex; }
 
-        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 18px; }
         .chevron-icon.rotate { transform: rotate(180deg); }
 
         /* CONTAINER */
-        .container { padding: 110px 20px 40px; display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100vh; }
+        .container { 
+            padding: 90px 15px 30px; 
+            display: flex; flex-direction: column; 
+            align-items: center; width: 100%; min-height: 100vh; 
+        }
         
         .welcome-card {
-            width: 100%; max-width: 900px; background: linear-gradient(145deg, var(--bg-card), #1c2128);
-            border-radius: 30px; border: 1px solid var(--border-color);
-            padding: 40px 30px; text-align: center; margin-bottom: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            width: 100%; max-width: 500px; 
+            background: linear-gradient(145deg, var(--bg-card), #1c2128);
+            border-radius: 24px; border: 1px solid var(--border-color);
+            padding: 30px 20px; text-align: center; margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .welcome-card h1 { font-size: 2.2rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .welcome-card p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; }
+        .welcome-card h1 { font-size: 1.8rem; margin-bottom: 8px; font-weight: 800; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .welcome-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.4; margin-bottom: 20px; }
 
-        /* STATUS BADGE STYLES */
+        /* STATUS BADGE */
         .status-badge {
-            display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-            border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-            transition: 0.3s;
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+            border-radius: 30px; font-size: 0.8rem; font-weight: 700;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .status-badge.online {
-            background: rgba(34, 197, 94, 0.1); color: #22c55e;
+        .status-badge.online { background: rgba(34, 197, 94, 0.15); color: #2ecc71; }
+        .status-badge.offline { background: rgba(255, 77, 77, 0.15); color: var(--accent-red); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; position: relative; }
+        .online .status-dot { background: #2ecc71; }
+        .online .status-dot::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: #2ecc71; animation: pulse 2s infinite;
         }
-        .status-badge.offline {
-            background: rgba(255, 77, 77, 0.1); color: var(--accent-red);
-        }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .online .status-dot { background: #22c55e; }
         .offline .status-dot { background: var(--accent-red); }
 
-        /* QUICK ACTIONS GRID */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* MOBILE ACTION GRID */
         .action-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px; width: 100%; max-width: 900px;
+            display: grid; grid-template-columns: 1fr;
+            gap: 15px; width: 100%; max-width: 500px;
         }
         .action-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            padding: 25px; border-radius: 20px; transition: var(--transition);
-            text-decoration: none; color: white; display: flex; flex-direction: column; gap: 15px;
+            padding: 20px; border-radius: 18px; transition: 0.2s;
+            text-decoration: none; color: white; display: flex; align-items: center; gap: 18px;
         }
-        .action-card:hover { transform: translateY(-5px); border-color: var(--accent-green); background: #1c2128; }
-        .action-card i { color: var(--accent-green); width: 32px; height: 32px; }
-        .action-card h3 { font-size: 1.2rem; }
-        .action-card p { font-size: 0.85rem; color: var(--text-muted); }
+        .action-card:active { transform: scale(0.97); border-color: var(--accent-green); background: #1c2128; }
+        .action-card .icon-box {
+            background: rgba(144, 238, 144, 0.1); 
+            padding: 12px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .action-card i { color: var(--accent-green); width: 24px; height: 24px; }
+        .action-card h3 { font-size: 1.1rem; margin-bottom: 2px; }
+        .action-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.3; }
 
-        @media (max-width: 600px) {
-            .welcome-card h1 { font-size: 1.8rem; }
-            .action-grid { grid-template-columns: 1fr; }
-            .side-menu { width: 85%; }
+        .section-title {
+            width: 100%; max-width: 500px; margin-bottom: 12px;
+            color: var(--text-muted); font-size: 0.75rem; 
+            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;
         }
     </style>
 </head>
@@ -147,12 +187,12 @@
             <i data-lucide="factory"></i> Extrusion
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
-     <div class="dropdown-content" id="extrusionSub">
-    <a href="Extrusion/Bucket Income/index.html" class="sub-menu-item">Bucket income</a>
-    <a href="Extrusion/Profile Income/index.html" class="sub-menu-item">Profile income</a>
-    <a href="Extrusion/Aging Details/index.html" class="sub-menu-item">Aging Details</a>
-    <a href="Extrusion/Overview/index.html" class="sub-menu-item">Overview</a>
-		</div>
+        <div class="dropdown-content" id="extrusionSub">
+            <a href="Extrusion/Bucket Income/index.html" class="sub-menu-item">Bucket income</a>
+            <a href="Extrusion/Profile Income/index.html" class="sub-menu-item">Profile income</a>
+            <a href="Extrusion/Aging Details/index.html" class="sub-menu-item">Aging Details</a>
+            <a href="Extrusion/Overview/index.html" class="sub-menu-item">Overview</a>
+        </div>
     </div>
 
     <div class="dropdown-container">
@@ -165,7 +205,7 @@
             <a href="#" class="sub-menu-item">Mill Finish Profile Stock</a>
             <a href="#" class="sub-menu-item">Mill Finish Bucket Stock</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this, event)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 12px 16px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this, event)">
                 <i data-lucide="repeat" style="width:14px"></i> Transfer
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -173,7 +213,6 @@
                 <a href="#" class="sub-menu-item">Anodizing</a>
                 <a href="#" class="sub-menu-item">Powder Coat</a>
             </div>
-
             <a href="#" class="sub-menu-item">Overview</a>
         </div>
     </div>
@@ -188,7 +227,7 @@
             <a href="#" class="sub-menu-item">Production</a>
             <a href="#" class="sub-menu-item">Pending</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 12px 16px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
                 <i data-lucide="alert-triangle" style="width:14px"></i> Damage
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -196,23 +235,21 @@
                 <a href="#" class="sub-menu-item">Re-Powder</a>
                 <a href="#" class="sub-menu-item">Scrap</a>
             </div>
-
             <a href="#" class="sub-menu-item">Overview</a>
         </div>
     </div>
 
     <div class="dropdown-container">
         <div class="menu-item" onclick="toggleDropdown('anodizingSub', this, event)">
-            <i data-lucide="Zap"></i> Anodizing
+            <i data-lucide="zap"></i> Anodizing
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="anodizingSub">
             <a href="#" class="sub-menu-item">Binding</a>
             <a href="#" class="sub-menu-item">Production</a>
-            <a href="#" class="sub-menu-item">Prodection Pending</a>
             <a href="#" class="sub-menu-item">Pending</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this, event)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 12px 16px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this, event)">
                 <i data-lucide="trash-2" style="width:14px"></i> Scrap
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -229,8 +266,8 @@
 <div class="container">
     <div class="welcome-card">
         <h1>Welcome Back</h1>
-        <p>Production Management & Tracking System for Ultra Aluminium Extrusion Plant.</p>
-        <div style="display: flex; justify-content: center; gap: 15px;">
+        <p>Production Management & Tracking System for Ultra Aluminium Plant.</p>
+        <div style="display: flex; justify-content: center;">
             <div id="statusBadge" class="status-badge online">
                 <span class="status-dot"></span>
                 <span id="statusText">System Online</span>
@@ -238,40 +275,38 @@
         </div>
     </div>
 
-    <div style="width: 100%; max-width: 900px; margin-bottom: 15px;">
-        <h3 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Quick Access</h3>
-    </div>
+    <div class="section-title">Quick Access</div>
 
     <div class="action-grid">
         <a href="https://aging-details.netlify.app/" class="action-card">
-            <i data-lucide="timer"></i>
+            <div class="icon-box"><i data-lucide="timer"></i></div>
             <div>
                 <h3>Aging Details</h3>
-                <p>Record batch in/out times and manage bucket weights for the extrusion section.</p>
+                <p>Record batch times and manage bucket weights.</p>
             </div>
         </a>
 
         <a href="https://bucketstock.netlify.app/" class="action-card">
-            <i data-lucide="container"></i>
+            <div class="icon-box"><i data-lucide="container"></i></div>
             <div>
                 <h3>Bucket Income</h3>
-                <p>Track incoming buckets and manage inventory counts in real-time.</p>
+                <p>Track incoming buckets and inventory counts.</p>
             </div>
         </a>
 
         <a href="https://profile-income.netlify.app/" class="action-card">
-            <i data-lucide="bar-chart-3"></i>
+            <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
             <div>
                 <h3>Profile Income</h3>
-                <p>Log profile production data and monitor extrusion output efficiency.</p>
+                <p>Log profile production and monitor efficiency.</p>
             </div>
         </a>
 
         <a href="#" class="action-card">
-            <i data-lucide="history"></i>
+            <div class="icon-box"><i data-lucide="history"></i></div>
             <div>
                 <h3>Records History</h3>
-                <p>View previous logs, batch reports, and historical production data.</p>
+                <p>View previous logs and batch reports.</p>
             </div>
         </a>
     </div>
@@ -280,7 +315,7 @@
 <script>
     lucide.createIcons();
 
-    // INTERNET CONNECTIVITY FEATURE
+    // CONNECTIVITY STATUS
     function updateOnlineStatus() {
         const badge = document.getElementById('statusBadge');
         const text = document.getElementById('statusText');
@@ -294,24 +329,18 @@
         }
     }
 
-    // Listen for connection changes
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
-    
-    // Check status on initial load
     updateOnlineStatus();
 
+    // NAVIGATION
     function toggleDropdown(id, element, event) {
         if (event) event.stopPropagation();
         const content = document.getElementById(id);
         const chevron = element.querySelector('.chevron-icon');
         
-        if (content) {
-            content.classList.toggle('show');
-        }
-        if (chevron) {
-            chevron.classList.toggle('rotate');
-        }
+        if (content) content.classList.toggle('show');
+        if (chevron) chevron.classList.toggle('rotate');
     }
 
     function toggleMenu() { 
