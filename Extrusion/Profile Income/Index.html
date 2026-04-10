@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultra Aluminium | Profile Income</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0d0f14;
+            --bg-card: #161b22;
+            --bg-inner: #0d1117;
+            --accent-green: #4ade80;
+            --accent-blue: #38bdf8;
+            --text-main: #ffffff;
+            --text-muted: #9aa0a6;
+            --border-color: #30363d;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #090b0f; color: var(--text-main); line-height: 1.6; padding-bottom: 100px; overflow-x: hidden; width: 100%; }
+
+        /* HEADER */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 15px; }
+        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; }
+
+        /* SIDE MENU */
+        .side-menu {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 20px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
+        }
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; transition: 0.3s; }
+        .overlay.active { display: block; }
+
+        .menu-item { color: white; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 15px; cursor: pointer; transition: 0.2s; border-radius: 10px; }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(74, 222, 128, 0.1); }
+        
+        .dropdown-content { display: none; flex-direction: column; padding-left: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px; }
+        .dropdown-content.show { display: flex; animation: fadeIn 0.3s ease; }
+        
+        /* Nested Styles */
+        .nested-content { display: none; flex-direction: column; padding-left: 20px; background: rgba(255,255,255,0.02); }
+        .nested-content.show { display: flex; }
+
+        .sub-menu-item { color: var(--text-muted); text-decoration: none; padding: 12px; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; border-radius: 8px; }
+        .sub-menu-item:hover { color: white; }
+        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; }
+        
+        .chevron-icon { transition: transform 0.3s; width: 18px; height: 18px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        /* CONTAINER & CARDS */
+        .container { padding: 90px 15px 20px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .page-header { text-align: center; margin-bottom: 25px; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        
+        .card { width: 100%; max-width: 850px; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .inner-frame { width: 100%; min-height: 100px; background: var(--bg-inner); border-radius: 15px; border: 1px dashed #444c56; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+        .data-entry { background: #1c2128; border-radius: 12px; padding: 15px; border-left: 5px solid var(--accent-blue); position: relative; animation: slideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 0.85rem; }
+        .data-item b { display: block; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; }
+
+        /* MODAL / POPUP */
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%);
+            width: 95%; max-width: 480px; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 28px;
+            padding: 25px; z-index: 3000; display: none; opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal.active { display: block; opacity: 1; transform: translate(-50%, -50%); }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; padding-left: 4px; }
+        .form-group input { padding: 14px; background: var(--bg-inner); border: 1px solid var(--border-color); border-radius: 12px; color: white; outline: none; transition: 0.2s; width: 100%; }
+
+        /* CHECKBOXES */
+        .length-multi-container { background: var(--bg-inner); padding: 5px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
+        .length-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border-color); }
+        .length-label { display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1; user-select: none; }
+        
+        .l-check {
+            width: 22px; height: 22px; appearance: none;
+            background: #2d333b; border: 2px solid #444c56;
+            border-radius: 6px; cursor: pointer; position: relative;
+        }
+        .l-check:checked { background: var(--accent-green); border-color: var(--accent-green); }
+        .l-check:checked::after { content: '✓'; position: absolute; color: #052e16; font-size: 14px; font-weight: 900; left: 4px; top: -1px; }
+
+        .l-qty-input { width: 90px; padding: 10px !important; text-align: center; background: #090b0f !important; border: 1px solid transparent !important; border-radius: 10px !important; opacity: 0.2; pointer-events: none; }
+        .length-row:has(.l-check:checked) .l-qty-input { opacity: 1; pointer-events: all; border-color: #444c56 !important; }
+
+        .other-input-field { display: none; margin: 10px; width: calc(100% - 20px); padding: 12px; background: #090b0f; border: 1px solid #444c56; color: white; border-radius: 10px; }
+        .length-row:has(.other-check:checked) + .other-input-field { display: block; }
+
+        /* BUTTONS */
+        .btn { padding: 16px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-save { background: var(--accent-blue); color: #082f49; width: 100%; }
+        .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); flex: 1; }
+        .add-main-btn { background: var(--bg-inner); color: var(--accent-blue); border: 1px solid var(--accent-blue); padding: 16px; font-size: 1rem; font-weight: 700; border-radius: 12px; cursor: pointer; width: 100%; }
+        .final-submit-btn { width: 100%; max-width: 850px; background: linear-gradient(135deg, #38bdf8, #0284c7); color: white; border: none; padding: 18px; font-size: 1.1rem; font-weight: 800; border-radius: 16px; cursor: pointer; }
+
+        .submit-footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 20px; background: rgba(13, 15, 20, 0.8); backdrop-filter: blur(15px); border-top: 1px solid var(--border-color); display: flex; justify-content: center; z-index: 1000; }
+
+        /* OVERLAYS */
+        .success-overlay { position: fixed; inset: 0; background: rgba(9, 11, 15, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(10px); }
+        .success-overlay.active { display: flex; }
+        .loader { width: 60px; height: 60px; border: 5px solid #1e293b; border-top: 5px solid var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .success-icon { display: none; width: 80px; height: 80px; background: var(--accent-green); color: #052e16; border-radius: 50%; align-items: center; justify-content: center; margin-bottom: 20px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        
+        .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; padding: 5px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="company-name">ULTRA ALUMINIUM</div>
+</div>
+
+<div class="side-menu" id="menu">
+    <div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800;">MAIN MENU</div>
+    
+    <a href="../../index.html" class="menu-item"><div style="display:flex; align-items:center; gap:10px;"><i data-lucide="home"></i> Home</div></a>
+
+    <div class="menu-item" onclick="toggleDrop('extrusionDrop', 'extrusionChev')">
+        <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="factory"></i> Extrusion</div>
+        <i data-lucide="chevron-down" class="chevron-icon" id="extrusionChev"></i>
+    </div>
+    <div class="dropdown-content" id="extrusionDrop">
+        <a href="../Bucket Income/index.html" class="sub-menu-item">• Bucket income</a>
+        <a href="../Profile Income/index.html" class="sub-menu-item active-sub">• Profile income</a>
+        <a href="../Aging Details/index.html" class="sub-menu-item">• Aging Details</a>
+        <a href="../Overview/index.html" class="sub-menu-item">• Overview</a>
+    </div>
+
+    <div class="menu-item" onclick="toggleDrop('millDrop', 'millChev')">
+        <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="layers"></i> Mill Finish</div>
+        <i data-lucide="chevron-down" class="chevron-icon" id="millChev"></i>
+    </div>
+    <div class="dropdown-content" id="millDrop">
+        <a href="#" class="sub-menu-item">• Hardness Check</a>
+        <a href="#" class="sub-menu-item">• Mill Finish Profile Stock</a>
+        <a href="#" class="sub-menu-item">• Mill Finish Bucket Stock</a>
+        <div class="sub-menu-item" onclick="event.stopPropagation(); toggleNested('transferDrop', 'transferChev')">
+            <span>• Transfer</span>
+            <i data-lucide="chevron-down" class="chevron-icon" id="transferChev" style="width:14px"></i>
+        </div>
+        <div class="nested-content" id="transferDrop">
+            <a href="#" class="sub-menu-item">-- Anodizing</a>
+            <a href="#" class="sub-menu-item">-- Powder Coat</a>
+        </div>
+        <a href="#" class="sub-menu-item">• Overview</a>
+    </div>
+
+    <div class="menu-item" onclick="toggleDrop('powderDrop', 'powderChev')">
+        <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="palette"></i> Powder Coat</div>
+        <i data-lucide="chevron-down" class="chevron-icon" id="powderChev"></i>
+    </div>
+    <div class="dropdown-content" id="powderDrop">
+        <a href="#" class="sub-menu-item">• Mill Finish Transfer Stock</a>
+        <a href="#" class="sub-menu-item">• Production</a>
+        <a href="#" class="sub-menu-item">• Pending</a>
+        <div class="sub-menu-item" onclick="event.stopPropagation(); toggleNested('damageDrop', 'damageChev')">
+            <span>• Damage</span>
+            <i data-lucide="chevron-down" class="chevron-icon" id="damageChev" style="width:14px"></i>
+        </div>
+        <div class="nested-content" id="damageDrop">
+            <a href="#" class="sub-menu-item">-- Re-Powder</a>
+            <a href="#" class="sub-menu-item">-- Scrap</a>
+        </div>
+        <a href="#" class="sub-menu-item">• Overview</a>
+    </div>
+
+    <div class="menu-item" onclick="toggleDrop('anodizingDrop', 'anodizingChev')">
+        <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="flask-conical"></i> Anodizing</div>
+        <i data-lucide="chevron-down" class="chevron-icon" id="anodizingChev"></i>
+    </div>
+    <div class="dropdown-content" id="anodizingDrop">
+        <a href="#" class="sub-menu-item">• Binding</a>
+        <a href="#" class="sub-menu-item">• Production</a>
+        <a href="#" class="sub-menu-item">• Production Pending</a>
+        <a href="#" class="sub-menu-item">• Pending</a>
+        <div class="sub-menu-item" onclick="event.stopPropagation(); toggleNested('scrapDrop', 'scrapChev')">
+            <span>• Scrap</span>
+            <i data-lucide="chevron-down" class="chevron-icon" id="scrapChev" style="width:14px"></i>
+        </div>
+        <div class="nested-content" id="scrapDrop">
+            <a href="#" class="sub-menu-item">-- Damage</a>
+            <a href="#" class="sub-menu-item">-- One Micron</a>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
+
+<div class="modal" id="addModal">
+    <h2 style="margin-bottom:20px; font-weight: 800;">New Production</h2>
+    <form id="profileForm" onsubmit="event.preventDefault(); saveEntry();">
+        <div class="form-group"><label>Profile Name</label><input type="text" id="pName" required placeholder="Ex: Casement"></div>
+        <div class="form-group">
+            <label>Lengths & Quantities</label>
+            <div class="length-multi-container">
+                <div class="length-row"><label class="length-label"><input type="checkbox" id="c365" class="l-check"> <span>3.65 Meters</span></label><input type="number" id="q365" class="l-qty-input" placeholder="Qty"></div>
+                <div class="length-row"><label class="length-label"><input type="checkbox" id="c610" class="l-check"> <span>6.10 Meters</span></label><input type="number" id="q610" class="l-qty-input" placeholder="Qty"></div>
+                <div class="length-row"><label class="length-label"><input type="checkbox" id="c650" class="l-check"> <span>6.50 Meters</span></label><input type="number" id="q650" class="l-qty-input" placeholder="Qty"></div>
+                <div class="length-row"><label class="length-label"><input type="checkbox" id="cOther" class="l-check other-check"> <span>Others</span></label><input type="number" id="qOther" class="l-qty-input" placeholder="Qty"></div>
+                <input type="number" step="0.01" id="otherVal" class="other-input-field" placeholder="Custom length value">
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div class="form-group"><label>Input (kg)</label><input type="number" step="0.01" id="inW" required oninput="calcYield()"></div>
+            <div class="form-group"><label>Output (kg)</label><input type="number" step="0.01" id="outW" required oninput="calcYield()"></div>
+        </div>
+        <div class="form-group"><label>Yield</label><input type="text" id="yld" readonly style="color:var(--accent-green); font-weight: 800; font-size: 1.2rem; background: rgba(74, 222, 128, 0.05);"></div>
+        <div class="modal-footer" style="display:flex; gap:12px;"><button type="submit" class="btn btn-save">Add to Batch</button><button type="button" class="btn btn-cancel" onclick="closeModal()">Close</button></div>
+    </form>
+</div>
+
+<div class="container">
+    <div class="page-header"><h1>Profile Income</h1></div>
+    <div class="card">
+        <button class="add-main-btn" onclick="openModal()">+ Add New Entry</button>
+        <div class="inner-frame" id="displayArea"><div id="noData" style="color:var(--text-muted); text-align:center; padding:20px;">No entries yet.</div></div>
+    </div>
+</div>
+
+<div class="submit-footer"><button class="final-submit-btn" onclick="finalSubmit()">Finalize & Sync to Sheet</button></div>
+
+<div class="success-overlay" id="statusOverlay">
+    <div class="loader" id="loader"></div>
+    <div class="success-icon" id="successIcon"><i data-lucide="check" size="40"></i></div>
+    <h2 id="statusText" style="color: white; font-weight: 600;">Processing...</h2>
+</div>
+
+<script>
+    lucide.createIcons();
+    let sessionData = [];
+
+    // --- MENU LOGIC ---
+    function toggleMenu() { 
+        document.getElementById("menu").classList.toggle("active"); 
+        document.getElementById("mainOverlay").classList.toggle("active"); 
+    }
+
+    function toggleDrop(dropId, chevId) { 
+        document.getElementById(dropId).classList.toggle("show"); 
+        document.getElementById(chevId).classList.toggle("rotate"); 
+    }
+
+    function toggleNested(dropId, chevId) {
+        document.getElementById(dropId).classList.toggle("show");
+        document.getElementById(chevId).classList.toggle("rotate");
+    }
+
+    function closeAll() { 
+        document.getElementById("menu").classList.remove("active"); 
+        closeModal(); 
+        document.getElementById("mainOverlay").classList.remove("active");
+    }
+
+    // --- APP LOGIC ---
+    function openModal() { document.getElementById("profileForm").reset(); document.getElementById("yld").value=""; document.getElementById("addModal").classList.add("active"); document.getElementById("mainOverlay").classList.add("active"); }
+    function closeModal() { document.getElementById("addModal").classList.remove("active"); if(!document.getElementById("menu").classList.contains("active")) document.getElementById("mainOverlay").classList.remove("active"); }
+    function calcYield() { const i = parseFloat(document.getElementById('inW').value)||0, o = parseFloat(document.getElementById('outW').value)||0; document.getElementById('yld').value = i > 0 ? ((o/i)*100).toFixed(2)+"%" : ""; }
+
+    function saveEntry() {
+        const entry = {
+            id: Date.now(),
+            profile: document.getElementById('pName').value,
+            qty365: document.getElementById('c365').checked ? document.getElementById('q365').value : "",
+            qty610: document.getElementById('c610').checked ? document.getElementById('q610').value : "",
+            qty650: document.getElementById('c650').checked ? document.getElementById('q650').value : "",
+            otherLen: document.getElementById('cOther').checked ? document.getElementById('otherVal').value : "",
+            otherQty: document.getElementById('cOther').checked ? document.getElementById('qOther').value : "",
+            input: document.getElementById('inW').value,
+            output: document.getElementById('outW').value,
+            yield: document.getElementById('yld').value
+        };
+        if(!entry.qty365 && !entry.qty610 && !entry.qty650 && !entry.otherQty) return alert("Select a length.");
+        sessionData.push(entry); render(); closeModal();
+    }
+
+    function render() {
+        const area = document.getElementById('displayArea'); area.innerHTML = "";
+        if(sessionData.length === 0) { area.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No entries yet.</div>'; return; }
+        [...sessionData].reverse().forEach(item => {
+            let s = [];
+            if(item.qty365) s.push(`3.65: ${item.qty365}`);
+            if(item.qty610) s.push(`6.10: ${item.qty610}`);
+            if(item.qty650) s.push(`6.50: ${item.qty650}`);
+            if(item.otherQty) s.push(`${item.otherLen || 'Other'}: ${item.otherQty}`);
+            const div = document.createElement('div');
+            div.className = 'data-entry';
+            div.innerHTML = `<i data-lucide="trash-2" class="delete-btn" onclick="remove(${item.id})"></i>
+            <div class="data-grid"><div><b>Profile</b>${item.profile}</div><div><b>Lengths</b>${s.join(' | ')}</div><div><b>Input</b>${item.input}kg</div><div><b>Yield</b><span style="color:var(--accent-green)">${item.yield}</span></div></div>`;
+            area.appendChild(div);
+        });
+        lucide.createIcons();
+    }
+
+    function remove(id) { sessionData = sessionData.filter(i => i.id !== id); render(); }
+
+    async function finalSubmit() {
+        if(sessionData.length === 0) return;
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbypE9D3FuKH6GoidzCowpqOqRRwMarl5qNilDpKY-KUkV7IRuPTb-yhjk-F6aNVRhMgIA/exec';
+        const overlay = document.getElementById('statusOverlay'), loader = document.getElementById('loader'), icon = document.getElementById('successIcon'), text = document.getElementById('statusText');
+        overlay.classList.add('active'); loader.style.display = "block"; icon.style.display = "none"; text.innerText = "Syncing...";
+        try {
+            for (const entry of sessionData) {
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(entry) });
+            }
+            loader.style.display = "none"; icon.style.display = "flex"; text.innerText = "Sync Complete!"; text.style.color = "#4ade80";
+            setTimeout(() => location.reload(), 2500);
+        } catch (e) { alert("Error"); overlay.classList.remove('active'); }
+    }
+
+    // Auto-open current category on load
+    window.onload = () => {
+        toggleDrop('extrusionDrop', 'extrusionChev');
+    };
+</script>
+</body>
+</html>
