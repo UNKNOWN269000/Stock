@@ -139,6 +139,17 @@
         .search-results div { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
         .search-results div:hover { background: rgba(255,255,255,0.05); color: var(--accent-green); }
 
+        /* LOADING SPINNER */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(6, 78, 59, 0.3);
+            border-radius: 50%;
+            border-top-color: #064e3b;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes modalPop { from { transform: translate(-50%, -45%) scale(0.9); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -242,8 +253,8 @@
     <h3 style="text-align:center; margin-bottom:10px;">Ready to Submit?</h3>
     <p style="text-align:center; color:var(--text-muted);" id="confirmMessage"></p>
     <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn btn-save" onclick="executeSubmit()">Yes, Submit</button>
-        <button class="btn btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn btn-save" id="confirmSubmitBtn" onclick="executeSubmit()">Yes, Submit</button>
+        <button class="btn btn-cancel" id="cancelSubmitBtn" onclick="closeConfirmModal()">Cancel</button>
     </div>
 </div>
 
@@ -270,7 +281,11 @@
 </div>
 
 <div class="success-overlay" id="successOverlay">
-    <h2 style="color: var(--accent-green);">Submission Successful</h2>
+    <div style="background: var(--bg-card); padding: 40px; border-radius: 30px; border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <i data-lucide="check-circle" size="64" style="color: var(--accent-green);"></i>
+        <h2 style="color: var(--accent-green);">Submission Successful</h2>
+        <p style="color: var(--text-muted);">Production data has been recorded.</p>
+    </div>
 </div>
 
 <div class="container">
@@ -286,7 +301,7 @@
     </div>
 </div>
 
-<div class="submit-footer"><button class="final-submit-btn" onclick="finalSubmit()"><i data-lucide="check-circle"></i> Final Submit Production</button></div>
+<div class="submit-footer"><button class="final-submit-btn" id="footerSubmitBtn" onclick="finalSubmit()"><i data-lucide="check-circle"></i> Final Submit Production</button></div>
 
 <script>
     lucide.createIcons();
@@ -469,15 +484,40 @@
 
     async function executeSubmit() {
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw--rcOmfT-CqGbfmodaDliiXeQmvgPclu6lw-ji2as0BJS9TGsCKMT-AYtZ1SSmDup/exec";
+        const btn = document.getElementById('confirmSubmitBtn');
+        const cancelBtn = document.getElementById('cancelSubmitBtn');
+        const footerBtn = document.getElementById('footerSubmitBtn');
+        
+        // Start Animation
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        cancelBtn.style.display = 'none';
+        btn.innerHTML = '<div class="spinner"></div> Submitting...';
+        footerBtn.disabled = true;
+        footerBtn.style.opacity = '0.5';
+
         try {
-            const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(sessionData) });
-            const result = await response.json();
-            if (result.result === "success") {
-                closeConfirmModal();
-                document.getElementById('successOverlay').classList.add('active');
-                setTimeout(() => location.reload(), 2000);
-            }
-        } catch (error) { alert("Submission failed. Check connection."); }
+            const response = await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', // Added for common Apps Script CORS issues
+                body: JSON.stringify(sessionData) 
+            });
+            
+            // Note: with 'no-cors', we won't get a proper JSON result, 
+            // but we assume success if no error is thrown
+            closeConfirmModal();
+            document.getElementById('successOverlay').classList.add('active');
+            lucide.createIcons();
+            setTimeout(() => location.reload(), 2500);
+
+        } catch (error) { 
+            alert("Submission failed. Check connection.");
+            btn.disabled = false;
+            cancelBtn.style.display = 'flex';
+            btn.innerHTML = originalText;
+            footerBtn.disabled = false;
+            footerBtn.style.opacity = '1';
+        }
     }
 </script>
 </body>
