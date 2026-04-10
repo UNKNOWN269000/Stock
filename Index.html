@@ -12,6 +12,7 @@
             --bg-inner: #0d1117;
             --accent-orange: #f59e0b;
             --accent-green: #90ee90;
+            --accent-red: #ff4d4d;
             --text-main: #ffffff;
             --text-muted: #9aa0a6;
             --border-color: #30363d;
@@ -92,11 +93,21 @@
         .welcome-card h1 { font-size: 2.2rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .welcome-card p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; }
 
+        /* STATUS BADGE STYLES */
         .status-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-            background: rgba(34, 197, 94, 0.1); color: #22c55e;
             border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            transition: 0.3s;
         }
+        .status-badge.online {
+            background: rgba(34, 197, 94, 0.1); color: #22c55e;
+        }
+        .status-badge.offline {
+            background: rgba(255, 77, 77, 0.1); color: var(--accent-red);
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .online .status-dot { background: #22c55e; }
+        .offline .status-dot { background: var(--accent-red); }
 
         /* QUICK ACTIONS GRID */
         .action-grid {
@@ -132,7 +143,7 @@
     <a href="../../index.html" class="menu-item active-link"><i data-lucide="home"></i> Home</a>
 
     <div class="dropdown-container">
-        <div class="menu-item" onclick="toggleDropdown('extrusionSub', this)">
+        <div class="menu-item" onclick="toggleDropdown('extrusionSub', this, event)">
             <i data-lucide="factory"></i> Extrusion
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
@@ -145,7 +156,7 @@
     </div>
 
     <div class="dropdown-container">
-        <div class="menu-item" onclick="toggleDropdown('millSub', this)">
+        <div class="menu-item" onclick="toggleDropdown('millSub', this, event)">
             <i data-lucide="layers"></i> Mill Finish
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
@@ -154,7 +165,7 @@
             <a href="#" class="sub-menu-item">Mill Finish Profile Stock</a>
             <a href="#" class="sub-menu-item">Mill Finish Bucket Stock</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this, event)">
                 <i data-lucide="repeat" style="width:14px"></i> Transfer
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -168,7 +179,7 @@
     </div>
 
     <div class="dropdown-container">
-        <div class="menu-item" onclick="toggleDropdown('powderSub', this)">
+        <div class="menu-item" onclick="toggleDropdown('powderSub', this, event)">
             <i data-lucide="palette"></i> Powder Coat
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
@@ -177,7 +188,7 @@
             <a href="#" class="sub-menu-item">Production</a>
             <a href="#" class="sub-menu-item">Pending</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
                 <i data-lucide="alert-triangle" style="width:14px"></i> Damage
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -191,7 +202,7 @@
     </div>
 
     <div class="dropdown-container">
-        <div class="menu-item" onclick="toggleDropdown('anodizingSub', this)">
+        <div class="menu-item" onclick="toggleDropdown('anodizingSub', this, event)">
             <i data-lucide="Zap"></i> Anodizing
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
@@ -201,7 +212,7 @@
             <a href="#" class="sub-menu-item">Prodection Pending</a>
             <a href="#" class="sub-menu-item">Pending</a>
             
-            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this)">
+            <div class="menu-item" style="font-size: 0.85rem; padding: 8px 12px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this, event)">
                 <i data-lucide="trash-2" style="width:14px"></i> Scrap
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
@@ -220,7 +231,10 @@
         <h1>Welcome Back</h1>
         <p>Production Management & Tracking System for Ultra Aluminium Extrusion Plant.</p>
         <div style="display: flex; justify-content: center; gap: 15px;">
-            <div class="status-badge"><span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span> System Online</div>
+            <div id="statusBadge" class="status-badge online">
+                <span class="status-dot"></span>
+                <span id="statusText">System Online</span>
+            </div>
         </div>
     </div>
 
@@ -266,13 +280,38 @@
 <script>
     lucide.createIcons();
 
-    function toggleDropdown(id, element) {
+    // INTERNET CONNECTIVITY FEATURE
+    function updateOnlineStatus() {
+        const badge = document.getElementById('statusBadge');
+        const text = document.getElementById('statusText');
+        
+        if (navigator.onLine) {
+            badge.className = 'status-badge online';
+            text.textContent = 'System Online';
+        } else {
+            badge.className = 'status-badge offline';
+            text.textContent = 'System Offline';
+        }
+    }
+
+    // Listen for connection changes
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    // Check status on initial load
+    updateOnlineStatus();
+
+    function toggleDropdown(id, element, event) {
+        if (event) event.stopPropagation();
         const content = document.getElementById(id);
         const chevron = element.querySelector('.chevron-icon');
-        content.classList.toggle('show');
-        if(chevron) chevron.classList.toggle('rotate');
-        // Prevent closing the parent menu when clicking nested toggle
-        event.stopPropagation();
+        
+        if (content) {
+            content.classList.toggle('show');
+        }
+        if (chevron) {
+            chevron.classList.toggle('rotate');
+        }
     }
 
     function toggleMenu() { 
