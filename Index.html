@@ -129,46 +129,49 @@
         .online .status-dot { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
         .offline .status-dot { background: var(--accent-red); }
 
-        /* DUAL GRID SYSTEM (COMPUTER & MOBILE) */
-        .section-title {
-            width: 100%; max-width: 900px; margin-bottom: 15px;
-            color: var(--text-muted); font-size: 0.8rem; 
-            text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+        /* DASHBOARD SECTION STYLING */
+        .dashboard-wrapper { width: 100%; max-width: 900px; }
+        
+        .section-group { margin-bottom: 35px; }
+        
+        .section-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 15px;
         }
+        .section-header span {
+            color: var(--accent-green); font-size: 0.8rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .section-header .line { height: 1px; flex: 1; background: var(--border-color); }
 
         .action-grid {
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet/small desktop */
-            gap: 20px; width: 100%; max-width: 900px;
-        }
-
-        /* Large Screen Desktop */
-        @media (min-width: 1024px) {
-            .action-grid { grid-template-columns: repeat(2, 1fr); }
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px; width: 100%;
         }
 
         .action-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            padding: 25px; border-radius: 20px; transition: var(--transition);
-            text-decoration: none; color: white; display: flex; align-items: flex-start; gap: 20px;
+            padding: 15px; border-radius: 12px; transition: var(--transition);
+            text-decoration: none; color: white; display: flex; align-items: center; gap: 12px;
         }
-        .action-card:hover { transform: translateY(-5px); border-color: var(--accent-green); background: #1c2128; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .action-card:hover { transform: translateY(-3px); border-color: var(--accent-green); background: #1c2128; }
         
         .icon-box {
-            background: rgba(144, 238, 144, 0.1); padding: 12px; border-radius: 12px;
+            background: rgba(144, 238, 144, 0.1); padding: 8px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
         }
-        .action-card i { color: var(--accent-green); width: 28px; height: 28px; }
-        .action-card h3 { font-size: 1.2rem; margin-bottom: 5px; }
-        .action-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+        .action-card i { color: var(--accent-green); width: 18px; height: 18px; }
+        .action-card h3 { font-size: 0.85rem; font-weight: 500; }
 
         /* MOBILE ADJUSTMENTS */
         @media (max-width: 768px) {
-            .action-grid { grid-template-columns: 1fr; gap: 15px; }
+            .action-grid { grid-template-columns: repeat(2, 1fr); }
             .side-menu { width: 80%; }
             .welcome-card h1 { font-size: 1.8rem; }
-            .welcome-card { padding: 30px 20px; }
-            .action-card { padding: 20px; align-items: center; }
+        }
+        @media (max-width: 480px) {
+            .action-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -181,7 +184,7 @@
 </div>
 
 <div class="side-menu" id="menu">
-    <a href="../../index.html" class="menu-item active-link"><i data-lucide="home"></i> Home</a>
+    <a href="index.html" class="menu-item active-link"><i data-lucide="home"></i> Home</a>
 
     <div class="dropdown-container">
         <div class="menu-item" onclick="toggleDropdown('extrusionSub', this, event)">
@@ -189,8 +192,8 @@
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="extrusionSub">
-            <a href="Extrusion/Bucket Income/index.html" class="sub-menu-item">Bucket income</a>
-            <a href="Extrusion/Profile Income/index.html" class="sub-menu-item">Profile income</a>
+            <a href="Extrusion/Bucket Income/index.html" class="sub-menu-item">Bucket Income</a>
+            <a href="Extrusion/Profile Income/index.html" class="sub-menu-item">Profile Income</a>
             <a href="Extrusion/Aging Details/index.html" class="sub-menu-item">Aging Details</a>
             <a href="Extrusion/Overview/index.html" class="sub-menu-item">Overview</a>
         </div>
@@ -202,17 +205,18 @@
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="millSub">
-            <a href="#" class="sub-menu-item">Hardness Check</a>
-            <a href="#" class="sub-menu-item">Mill Finish Profile Stock</a>
+            <a href="Mill Finish/Hardness Check/index.html" class="sub-menu-item">Hardness Check</a>
+            <a href="Mill Finish/Mill finish Profile Stock/index.html" class="sub-menu-item">Profile Stock</a>
+            <a href="Mill Finish/Mill finish Bucket Stock/index.html" class="sub-menu-item">Bucket Stock</a>
             <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this, event)">
                 <i data-lucide="repeat" style="width:14px"></i> Transfer
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
             <div class="nested-content" id="millTransfer">
-                <a href="#" class="sub-menu-item">Anodizing</a>
-                <a href="#" class="sub-menu-item">Powder Coat</a>
+                <a href="Mill Finish/Transfer/Anodizing/index.html" class="sub-menu-item">Anodizing</a>
+                <a href="Mill Finish/Transfer/Powder Coat/index.html" class="sub-menu-item">Powder Coat</a>
             </div>
-            <a href="#" class="sub-menu-item">Overview</a>
+            <a href="Mill Finish/Overview/index.html" class="sub-menu-item">Overview</a>
         </div>
     </div>
 
@@ -222,6 +226,7 @@
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="powderSub">
+            <a href="#" class="sub-menu-item">Mill Finish Transfer Stock</a>
             <a href="#" class="sub-menu-item">Production</a>
             <a href="#" class="sub-menu-item">Pending</a>
             <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
@@ -242,7 +247,9 @@
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="anodizingSub">
+            <a href="#" class="sub-menu-item">Binding</a>
             <a href="#" class="sub-menu-item">Production</a>
+            <a href="#" class="sub-menu-item">Prodection Pending</a>
             <a href="#" class="sub-menu-item">Pending</a>
             <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('anodizingScrap', this, event)">
                 <i data-lucide="trash-2" style="width:14px"></i> Scrap
@@ -270,47 +277,118 @@
         </div>
     </div>
 
-    <div class="section-title">Quick Access Dashboard</div>
-
-    <div class="action-grid">
-        <a href="https://aging-details.netlify.app/" class="action-card">
-            <div class="icon-box"><i data-lucide="timer"></i></div>
-            <div>
-                <h3>Aging Details</h3>
-                <p>Record batch times and manage bucket weights for extrusion.</p>
+    <div class="dashboard-wrapper">
+        
+        <div class="section-group">
+            <div class="section-header"><span>Extrusion</span><div class="line"></div></div>
+            <div class="action-grid">
+                <a href="Extrusion/Bucket Income/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="container"></i></div>
+                    <h3>Bucket Income</h3>
+                </a>
+                <a href="Extrusion/Profile Income/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
+                    <h3>Profile Income</h3>
+                </a>
+                <a href="Extrusion/Aging Details/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="timer"></i></div>
+                    <h3>Aging Details</h3>
+                </a>
+                <a href="Extrusion/Overview/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="eye"></i></div>
+                    <h3>Overview</h3>
+                </a>
             </div>
-        </a>
+        </div>
 
-        <a href="https://bucketstock.netlify.app/" class="action-card">
-            <div class="icon-box"><i data-lucide="container"></i></div>
-            <div>
-                <h3>Bucket Income</h3>
-                <p>Track incoming buckets and manage real-time inventory.</p>
+        <div class="section-group">
+            <div class="section-header"><span>Mill Finish</span><div class="line"></div></div>
+            <div class="action-grid">
+                <a href="Mill Finish/Hardness Check/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="shield-check"></i></div>
+                    <h3>Hardness</h3>
+                </a>
+                <a href="Mill Finish/Mill finish Profile Stock/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="package"></i></div>
+                    <h3>Profile Stock</h3>
+                </a>
+                <a href="Mill Finish/Mill finish Bucket Stock/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="database"></i></div>
+                    <h3>Bucket Stock</h3>
+                </a>
+                <a href="Mill Finish/Transfer/Anodizing/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="repeat"></i></div>
+                    <h3>Transfer Anodizing</h3>
+                </a>
+                <a href="Mill Finish/Transfer/Powder Coat/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="repeat"></i></div>
+                    <h3>Transfer Powder</h3>
+                </a>
+                <a href="Mill Finish/Overview/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="eye"></i></div>
+                    <h3>Overview</h3>
+                </a>
             </div>
-        </a>
+        </div>
 
-        <a href="https://profile-income.netlify.app/" class="action-card">
-            <div class="icon-box"><i data-lucide="bar-chart-3"></i></div>
-            <div>
-                <h3>Profile Income</h3>
-                <p>Log profile production data and monitor output efficiency.</p>
+        <div class="section-group">
+            <div class="section-header"><span>Powder Coat</span><div class="line"></div></div>
+            <div class="action-grid">
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="move-right"></i></div>
+                    <h3>Transfer Stock</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="cpu"></i></div>
+                    <h3>Production</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="clock"></i></div>
+                    <h3>Pending</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="alert-circle"></i></div>
+                    <h3>Damage / Scrap</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="eye"></i></div>
+                    <h3>Overview</h3>
+                </a>
             </div>
-        </a>
+        </div>
 
-        <a href="#" class="action-card">
-            <div class="icon-box"><i data-lucide="history"></i></div>
-            <div>
-                <h3>Records History</h3>
-                <p>View previous logs, batch reports, and historical data.</p>
+        <div class="section-group">
+            <div class="section-header"><span>Anodizing</span><div class="line"></div></div>
+            <div class="action-grid">
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="link"></i></div>
+                    <h3>Binding</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="zap"></i></div>
+                    <h3>Production</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="loader"></i></div>
+                    <h3>Prod. Pending</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="pause-circle"></i></div>
+                    <h3>Pending</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="trash-2"></i></div>
+                    <h3>Scrap / Damage</h3>
+                </a>
             </div>
-        </a>
+        </div>
+
     </div>
 </div>
 
 <script>
     lucide.createIcons();
 
-    // INTERNET STATUS SCRIPT
     function updateOnlineStatus() {
         const badge = document.getElementById('statusBadge');
         const text = document.getElementById('statusText');
@@ -326,7 +404,6 @@
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
-    // MENU CONTROLS
     function toggleDropdown(id, element, event) {
         if (event) event.stopPropagation();
         const content = document.getElementById(id);
