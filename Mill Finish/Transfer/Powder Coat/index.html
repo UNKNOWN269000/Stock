@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bulk Transfer | Ultra Aluminium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #080a0c;
+            --bg-card: rgba(22, 27, 34, 0.7);
+            --accent-green: #4ade80;
+            --accent-glow: rgba(74, 222, 128, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --border-color: rgba(48, 54, 61, 0.8);
+            --frame-max-width: 1000px;
+            --sidebar-width: 280px;
+            --top-nav-height: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top right, #161b22, #080a0c); 
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; 
+            padding: calc(var(--top-nav-height) + 40px) 20px 40px;
+            overflow-x: hidden;
+        }
+
+        /* TOP NAVIGATION BAR */
+        .top-nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--top-nav-height);
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 25px; z-index: 2000;
+        }
+
+        .top-nav-left { display: flex; align-items: center; gap: 20px; }
+        .top-nav-right { display: flex; align-items: center; gap: 15px; }
+
+        .top-nav-logo { display: flex; align-items: center; gap: 10px; }
+        .top-nav-logo i { color: var(--accent-green); }
+        .top-nav-logo span { font-weight: 800; letter-spacing: 1px; font-size: 1.1rem; }
+
+        .page-title-badge {
+            background: var(--accent-glow);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            color: var(--accent-green);
+            padding: 6px 15px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+
+        /* SIDEBAR STYLES */
+        .sidebar {
+            position: fixed; left: calc(var(--sidebar-width) * -1); top: 0;
+            width: var(--sidebar-width); height: 100%;
+            background: rgba(13, 17, 23, 0.98); backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color); z-index: 3000;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0; overflow-y: auto;
+        }
+        .sidebar.active { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,0.5); }
+
+        .sidebar-branding {
+            padding: 30px 20px;
+            background: linear-gradient(to bottom, rgba(74, 222, 128, 0.05), transparent);
+            text-align: center; border-bottom: 1px solid var(--border-color);
+        }
+        .logo-placeholder {
+            width: 50px; height: 50px; background: var(--accent-green);
+            border-radius: 12px; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #000; box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .menu-heading { padding: 20px 25px 10px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 700; }
+
+        .nav-item { margin: 2px 15px; }
+        .nav-link {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; border-radius: 10px; color: var(--text-muted);
+            text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: 0.2s; cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active { background: var(--accent-glow); color: var(--accent-green); }
+        .nav-link i { width: 18px; margin-right: 12px; }
+
+        .submenu { display: none; padding-left: 15px; margin: 5px 0 10px 15px; border-left: 1px solid var(--border-color); }
+        .submenu.show { display: block; }
+
+        /* MENU TOGGLE BUTTON */
+        .menu-toggle-btn {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 10px; border-radius: 10px; color: white; cursor: pointer; transition: 0.2s;
+        }
+        .menu-toggle-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+        .sidebar-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: none; z-index: 2900; backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* MAIN CONTENT AREA */
+        .container { width: 100%; max-width: var(--frame-max-width); position: relative; }
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .page-header h2 { font-size: 2.2rem; font-weight: 900; }
+        .page-header p { color: var(--accent-green); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 4px; margin-bottom: 5px; }
+
+        .search-box { position: relative; margin-bottom: 25px; }
+        .search-input {
+            width: 100%; background: var(--bg-card); border: 2px solid var(--border-color);
+            border-radius: 16px; padding: 18px 25px 18px 55px; color: white; font-size: 1rem;
+            outline: none; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .search-input:focus { border-color: var(--accent-green); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .dropdown-results {
+            position: absolute; top: 100%; width: 100%; background: #1c2128; 
+            border: 1px solid var(--border-color); border-radius: 12px;
+            max-height: 250px; overflow-y: auto; display: none; z-index: 100; margin-top: 5px;
+        }
+        .dropdown-results.show { display: block; }
+        .result-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
+        .result-item:hover { background: var(--accent-glow); color: var(--accent-green); }
+
+        .entry-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 30px; backdrop-filter: blur(15px);
+            margin-bottom: 30px; display: none; animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bucket-info-bar { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px;
+        }
+
+        .profile-list-header {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+            padding: 10px 15px; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; font-weight: 800;
+        }
+
+        .profile-row {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+            align-items: center; padding: 15px; background: rgba(255,255,255,0.03);
+            border-radius: 12px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.2s;
+        }
+        .profile-row:hover { border-color: var(--accent-green); background: rgba(74, 222, 128, 0.05); }
+
+        .p-name { color: #fff; font-weight: 600; font-size: 0.9rem; }
+        .p-data { color: var(--text-muted); font-size: 0.85rem; }
+
+        .qty-input {
+            background: #0d1117; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 8px; color: var(--accent-green); width: 100%; text-align: center; font-weight: 700; outline: none;
+        }
+        .qty-input:focus { border-color: var(--accent-green); }
+
+        .btn-add-bulk {
+            width: 100%; background: #fff; color: #000; border: none; padding: 15px;
+            border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 15px;
+            display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;
+        }
+        .btn-add-bulk:hover { background: var(--accent-green); transform: translateY(-2px); }
+
+        .queue-frame {
+            background: rgba(0,0,0,0.3); border: 2px dashed var(--border-color);
+            border-radius: 24px; padding: 25px;
+        }
+        .queue-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        
+        .queue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .queue-item {
+            background: #1c2128; border: 1px solid var(--border-color); padding: 12px 18px;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .final-submit-wrap { margin-top: 30px; display: flex; justify-content: center; }
+        .btn-submit {
+            background: var(--accent-green); color: #080a0c; border: none;
+            padding: 18px 80px; border-radius: 16px; font-size: 1.1rem; font-weight: 900;
+            cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.4s;
+        }
+        .btn-submit:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
+
+        .success-overlay {
+            position: fixed; inset: 0; background: var(--bg-dark); z-index: 4000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<header class="top-nav">
+    <div class="top-nav-left">
+        <button class="menu-toggle-btn" onclick="toggleSidebar()">
+            <i data-lucide="menu"></i>
+        </button>
+        <div class="top-nav-logo">
+            <i data-lucide="component" size="24"></i>
+            <span>ULTRA <span style="color:var(--text-muted); font-weight:400;">ALUMINIUM</span></span>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="page-title-badge">Mill Finish Transfer</div>
+        <div style="background: var(--border-color); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-green);">
+            <i data-lucide="user" size="18"></i>
+        </div>
+    </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-branding">
+        <div class="logo-placeholder">
+            <i data-lucide="component" size="28"></i>
+        </div>
+        <h1 style="font-size: 1.1rem; color:#fff;">ULTRA ADMIN</h1>
+        <span style="font-size: 0.6rem; color: var(--accent-green); text-transform: uppercase; letter-spacing: 2px;">V 2.0.4</span>
+    </div>
+
+    <div class="menu-heading">Main Menu</div>
+    <div class="nav-item">
+        <a href="../../../index.html" class="nav-link"><span style="display:flex; align-items:center;"><i data-lucide="home"></i> Home</span></a>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="factory"></i> Extrusion</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="../../../Extrusion/Bucket Income/index.html" class="nav-link">Bucket Income</a>
+            <a href="../../../Extrusion/Profile Income/index.html" class="nav-link">Profile Income</a>
+            <a href="../../../Extrusion/Aging Details/index.html" class="nav-link">Aging Details</a>
+            <a href="../../../Extrusion/Overview/index.html" class="nav-link">Overview</a>
+        </div>
+    </div>
+
+    <div class="menu-heading">Production Units</div>
+    <div class="nav-item">
+        <div class="nav-link active" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="layers"></i> Mill Finish</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu show">
+            <a href="../../Hardness Check/index.html" class="nav-link">Hardness Check</a>
+            <a href="../../Mill finish Profile Stock/index.html" class="nav-link">Mill Finish Profile Stock</a>
+            <a href="../../Mill finish Bucket Stock/index.html" class="nav-link">Mill Finish Bucket Stock</a>
+            <div class="nav-link" onclick="toggleSubmenu(this)">
+                <span>Transfer</span>
+                <i data-lucide="chevron-down" size="14"></i>
+            </div>
+            <div class="submenu show">
+                <a href="../../Transfer/Anodizing/index.html" class="nav-link">Anodizing</a>
+                <a href="../../Transfer/Powder Coat/index.html" class="nav-link active">Powder Coat</a>
+            </div>
+            <a href="../../Overview/index.html" class="nav-link">Overview</a>
+        </div>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="palette"></i> Powder Coat</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="#" class="nav-link">Mill Finish Transfer Stock</a>
+            <a href="#" class="nav-link">Production</a>
+            <a href="#" class="nav-link">Pending</a>
+            <a href="#" class="nav-link">Damage Overview</a>
+            <a href="#" class="nav-link">Overview</a>
+        </div>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="droplet"></i> Anodizing</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="#" class="nav-link">Binding</a>
+            <a href="#" class="nav-link">Production</a>
+            <a href="#" class="nav-link">Pending</a>
+            <a href="#" class="nav-link">Scrap/Damage</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <p>Mill Finish Transfer</p>
+        <h2>Transfer Powder Coat</h2>
+    </div>
+
+    <div class="search-box">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" class="search-input" id="bucketSearch" placeholder="Search Bucket Number (e.g. B-5000)..." onkeyup="filterBuckets()">
+        <div class="dropdown-results" id="searchResults"></div>
+    </div>
+
+    <div class="entry-card" id="entryCard">
+        <div class="bucket-info-bar">
+            <div>
+                <span style="color:var(--text-muted); font-size:0.8rem;">Active Bucket: </span>
+                <span id="activeBucket" style="color:var(--accent-green); font-weight:800; font-size:1.2rem; margin-left:10px;">-</span>
+            </div>
+            <div id="activeDate" style="font-size:0.85rem; color:var(--text-muted);">Date: -</div>
+        </div>
+
+        <div class="profile-list-header">
+            <span>Profile Name</span>
+            <span>Type</span>
+            <span>Length</span>
+            <span>Stock</span>
+            <span>Transfer Qty</span>
+        </div>
+
+        <div id="profileContainer"></div>
+
+        <button class="btn-add-bulk" onclick="addBulkToQueue()">
+            <i data-lucide="plus-circle"></i> Add Selected Profiles to Queue
+        </button>
+    </div>
+
+    <div class="queue-frame">
+        <div class="queue-header">
+            <span>Transfer Queue</span>
+            <span id="queueCounter" style="color:var(--accent-green)">0 Items</span>
+        </div>
+        <div id="queueList" class="queue-grid"></div>
+    </div>
+
+    <div class="final-submit-wrap">
+        <button class="btn-submit" id="submitBtn" disabled onclick="finalSubmit()">
+            <span>SUBMIT ALL</span>
+            <i data-lucide="send"></i>
+        </button>
+    </div>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+    <div style="background:var(--accent-green); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000;">
+        <i data-lucide="check" size="40"></i>
+    </div>
+    <h2 style="margin-top:20px;">TRANSFER SUCCESSFUL</h2>
+</div>
+
+<script>
+    const bucketDatabase = [
+        { 
+            id: "B-5000", date: "2026-04-05",
+            profiles: [
+                { name: "Flat Bar 20x5", type: "ULR", len: "5.8m", qty: 40 },
+                { name: "Round Tube 25", type: "PRM", len: "6.0m", qty: 100 },
+                { name: "Square 40x40", type: "ULR", len: "5.8m", qty: 65 },
+                { name: "Angle 20x20", type: "PRM", len: "5.8m", qty: 200 },
+                { name: "U-Channel 15", type: "ULR", len: "6.0m", qty: 30 }
+            ]
+        },
+        { 
+            id: "B-5001", date: "2026-04-06",
+            profiles: [
+                { name: "Sliding Track 2W", type: "ULR", len: "5.8m", qty: 85 },
+                { name: "Top Track 100", type: "PRM", len: "6.0m", qty: 45 },
+                { name: "Handle Section", type: "ULR", len: "5.8m", qty: 120 },
+                { name: "Interlock", type: "PRM", len: "5.8m", qty: 90 },
+                { name: "Bottom Rail", type: "ULR", len: "6.0m", qty: 55 }
+            ]
+        }
+    ];
+
+    let currentBucket = null;
+    let queue = [];
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    function toggleSubmenu(el) {
+        const submenu = el.nextElementSibling;
+        if (submenu && submenu.classList.contains('submenu')) {
+            submenu.classList.toggle('show');
+            el.classList.toggle('active');
+        }
+    }
+
+    function filterBuckets() {
+        const input = document.getElementById('bucketSearch').value.toUpperCase();
+        const results = document.getElementById('searchResults');
+        if (!input) { results.classList.remove('show'); return; }
+
+        const filtered = bucketDatabase.filter(item => item.id.includes(input));
+        results.innerHTML = filtered.map(item => `<div class="result-item" onclick="loadBucket('${item.id}')"><b>${item.id}</b> <span>${item.profiles.length} Profiles</span></div>`).join('');
+        results.classList.add('show');
+    }
+
+    function loadBucket(id) {
+        currentBucket = bucketDatabase.find(b => b.id === id);
+        document.getElementById('activeBucket').innerText = currentBucket.id;
+        document.getElementById('activeDate').innerText = "Extrusion Date: " + currentBucket.date;
+        
+        const container = document.getElementById('profileContainer');
+        container.innerHTML = currentBucket.profiles.map((p, index) => `
+            <div class="profile-row">
+                <span class="p-name">${p.name}</span>
+                <span class="p-data">${p.type}</span>
+                <span class="p-data">${p.len}</span>
+                <span class="p-data" style="font-weight:700;">${p.qty}</span>
+                <input type="number" class="qty-input bulk-qty" data-index="${index}" placeholder="0">
+            </div>
+        `).join('');
+
+        document.getElementById('searchResults').classList.remove('show');
+        document.getElementById('entryCard').style.display = 'block';
+        lucide.createIcons();
+    }
+
+    function addBulkToQueue() {
+        const inputs = document.querySelectorAll('.bulk-qty');
+        let addedCount = 0;
+
+        inputs.forEach(input => {
+            const qty = parseInt(input.value);
+            if (qty > 0) {
+                const profileIndex = input.getAttribute('data-index');
+                const profile = currentBucket.profiles[profileIndex];
+                
+                queue.push({
+                    id: Date.now() + Math.random(),
+                    bucket: currentBucket.id,
+                    name: profile.name,
+                    qty: qty
+                });
+                addedCount++;
+            }
+        });
+
+        if(addedCount > 0) {
+            updateQueueUI();
+            document.getElementById('entryCard').style.display = 'none';
+            document.getElementById('bucketSearch').value = '';
+        }
+    }
+
+    function updateQueueUI() {
+        const list = document.getElementById('queueList');
+        list.innerHTML = queue.map(item => `
+            <div class="queue-item">
+                <div style="font-size:0.85rem;">
+                    <b style="color:var(--accent-green)">${item.bucket}</b> - ${item.name}
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-weight:800;">${item.qty}</span>
+                    <i data-lucide="x-circle" size="16" style="color:#ff4d4d; cursor:pointer;" onclick="removeItem(${item.id})"></i>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('queueCounter').innerText = queue.length + " Items";
+        document.getElementById('submitBtn').disabled = queue.length === 0;
+        lucide.createIcons();
+    }
+
+    function removeItem(id) {
+        queue = queue.filter(i => i.id !== id);
+        updateQueueUI();
+    }
+
+    function finalSubmit() {
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = 'Processing...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            document.getElementById('successOverlay').style.display = 'flex';
+            setTimeout(() => location.reload(), 2000);
+        }, 1500);
+    }
+
+    window.onload = () => lucide.createIcons();
+</script>
+</body>
+</html>

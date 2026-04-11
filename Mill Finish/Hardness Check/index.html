@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hardness Check | Ultra Aluminium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0d0f14;
+            --bg-sidebar: #0d1117;
+            --bg-card: #161b22;
+            --bg-active: #1c2128;
+            --accent-green: #90ee90;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #ffffff;
+            --text-muted: #9aa0a6;
+            --border-color: #30363d;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #090b0f; color: var(--text-main); height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR / MENU */
+        .sidebar {
+            position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
+            background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+            transition: var(--transition); z-index: 3000; overflow-y: auto;
+        }
+        .sidebar.active { left: 0; }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); visibility: hidden; opacity: 0;
+            transition: var(--transition); z-index: 2500; backdrop-filter: blur(4px);
+        }
+        .overlay.active { visibility: visible; opacity: 1; }
+
+        .menu-list { padding: 0 10px; }
+        .menu-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; color: var(--text-muted); text-decoration: none;
+            border-radius: 10px; margin-bottom: 4px; transition: 0.2s; cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .menu-item:hover { background: var(--bg-active); color: var(--text-main); }
+        .menu-item.active { background: var(--bg-active); color: var(--accent-green); }
+        
+        .submenu {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
+            padding-left: 20px; background: rgba(255,255,255,0.02);
+        }
+        .submenu.open { max-height: 800px; transition: max-height 0.5s ease-in; }
+
+        .sub-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 15px;
+            color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+            border-radius: 8px; margin-bottom: 2px; display: block;
+        }
+        .sub-item:hover { color: var(--accent-green); background: rgba(144, 238, 144, 0.05); }
+        
+        .chevron { transition: 0.3s; width: 16px; height: 16px; }
+        .rotate { transform: rotate(180deg); }
+
+        /* HEADER */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .menu-trigger { background: transparent; border: none; color: #fff; cursor: pointer; margin-right: 15px; }
+        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; }
+
+        /* CONTENT */
+        .main-wrapper { width: 100%; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; padding-top: 70px; }
+        .container { padding: 20px; max-width: 800px; width: 100%; margin: 0 auto; }
+
+        .form-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 25px; margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 0.8rem; color: var(--accent-green); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; margin-left: 5px; }
+        
+        .input-field {
+            width: 100%; background: var(--bg-sidebar); border: 1px solid var(--border-color);
+            padding: 12px 15px; border-radius: 12px; color: white; outline: none; transition: 0.3s;
+            font-size: 0.9rem;
+        }
+        .input-field:focus { border-color: var(--accent-green); box-shadow: 0 0 10px rgba(144, 238, 144, 0.1); }
+        .input-field:disabled { opacity: 0.6; cursor: not-allowed; background: #090b0f; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn-submit {
+            width: 100%; padding: 15px; border-radius: 12px; border: none;
+            background: var(--accent-green); color: #000; font-weight: 700;
+            cursor: pointer; font-size: 1rem; margin-top: 10px; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .table-wrap { 
+            background: var(--bg-card); border: 1px solid var(--border-color); 
+            border-radius: 15px; overflow: hidden; 
+        }
+        .log-table { width: 100%; border-collapse: collapse; }
+        .log-table th { background: var(--bg-active); color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; padding: 12px; text-align: left; }
+        .log-table td { padding: 12px; font-size: 0.8rem; border-bottom: 1px solid var(--border-color); color: white; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+        .pass { background: rgba(144, 238, 144, 0.1); color: var(--accent-green); }
+        .fail { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rotate-icon { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="mainOverlay" onclick="toggleMenu()"></div>
+    
+    <nav class="sidebar" id="menu">
+        <div class="sidebar-header">
+            <div class="company-name" style="font-size: 1.4rem;">ERP SYSTEM</div>
+        </div>
+
+        <div class="menu-list">
+            <a href="../../index.html" class="menu-item" onclick="toggleMenu()">
+                <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="home"></i> Home</div>
+            </a>
+
+            <div class="menu-item" onclick="toggleSubmenu('extSub', this)">
+                <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="factory"></i> Extrusion</div>
+                <i data-lucide="chevron-down" class="chevron"></i>
+            </div>
+            <div class="submenu" id="extSub">
+                <a href="../../Extrusion/Bucket Income/index.html" class="sub-item" onclick="toggleMenu()">Bucket income</a>
+                <a href="../../Extrusion/Profile Income/index.html" class="sub-item" onclick="toggleMenu()">Profile income</a>
+                <a href="../../Extrusion/Aging Details/index.html" class="sub-item" onclick="toggleMenu()">Aging Details</a>
+                <a href="../../Extrusion/Overview/index.html" class="sub-item" onclick="toggleMenu()">Overview</a>
+            </div>
+
+            <div class="menu-item active" onclick="toggleSubmenu('millSub', this)">
+                <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="layers"></i> Mill Finish</div>
+                <i data-lucide="chevron-down" class="chevron rotate"></i>
+            </div>
+            <div class="submenu open" id="millSub" style="max-height: 800px;">
+                <a href="../Hardness Check/index.html" class="sub-item" style="color: var(--accent-green);" onclick="toggleMenu()">Hardness Check</a>
+                <a href="../Mill finish Profile Stock/index.html" class="sub-item" onclick="toggleMenu()">Mill Finish Profile Stock</a>
+                <a href="../Mill finish Bucket Stock/index.html" class="sub-item" onclick="toggleMenu()">Mill Finish Bucket Stock</a>
+                
+                <div class="menu-item" onclick="toggleSubmenu('transSub', this)">
+                    <div style="display:flex; align-items:center; gap:10px;">Transfer</div>
+                    <i data-lucide="chevron-down" class="chevron"></i>
+                </div>
+                <div class="submenu" id="transSub">
+                    <a href="../Transfer/Anodizing/index.html" class="sub-item" onclick="toggleMenu()">Anodizing</a>
+                    <a href="../Transfer/Powder Coat/index.html" class="sub-item" onclick="toggleMenu()">Powder Coat</a>
+                </div>
+                <a href="../Overview/index.html" class="sub-item" onclick="toggleMenu()">Overview</a>
+            </div>
+
+            <div class="menu-item" onclick="toggleSubmenu('powderSub', this)">
+                <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="palette"></i> Powder Coat</div>
+                <i data-lucide="chevron-down" class="chevron"></i>
+            </div>
+            <div class="submenu" id="powderSub">
+                <a href="#" class="sub-item" onclick="toggleMenu()">Mill Finish Transfer Stock</a>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Production</a>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Pending</a>
+                <div class="menu-item" onclick="toggleSubmenu('damSub', this)">
+                    <div style="display:flex; align-items:center; gap:10px;">Damage</div>
+                    <i data-lucide="chevron-down" class="chevron"></i>
+                </div>
+                <div class="submenu" id="damSub">
+                    <a href="#" class="sub-item" onclick="toggleMenu()">Re-Powder</a>
+                    <a href="#" class="sub-item" onclick="toggleMenu()">Scrap</a>
+                </div>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Overview</a>
+            </div>
+
+            <div class="menu-item" onclick="toggleSubmenu('anoSub', this)">
+                <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="zap"></i> Anodizing</div>
+                <i data-lucide="chevron-down" class="chevron"></i>
+            </div>
+            <div class="submenu" id="anoSub">
+                <a href="#" class="sub-item" onclick="toggleMenu()">Binding</a>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Production</a>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Prodection Pending</a>
+                <a href="#" class="sub-item" onclick="toggleMenu()">Pending</a>
+                <div class="menu-item" onclick="toggleSubmenu('anoScrapSub', this)">
+                    <div style="display:flex; align-items:center; gap:10px;">Scrap</div>
+                    <i data-lucide="chevron-down" class="chevron"></i>
+                </div>
+                <div class="submenu" id="anoScrapSub">
+                    <a href="#" class="sub-item" onclick="toggleMenu()">Damage</a>
+                    <a href="#" class="sub-item" onclick="toggleMenu()">One Micron</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="header">
+        <button class="menu-trigger" onclick="toggleMenu()"><i data-lucide="menu"></i></button>
+        <div class="company-name">HARDNESS CHECK</div>
+    </div>
+
+    <div class="main-wrapper">
+        <main class="container">
+            <div class="form-card">
+                <div class="section-title"><i data-lucide="package" style="width:18px"></i> Select Bucket</div>
+                <div class="input-group">
+                    <label>Saved Bucket Number</label>
+                    <select id="bucketSelect" class="input-field" onchange="autoFillDetails()">
+                        <option value="">-- Choose a Bucket --</option>
+                        <option value="BK-101">BK-101</option>
+                        <option value="BK-102">BK-102</option>
+                        <option value="BK-103">BK-103</option>
+                        <option value="BK-104">BK-104</option>
+                        <option value="BK-105">BK-105</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title"><i data-lucide="clipboard-check" style="width:18px"></i> Quality Entry</div>
+                <div class="input-group">
+                    <label>Profile Name</label>
+                    <input type="text" id="profileName" class="input-field" disabled placeholder="Auto-filled">
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Quantity (PCS)</label>
+                        <input type="text" id="qty" class="input-field" disabled placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Length (Mtr)</label>
+                        <input type="text" id="length" class="input-field" disabled placeholder="0.0">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Hardness Value (WEB)</label>
+                        <input type="number" id="hardness" class="input-field" placeholder="Target: 10+" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Operator</label>
+                        <input type="text" id="operator" class="input-field" placeholder="Name">
+                    </div>
+                </div>
+                <button class="btn-submit" onclick="submitData()">
+                    <i data-lucide="send" style="width:18px"></i> SUBMIT RECORD
+                </button>
+            </div>
+
+            <div class="logs-section">
+                <div class="section-title"><i data-lucide="history" style="width:18px"></i> Recent Checks</div>
+                <div class="table-wrap">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Bucket</th>
+                                <th>Profile</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleMenu() {
+            document.getElementById('menu').classList.toggle('active');
+            document.getElementById('mainOverlay').classList.toggle('active');
+        }
+
+        function toggleSubmenu(id, el) {
+            const sub = document.getElementById(id);
+            const chevron = el.querySelector('.chevron');
+            
+            // Close other menus if needed (optional)
+            sub.classList.toggle('open');
+            if(chevron) chevron.classList.toggle('rotate');
+            
+            event.stopPropagation();
+        }
+
+        const bucketData = {
+            "BK-101": { profile: "P-102 Section", qty: "150", len: "6.0" },
+            "BK-102": { profile: "C-405 Tube", qty: "90", len: "5.8" },
+            "BK-103": { profile: "H-201 Handle", qty: "300", len: "4.5" },
+            "BK-104": { profile: "Z-88 Frame", qty: "45", len: "6.0" },
+            "BK-105": { profile: "M-12 Flat Bar", qty: "120", len: "3.0" }
+        };
+
+        function autoFillDetails() {
+            const bucketVal = document.getElementById('bucketSelect').value;
+            const detail = bucketData[bucketVal];
+            if(detail) {
+                document.getElementById('profileName').value = detail.profile;
+                document.getElementById('qty').value = detail.qty;
+                document.getElementById('length').value = detail.len;
+            } else {
+                document.getElementById('profileName').value = '';
+                document.getElementById('qty').value = '';
+                document.getElementById('length').value = '';
+            }
+        }
+
+        function submitData() {
+            const btn = document.querySelector('.btn-submit');
+            const hardness = document.getElementById('hardness').value;
+            if(!document.getElementById('bucketSelect').value || !hardness) {
+                alert("Fill required fields"); return;
+            }
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="rotate-icon"></i> SAVING...';
+            btn.disabled = true;
+            lucide.createIcons();
+            setTimeout(() => {
+                const status = parseFloat(hardness) >= 10 ? 'pass' : 'fail';
+                const row = `<tr><td>${document.getElementById('bucketSelect').value}</td><td>${document.getElementById('profileName').value}</td><td>${hardness}</td><td><span class="status-badge ${status}">${status.toUpperCase()}</span></td></tr>`;
+                document.getElementById('logBody').insertAdjacentHTML('afterbegin', row);
+                btn.innerHTML = original; btn.disabled = false; lucide.createIcons();
+                document.getElementById('hardness').value = '';
+                alert('Saved');
+            }, 800);
+        }
+    </script>
+</body>
+</html>

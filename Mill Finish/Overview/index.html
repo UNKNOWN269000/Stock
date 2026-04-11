@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mill Finish Overview | Ultra Aluminium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #080a0c;
+            --bg-card: rgba(22, 27, 34, 0.7);
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --accent-glow: rgba(56, 189, 248, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --border-color: rgba(48, 54, 61, 0.8);
+            --frame-max-width: 1200px;
+            --sidebar-width: 280px;
+            --top-nav-height: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top right, #0c1a2b, #080a0c); 
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; 
+            padding: calc(var(--top-nav-height) + 40px) 20px 40px;
+            overflow-x: hidden;
+        }
+
+        /* TOP NAVIGATION */
+        .top-nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--top-nav-height);
+            background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; z-index: 4000;
+        }
+        .top-nav-left, .top-nav-right { display: flex; align-items: center; gap: 15px; }
+        .top-nav-logo { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .top-nav-logo i { color: var(--accent-blue); filter: drop-shadow(0 0 5px var(--accent-blue)); }
+        .top-nav-logo span { font-weight: 800; letter-spacing: 1px; font-size: 1.1rem; }
+        .page-title-badge { background: var(--accent-glow); border: 1px solid rgba(56, 189, 248, 0.3); color: var(--accent-blue); padding: 6px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 0 10px var(--accent-glow); }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed; left: calc(var(--sidebar-width) * -1); top: 0;
+            width: var(--sidebar-width); height: 100%;
+            background: rgba(13, 17, 23, 0.98); backdrop-filter: blur(25px);
+            border-right: 1px solid var(--border-color); z-index: 5000;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .sidebar.active { left: 0; box-shadow: 10px 0 40px rgba(0, 0, 0, 0.8), 2px 0 15px rgba(56, 189, 248, 0.1); }
+        .sidebar-branding { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .logo-placeholder { width: 50px; height: 50px; background: var(--accent-blue); border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #000; box-shadow: 0 0 20px var(--accent-glow); }
+        .menu-heading { padding: 20px 25px 10px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 700; }
+        .nav-item { margin: 2px 15px; }
+        .nav-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .nav-link:hover, .nav-link.active { background: var(--accent-glow); color: var(--accent-blue); }
+        .submenu { display: none; padding-left: 10px; margin: 5px 0 5px 10px; border-left: 1px solid var(--border-color); }
+        .submenu.show { display: block; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 3500; backdrop-filter: blur(4px); }
+        .sidebar-overlay.active { display: block; }
+        .menu-toggle-btn { background: var(--bg-card); border: 1px solid var(--border-color); padding: 10px; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; transition: 0.3s; }
+
+        /* DASHBOARD GRID & GLOW CARDS */
+        .container { width: 100%; max-width: var(--frame-max-width); }
+        .overview-header { margin-bottom: 30px; }
+        .overview-header h2 { font-size: 2rem; font-weight: 900; }
+        .overview-header p { color: var(--accent-blue); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 4px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 25px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); transition: 0.3s ease;
+        }
+        .stat-card:hover { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 25px rgba(56, 189, 248, 0.15); transform: translateY(-3px); }
+        .stat-card .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        .stat-card .value { font-size: 2.2rem; font-weight: 900; color: #fff; display: flex; align-items: baseline; gap: 8px; }
+        .stat-card .value span { font-size: 1rem; color: var(--accent-blue); font-weight: 600; }
+        .stat-card .footer { font-size: 0.8rem; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5px; color: var(--text-muted); }
+
+        .display-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 25px; border-radius: 24px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (max-width: 992px) { .charts-row { grid-template-columns: 1fr; } }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+
+        /* RECENT ACTIVITY */
+        .activity-list { display: flex; flex-direction: column; gap: 12px; }
+        .activity-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .activity-item:hover { border-color: rgba(56, 189, 248, 0.2); background: rgba(56, 189, 248, 0.05); }
+        .activity-info b { color: #fff; font-size: 0.95rem; display: block; }
+        .activity-info span { color: var(--text-muted); font-size: 0.75rem; }
+        
+        .type-indicator { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .type-anod { background: rgba(56, 189, 248, 0.1); color: var(--accent-blue); }
+        .type-pc { background: rgba(168, 85, 247, 0.1); color: var(--accent-purple); }
+
+        /* STOCK DISTRIBUTION */
+        .dist-item { margin-bottom: 20px; }
+        .dist-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; }
+        .progress-track { height: 10px; background: #1c2128; border-radius: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 5px; box-shadow: 0 0 10px currentColor; }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px); display: none; align-items: center;
+            justify-content: center; z-index: 6000; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #0d1117; border: 1px solid var(--border-color);
+            width: 100%; max-width: 800px; border-radius: 24px;
+            padding: 30px; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-title { font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #fff; }
+        .close-modal-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px; border-radius: 10px; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+
+        .filter-bar { 
+            display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; 
+            padding: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .date-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+        .date-group label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; }
+        .date-group input { background: #080a0c; border: 1px solid var(--border-color); color: #fff; padding: 10px 15px; border-radius: 10px; outline: none; }
+        
+        .filter-action-btn {
+            align-self: flex-end; background: var(--accent-blue); color: #000;
+            border: none; padding: 11px 25px; border-radius: 10px; font-weight: 800; cursor: pointer;
+        }
+
+        .table-wrap { max-height: 400px; overflow-y: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .transfer-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .transfer-table th { background: #161b22; padding: 15px; font-size: 0.75rem; color: var(--text-muted); position: sticky; top: 0; }
+        .transfer-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.9rem; }
+        .weight-badge { background: var(--accent-glow); color: var(--accent-blue); padding: 4px 10px; border-radius: 6px; font-weight: 700; }
+        .spin { animation: rotate 2s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+<header class="top-nav">
+    <div class="top-nav-left">
+        <button class="menu-toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+        <div class="top-nav-logo">
+            <i data-lucide="layers" size="24"></i>
+            <span>ULTRA <span style="color:var(--text-muted); font-weight:400;">ALUMINIUM</span></span>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="page-title-badge">Mill Finish Overview</div>
+        <div style="background: var(--accent-glow); width: 38px; height: 38px; border: 1px solid var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent-blue); box-shadow: 0 0 10px var(--accent-glow);">
+            <i data-lucide="user" size="18"></i>
+        </div>
+    </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-branding">
+        <div class="logo-placeholder"><i data-lucide="component" size="28"></i></div>
+        <h1 style="font-size: 1.1rem; color:#fff;">ULTRA ADMIN</h1>
+        <span style="font-size: 0.6rem; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 2px;">V 2.0.4</span>
+    </div>
+
+    <div class="menu-heading">Main Navigation</div>
+    
+    <div class="nav-item">
+        <a href="../../index.html" class="nav-link">
+            <span style="display:flex; align-items:center;"><i data-lucide="home"></i> Home</span>
+        </a>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="factory"></i> Extrusion</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="../../Extrusion/Bucket Income/index.html" class="nav-link">Bucket income</a>
+            <a href="../../Extrusion/Profile Income/index.html" class="nav-link">Profile income</a>
+            <a href="../../Extrusion/Aging Details/index.html" class="nav-link">Aging Details</a>
+            <a href="../../Extrusion/Overview/index.html" class="nav-link">Overview</a>
+        </div>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link active" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="layers"></i> Mill Finish</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu show">
+            <a href="../Hardness Check/index.html" class="nav-link">Hardness Check</a>
+            <a href="../Mill finish Profile Stock/index.html" class="nav-link">Mill Finish Profile Stock</a>
+            <a href="../Mill finish Bucket Stock/index.html" class="nav-link">Mill Finish Bucket Stock</a>
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleSubmenu(this)">
+                    <span>Transfer</span>
+                    <i data-lucide="chevron-down" size="12"></i>
+                </div>
+                <div class="submenu">
+                    <a href="../Transfer/Anodizing/index.html" class="nav-link">Anodizing</a>
+                    <a href="../Transfer/Powder Coat/index.html" class="nav-link">Powder Coat</a>
+                </div>
+            </div>
+            <a href="#" class="nav-link active">Overview</a>
+        </div>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="palette"></i> Powder Coat</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="#" class="nav-link">Mill Finish Transfer Stock</a>
+            <a href="#" class="nav-link">Production</a>
+            <a href="#" class="nav-link">Pending</a>
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleSubmenu(this)">
+                    <span>Damage</span>
+                    <i data-lucide="chevron-down" size="12"></i>
+                </div>
+                <div class="submenu">
+                    <a href="#" class="nav-link">Re-Powder</a>
+                    <a href="#" class="nav-link">Scrap</a>
+                </div>
+            </div>
+            <a href="#" class="nav-link">Overview</a>
+        </div>
+    </div>
+
+    <div class="nav-item">
+        <div class="nav-link" onclick="toggleSubmenu(this)">
+            <span style="display:flex; align-items:center;"><i data-lucide="droplet"></i> Anodizing</span>
+            <i data-lucide="chevron-down" size="14"></i>
+        </div>
+        <div class="submenu">
+            <a href="#" class="nav-link">Binding</a>
+            <a href="#" class="nav-link">Production</a>
+            <a href="#" class="nav-link">Production Pending</a>
+            <a href="#" class="nav-link">Pending</a>
+            <div class="nav-item">
+                <div class="nav-link" onclick="toggleSubmenu(this)">
+                    <span>Scrap</span>
+                    <i data-lucide="chevron-down" size="12"></i>
+                </div>
+                <div class="submenu">
+                    <a href="#" class="nav-link">Damage</a>
+                    <a href="#" class="nav-link">One Micron</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="overview-header">
+        <p>Live Inventory Metrics</p>
+        <h2>Mill Finish Overview</h2>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="label">Total MF Stock</span>
+            <div class="value">12,450 <span>kg</span></div>
+            <div class="footer"><i data-lucide="database" size="14"></i> 482 Profiles in Main Rack</div>
+        </div>
+        <div class="stat-card" onclick="openTransferModal('Anodizing')" style="border-left: 3px solid var(--accent-blue); cursor: pointer;">
+            <span class="label">Anodizing Transfer</span>
+            <div class="value">5,820 <span>kg</span></div>
+            <div class="footer" style="color:var(--accent-blue); font-weight:600;">Today's Output (Anodizing)</div>
+        </div>
+        <div class="stat-card" onclick="openTransferModal('Powder Coat')" style="border-left: 3px solid var(--accent-purple); cursor: pointer;">
+            <span class="label">Powder Coat Transfer</span>
+            <div class="value">4,115 <span>kg</span></div>
+            <div class="footer" style="color:var(--accent-purple); font-weight:600;">Today's Output (PC)</div>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="display-card">
+            <div class="card-header">
+                <span class="card-title"><i data-lucide="history" size="18" color="var(--accent-blue)"></i> Recent Transfer Activities</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">LIVE UPDATE</span>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <div class="type-indicator type-anod"><i data-lucide="droplet" size="18"></i></div>
+                        <div class="activity-info">
+                            <b>Bucket B-7012</b>
+                            <span>Casement Outer • 450kg • 01:22 PM</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" size="16" color="var(--text-muted)"></i>
+                </div>
+                <div class="activity-item">
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <div class="type-indicator type-pc"><i data-lucide="palette" size="18"></i></div>
+                        <div class="activity-info">
+                            <b>Bucket B-6995</b>
+                            <span>L-Angle 25x25 • 210kg • 12:45 PM</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" size="16" color="var(--text-muted)"></i>
+                </div>
+                <div class="activity-item">
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <div class="type-indicator type-anod"><i data-lucide="droplet" size="18"></i></div>
+                        <div class="activity-info">
+                            <b>Bucket B-7008</b>
+                            <span>T-Section • 185kg • 11:30 AM</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" size="16" color="var(--text-muted)"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="display-card">
+            <div class="card-header">
+                <span class="card-title"><i data-lucide="pie-chart" size="18" color="var(--accent-blue)"></i> Stock Distribution</span>
+            </div>
+            
+            <div class="dist-item">
+                <div class="dist-info"><span>Anodizing Grade</span><span>5,820 kg</span></div>
+                <div class="progress-track"><div class="progress-bar" style="width: 55%; background: var(--accent-blue);"></div></div>
+            </div>
+
+            <div class="dist-item">
+                <div class="dist-info"><span>Powder Coat Grade</span><span>4,115 kg</span></div>
+                <div class="progress-track"><div class="progress-bar" style="width: 35%; background: var(--accent-purple);"></div></div>
+            </div>
+
+            <div class="dist-item" style="margin-bottom: 0;">
+                <div class="dist-info"><span>Damaged / Scrap</span><span>1,220 kg</span></div>
+                <div class="progress-track"><div class="progress-bar" style="width: 10%; background: #ef4444;"></div></div>
+            </div>
+
+            <div style="margin-top: 35px; padding: 15px; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 15px; text-align: center;">
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Current Operational Efficiency</p>
+                <p style="font-size: 1.2rem; font-weight: 800; color: var(--accent-blue); margin-top: 5px;">92.4%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="transferModal" class="modal-overlay" onclick="closeTransferModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i data-lucide="arrow-right-left" id="modalIcon"></i>
+                <span id="modalCategoryTitle">Transfer Details</span>
+            </div>
+            <button class="close-modal-btn" onclick="closeTransferModal()"><i data-lucide="x" size="20"></i></button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="date-group">
+                <label for="startDate">From Date</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="date-group">
+                <label for="endDate">To Date</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="filter-action-btn" onclick="executeDataFetch()">
+                <i data-lucide="search" size="18"></i> Fetch Data
+            </button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="transfer-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bucket ID</th>
+                        <th>Description</th>
+                        <th>Weight</th>
+                    </tr>
+                </thead>
+                <tbody id="transferTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    function toggleSubmenu(el) {
+        event.stopPropagation();
+        const submenu = el.nextElementSibling;
+        if (submenu) {
+            submenu.classList.toggle('show');
+            // Toggle the rotation of the chevron if you decide to add that CSS
+        }
+    }
+
+    function openTransferModal(category) {
+        const modal = document.getElementById('transferModal');
+        const titleSpan = document.getElementById('modalCategoryTitle');
+        const iconEl = document.getElementById('modalIcon');
+        
+        titleSpan.innerText = category + " Transfer Details";
+        
+        if(category === 'Anodizing') {
+            titleSpan.style.color = 'var(--accent-blue)';
+            iconEl.setAttribute('data-lucide', 'droplet');
+        } else {
+            titleSpan.style.color = 'var(--accent-purple)';
+            iconEl.setAttribute('data-lucide', 'palette');
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        if(!document.getElementById('startDate').value) document.getElementById('startDate').value = today;
+        if(!document.getElementById('endDate').value) document.getElementById('endDate').value = today;
+
+        modal.classList.add('active');
+        lucide.createIcons(); 
+        executeDataFetch();   
+    }
+
+    function closeTransferModal(e) {
+        if (e && e.target.id !== 'transferModal' && e.type === 'click') return;
+        document.getElementById('transferModal').classList.remove('active');
+    }
+
+    function executeDataFetch() {
+        const tbody = document.getElementById('transferTableBody');
+        const startVal = document.getElementById('startDate').value;
+        const endVal = document.getElementById('endDate').value;
+
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--text-muted);"><i data-lucide="loader-2" class="spin"></i><br>Syncing...</td></tr>`;
+        lucide.createIcons();
+
+        setTimeout(() => {
+            if(!startVal || !endVal) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ef4444;">Please select a valid date range.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = `
+                <tr>
+                    <td>${startVal}</td>
+                    <td><b>B-7012</b></td>
+                    <td>Profile Transfer - Log Entry</td>
+                    <td><span class="weight-badge">450 kg</span></td>
+                </tr>
+                <tr>
+                    <td>${endVal}</td>
+                    <td><b>B-6995</b></td>
+                    <td>Profile Transfer - Log Entry</td>
+                    <td><span class="weight-badge">210 kg</span></td>
+                </tr>
+            `;
+            lucide.createIcons();
+        }, 800);
+    }
+
+    window.onload = () => lucide.createIcons();
+</script>
+</body>
+</html>
