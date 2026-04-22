@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hardness Analytics | Ultra Aluminium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-obsidian: #000000;
+            --bg-card: #0a0a0a;
+            --brand-green: #48A111;
+            --brand-glow: rgba(72, 161, 17, 0.2);
+            --border: #1a1a1a;
+            --text-main: #ffffff;
+            --text-dim: #717171;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { background-color: var(--bg-obsidian); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+
+        /* --- SIDEBAR SYSTEM --- */
+        #sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: var(--bg-card); border-right: 1px solid var(--border);
+            z-index: 9999; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px 0;
+        }
+
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+            z-index: 9998; display: none;
+        }
+
+        .menu-section { padding: 0 15px; }
+        .menu-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; border-radius: 10px; color: var(--text-dim);
+            cursor: pointer; transition: 0.3s; margin-bottom: 5px; text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(72, 161, 17, 0.1); color: #fff; }
+        .menu-item span { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+
+        .submenu { padding-left: 45px; display: none; }
+        .submenu.open { display: block; }
+
+        .sub-item {
+            display: block; padding: 10px 0; color: var(--text-dim);
+            font-size: 0.9rem; text-decoration: none; transition: 0.3s;
+        }
+        .sub-item:hover { color: var(--brand-green); }
+
+        .nested-trigger { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .nested-content { display: none; padding-left: 15px; border-left: 1px solid var(--border); margin-left: 5px; }
+
+        /* --- HEADER --- */
+        .header {
+            height: 70px; background: #000; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 25px; position: sticky; top: 0; z-index: 1000;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-btn { background: none; border: none; color: #fff; cursor: pointer; padding: 10px; border-radius: 8px; }
+        .menu-btn:hover { background: #111; }
+        
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand-logo { width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--brand-green); }
+        .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .brand-name { font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: 1px; }
+
+        /* --- CONTENT --- */
+        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        
+        .hero-section { text-align: center; margin-bottom: 40px; }
+        .hero-section h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+        .hero-section p { color: var(--text-dim); font-size: 0.95rem; }
+        
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(72, 161, 17, 0.05); color: var(--brand-green);
+            padding: 6px 16px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: 700; margin-top: 15px; border: 1px solid rgba(72, 161, 17, 0.2);
+        }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; padding: 25px; margin-bottom: 20px; transition: 0.3s; }
+        .card:hover { border-color: #222; }
+        
+        .label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--brand-green); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Dropdown Styling */
+        .input-box { 
+            width: 100%; 
+            background: #000; 
+            border: 1px solid var(--border); 
+            padding: 15px; 
+            border-radius: 10px; 
+            color: #fff; 
+            outline: none; 
+            font-size: 1rem; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .input-box:focus { border-color: var(--brand-green); box-shadow: 0 0 10px var(--brand-glow); }
+        
+        /* Forces the select to behave like a scrollable list when it has the "open" class */
+        .input-box.expandable {
+            position: absolute;
+            z-index: 100;
+            height: auto;
+        }
+
+        .btn-primary { width: 100%; padding: 18px; border-radius: 10px; border: none; background: var(--brand-green); color: #000; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* --- ANIMATIONS --- */
+        #successOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-obsidian); z-index: 10000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .success-icon {
+            width: 80px; height: 80px; background: var(--brand-green);
+            border-radius: 50%; display: grid; place-items: center;
+            color: #000; margin-bottom: 20px;
+            animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+        .sending-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' . .'; } 60% { content: ' . . .'; } 80%, 100% { content: ''; } }
+        .spin { animation: rotate 1s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="successOverlay">
+        <div class="success-icon"><i data-lucide="check" size="40"></i></div>
+        <h2 style="font-weight:800; letter-spacing:1px;">SYNC COMPLETE</h2>
+        <p style="color:var(--text-dim); margin-top:10px;">Database updated successfully</p>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+            <div class="brand">
+                <div class="brand-logo"><img src="Src/logo.png" alt="Logo"></div>
+                <div class="brand-name">ULTRA ALUMINIUM</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <a href="../Home/index.html" class="menu-item">
+                <span><i data-lucide="home" size="18"></i> Home</span>
+            </a>
+            
+            <div class="menu-item active" onclick="toggleSub('millFinishSub')">
+                <span><i data-lucide="layers" size="18"></i> Mill Finish</span>
+                <i data-lucide="chevron-down" size="14"></i>
+            </div>
+            <div class="submenu open" id="millFinishSub">
+                <a href="../Hardness Check/index.html" class="sub-item" style="color:var(--brand-green)">Hardness Check</a>
+                <a href="../Mill Finish Profile Stock/index.html" class="sub-item">Profile Stock</a>
+                <a href="../Mill Finish Bucket Stock/index.html" class="sub-item">Bucket Stock</a>
+                
+                <div class="sub-item nested-trigger" onclick="toggleNested('transferSub')">
+                    Transfer <i data-lucide="chevron-right" size="14"></i>
+                </div>
+                <div class="nested-content" id="transferSub">
+                    <a href="../Transfer/Anodizing/index.html" class="sub-item">Anodizing</a>
+                    <a href="../Transfer/Powder Coat/index.html" class="sub-item">Powder Coat</a>
+                </div>
+
+                <a href="../Overview/index.html" class="sub-item">Overview</a>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+            <div class="brand">
+                <div class="brand-logo"><img src="Src/logo.png" alt="Logo"></div>
+                <div class="brand-name">ULTRA ALUMINIUM</div>
+            </div>
+        </div>
+        <div id="dateDisplay" style="color:var(--text-dim); font-size:0.75rem; font-weight:700;"></div>
+    </header>
+
+    <div class="container">
+        <div class="hero-section">
+            <h2>Hardness Analytics</h2>
+            <p>Quality assurance control panel for production verification.</p>
+            <div class="status-badge">
+                <span style="width:6px; height:6px; background:var(--brand-green); border-radius:50%; display:inline-block"></span>
+                System Operational
+            </div>
+        </div>
+
+        <div class="card" style="position:relative;">
+            <label class="label">Step 1: Identify Bucket</label>
+            <select id="bucketSelect" class="input-box" 
+                onmousedown="if(this.options.length>5){this.size=6;}" 
+                onchange="this.size=0; loadItems();" 
+                onblur="this.size=0;">
+                <option value="">Fetching active records...</option>
+            </select>
+        </div>
+
+        <div id="itemContainer"></div>
+
+        <div class="card" id="formFooter" style="display:none">
+            <label class="label">Inspector Signature</label>
+            <input type="text" id="operatorName" class="input-box" placeholder="Enter full name">
+            <br><br>
+            <button class="btn-primary" id="saveBtn" onclick="saveAll()">
+                <i data-lucide="database"></i> AUTHORIZE & SYNC
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleSidebar() {
+            const side = document.getElementById('sidebar');
+            const over = document.getElementById('overlay');
+            if (side.style.left === "0px") {
+                side.style.left = "-280px";
+                over.style.display = "none";
+            } else {
+                side.style.left = "0px";
+                over.style.display = "block";
+            }
+        }
+
+        function toggleSub(id) {
+            const sub = document.getElementById(id);
+            sub.style.display = (sub.style.display === "block") ? "none" : "block";
+        }
+
+        function toggleNested(id) {
+            const nested = document.getElementById(id);
+            nested.style.display = (nested.style.display === "block") ? "none" : "block";
+        }
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz3tnajyknbSOzCHNKDprFc4evdCrVA-l40fDcL2XJuXjTc2m4DCljc1gqRt5scanz1/exec'; 
+        let globalData = [];
+
+        window.onload = () => {
+            document.getElementById('dateDisplay').innerText = new Date().toDateString();
+            fetch(scriptURL).then(res => res.json()).then(data => {
+                globalData = data;
+                const sel = document.getElementById('bucketSelect');
+                sel.innerHTML = '<option value="">-- Choose Bucket ID --</option>';
+                data.forEach(b => {
+                    let opt = document.createElement('option');
+                    opt.value = b.bucket;
+                    opt.textContent = `Bucket ${b.bucket} (${b.items.length} Entries)`;
+                    sel.appendChild(opt);
+                });
+            });
+        };
+
+        function loadItems() {
+            const val = document.getElementById('bucketSelect').value;
+            const current = globalData.find(b => b.bucket == val);
+            const container = document.getElementById('itemContainer');
+            const footer = document.getElementById('formFooter');
+            container.innerHTML = '';
+            if(!current) { footer.style.display = 'none'; return; }
+            footer.style.display = 'block';
+            current.items.forEach((item, i) => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="card" style="border-left: 4px solid var(--brand-green);">
+                        <label class="label">Profile Model ${i+1}</label>
+                        <div style="font-weight:700; margin-bottom:10px; font-size:1.1rem;">${item.profile}</div>
+                        <div style="display:flex; gap:20px; font-size:0.8rem; color:var(--text-dim); margin-bottom:15px;">
+                            <div>Qty: ${item.qty}</div>
+                            <div>Length: ${item.length}M</div>
+                        </div>
+                        <div style="border-top:1px solid #1a1a1a; padding-top:15px;">
+                            <label class="label" style="color:#fff;">Measured Hardness (WEB)</label>
+                            <input type="number" class="input-box h-input" placeholder="0.0" step="0.1" data-p="${item.profile}" data-q="${item.qty}" data-l="${item.length}">
+                        </div>
+                    </div>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        async function saveAll() {
+            const bucket = document.getElementById('bucketSelect').value;
+            const op = document.getElementById('operatorName').value;
+            const inputs = document.querySelectorAll('.h-input');
+            const btn = document.getElementById('saveBtn');
+            
+            if(!op) return alert("Operator signature required.");
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="spin"></i> <span class="sending-dots">SENDING</span>`;
+            lucide.createIcons();
+
+            try {
+                for(let input of inputs) {
+                    if(!input.value) continue;
+                    await fetch(scriptURL, { 
+                        method: 'POST', 
+                        mode: 'no-cors', 
+                        body: JSON.stringify({
+                            bucket: bucket, profile: input.dataset.p, qty: input.dataset.q,
+                            length: input.dataset.l, hardness: input.value, operator: op
+                        })
+                    });
+                }
+
+                document.getElementById('successOverlay').style.display = 'flex';
+                lucide.createIcons();
+                setTimeout(() => { location.reload(); }, 2200);
+
+            } catch (e) {
+                alert("Sync Error. Please try again.");
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="database"></i> RETRY SYNC`;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>

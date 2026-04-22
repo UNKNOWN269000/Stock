@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MF Profile Stock | Ultra Aluminium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0d0f14; --bg-sidebar: #0d1117; --bg-card: #161b22;
+            --bg-active: #1c2128; --accent-green: #90ee90; --accent-blue: #3b82f6;
+            --accent-red: #ef4444; --accent-yellow: #f59e0b; --text-main: #ffffff;
+            --text-muted: #9aa0a6; --border-color: #30363d; --transition: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #090b0f; color: var(--text-main); overflow: hidden; }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
+            background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
+            transition: var(--transition); z-index: 3000; overflow-y: auto; padding: 20px 10px;
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-logo { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--accent-green); margin: 0 auto 20px; display: block; object-fit: cover; }
+        
+        .menu-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; color: var(--text-muted); text-decoration: none;
+            border-radius: 10px; cursor: pointer; font-size: 0.9rem; margin-bottom: 5px;
+        }
+        .menu-item.active { background: var(--bg-active); color: var(--accent-green); }
+        .submenu { padding-left: 15px; display: none; }
+        .submenu.open { display: block; }
+        .sub-item { display: block; padding: 10px 15px; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; border-radius: 8px; }
+        .nested-content { padding-left: 20px; display: none; border-left: 1px solid var(--border-color); }
+        .nested-content.open { display: block; }
+
+        /* Header Styles */
+        .header {
+            position: fixed; top: 0; width: 100%; height: 70px;
+            background: var(--bg-dark); display: flex; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid var(--border-color); z-index: 2000;
+        }
+        .header-logo { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--accent-green); margin-right: 12px; object-fit: cover; }
+        .menu-trigger { background: transparent; border: none; color: #fff; cursor: pointer; margin-right: 15px; }
+        .company-name { font-size: 1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 0.5px; }
+
+        /* Table & Content */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); visibility: hidden; opacity: 0; transition: var(--transition); z-index: 2500; }
+        .overlay.active { visibility: visible; opacity: 1; }
+        .main-wrapper { width: 100%; height: 100vh; overflow-y: auto; padding-top: 70px; -webkit-overflow-scrolling: touch; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        
+        .filter-section { background: var(--bg-card); border-radius: 15px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; border: 1px solid var(--border-color); }
+        .search-input, .filter-select { background: var(--bg-sidebar); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; color: white; outline: none; width: 100%; }
+        
+        .table-container { background: var(--bg-card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        .stock-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        .stock-table th { background: var(--bg-active); color: var(--text-muted); font-size: 0.7rem; padding: 15px; text-align: left; text-transform: uppercase; }
+        .stock-table td { padding: 15px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 100px; text-align: center; }
+        .status-ok { background: rgba(144, 238, 144, 0.1); color: var(--accent-green); }
+        .status-low { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); }
+        .status-none { background: rgba(154, 160, 166, 0.1); color: var(--text-muted); }
+        #loader { text-align: center; padding: 40px; color: var(--accent-green); font-weight: bold; }
+
+        /* Mobile Specific Optimization */
+        @media (max-width: 600px) {
+            .filter-section { grid-template-columns: 1fr; gap: 10px; }
+            .container { padding: 15px; }
+            .company-name { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <img src="Src/logo.png" class="sidebar-logo">
+        <div class="menu-section">
+            <a href="../index.html" class="menu-item">
+                <span><i data-lucide="home" size="18"></i> Home</span>
+            </a>
+            
+            <div class="menu-item active" onclick="toggleSub('millFinishSub')">
+                <span><i data-lucide="layers" size="18"></i> Mill Finish</span>
+                <i data-lucide="chevron-down" size="14"></i>
+            </div>
+            
+            <div class="submenu open" id="millFinishSub">
+                <a href="../Hardness Check/index.html" class="sub-item">Hardness Check</a>
+                <a href="../Mill Finish Profile Stock/index.html" class="sub-item"  style="color:var(--accent-green); font-weight: bold;">Profile Stock</a>
+                <a href="../Mill finish Bucket Stock/index.html" class="sub-item">Bucket Stock</a>
+                
+                <div class="sub-item" style="cursor:pointer;" onclick="toggleNested('transferSub', event)">
+                    Transfer <i data-lucide="chevron-down" size="14"></i>
+                </div>
+                <div class="nested-content" id="transferSub">
+                    <a href="../Transfer/Anodizing/index.html" class="sub-item">Anodizing</a>
+                    <a href="../Transfer/Powder Coat/index.html" class="sub-item">Powder Coat</a>
+                </div>
+                <a href="../Overview/index.html" class="sub-item">Overview</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="header">
+        <button class="menu-trigger" onclick="toggleMenu()"><i data-lucide="menu"></i></button>
+        <img src="Src/logo.png" class="header-logo">
+        <div class="company-name"> PROFILE STOCK</div>
+    </div>
+
+    <div class="main-wrapper">
+        <main class="container">
+            <div class="filter-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search profile..." onkeyup="applyFilters()">
+                <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="ALL">All Status</option>
+                    <option value="AVAILABLE">Available</option>
+                    <option value="LOW STOCK">Low Stock</option>
+                    <option value="NONE">None</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <div id="loader">Fetching Live Server Data...</div>
+                <div class="table-responsive">
+                    <table class="stock-table" id="stockTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Profile Name</th>
+                                <th>Length</th>
+                                <th>ULR</th>
+                                <th>PRM</th>
+                                <th>ULR PRM</th>
+                                <th>Total Qty</th>
+                                <th>Weight (KG)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const API_URL = "https://script.google.com/macros/s/AKfycbxwHsiDD1DXABB249lspi9cDTISsvWLm18Tf9b1kQPd1YjYmhDa04m_G8Zgd0aQauzs/exec";
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function toggleSub(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        function toggleNested(id, event) {
+            event.stopPropagation();
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        async function fetchStockData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                document.getElementById('loader').innerText = "Data Load Error";
+            }
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('stockTableBody');
+            tableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                let badgeClass = item.status === 'AVAILABLE' ? 'status-ok' : (item.status === 'NONE' ? 'status-none' : 'status-low');
+                row.innerHTML = `
+                    <td><strong>${item.profile}</strong></td>
+                    <td>${item.length}m</td>
+                    <td>${item.ulr}</td>
+                    <td>${item.prm}</td>
+                    <td>${item.ulrPrm}</td>
+                    <td style="font-weight:bold;">${item.totalQty}</td>
+                    <td style="color:var(--accent-yellow)">${Number(item.weight).toFixed(2)}</td>
+                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('stockTable').style.display = 'table';
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toUpperCase();
+            const filter = document.getElementById('statusFilter').value;
+            const rows = document.getElementById('stockTableBody').getElementsByTagName('tr');
+            for (let row of rows) {
+                const profile = row.cells[0].textContent.toUpperCase();
+                const status = row.cells[7].textContent.toUpperCase();
+                row.style.display = (profile.includes(search) && (filter === "ALL" || status === filter)) ? "" : "none";
+            }
+        }
+
+        window.onload = fetchStockData;
+    </script>
+</body>
+</html>
