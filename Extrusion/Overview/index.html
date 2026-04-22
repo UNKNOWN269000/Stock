@@ -5,254 +5,362 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ultra Aluminium | ERP System</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-dark: #0d0f14;
-            --bg-sidebar: #0d1117;
-            --bg-card: #161b22;
-            --bg-active: #1c2128;
-            --accent-green: #90ee90;
-            --accent-blue: #3b82f6;
-            --accent-red: #ef4444;
-            --accent-yellow: #f59e0b;
-            --text-main: #ffffff;
-            --text-muted: #9aa0a6;
-            --border-color: #30363d;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg-dark: #07080a; --bg-sidebar: #0d1117; --bg-card: #12161c;
+            --bg-active: #1c2128; --accent-green: #00ff88; --accent-blue: #3b82f6;
+            --accent-red: #ef4444; --accent-yellow: #f59e0b; --text-main: #ffffff;
+            --text-muted: #9aa0a6; --border-color: #21262d; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #090b0f; color: var(--text-main); height: 100vh;
-            overflow: hidden; position: relative;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            height: 100vh; 
+            overflow: hidden;
+            line-height: 1.5;
         }
-
-        /* HEADER */
-        .header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
-            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
-        }
-        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 12px; display: flex; align-items: center; }
-        .logo-img { height: 45px; width: 45px; margin-right: 12px; object-fit: cover; border-radius: 50%; border: 2px solid var(--accent-green); }
-        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green); letter-spacing: 1px; }
-
-        /* SIDEBAR MENU */
-        .side-menu {
-            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
-            background: var(--bg-dark); border-right: 1px solid var(--border-color);
-            padding: 85px 10px 40px; transition: var(--transition); z-index: 1500; overflow-y: auto;
-        }
-        .side-menu.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
-        .overlay.active { display: block; }
-
-        .menu-item {
-            color: white; text-decoration: none; display: flex; align-items: center; 
-            gap: 12px; padding: 12px; cursor: pointer; transition: all 0.2s ease; border-radius: 10px;
-            margin-bottom: 2px; font-size: 0.95rem;
-        }
-
-        /* HOVER EFFECTS */
-        .menu-item:hover { background: rgba(144, 238, 144, 0.15); color: var(--accent-green); padding-left: 18px; }
-        .sub-menu-item:hover { background: rgba(144, 238, 144, 0.1); color: var(--accent-green); transform: translateX(5px); }
         
-        .dropdown-content, .nested-content { 
-            display: none; flex-direction: column; 
-            padding-left: 15px; border-left: 1px solid var(--border-color); 
-            margin-left: 20px; margin-top: 2px; margin-bottom: 5px;
+        /* Header */
+        .header { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px; 
+            background: rgba(7, 8, 10, 0.8); 
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; padding: 0 20px; 
+            border-bottom: 1px solid var(--border-color); z-index: 2000; 
         }
-        .show { display: flex !important; }
         
+        .menu-btn { 
+            background: none; border: none; color: white; cursor: pointer; 
+            margin-right: 15px; display: flex; align-items: center; 
+            padding: 8px; border-radius: 8px; transition: 0.2s;
+        }
+
+        .logo-img { height: 38px; width: 38px; margin-right: 12px; border-radius: 50%; border: 1.5px solid var(--accent-green); }
+        .company-name { font-size: clamp(0.9rem, 4vw, 1.1rem); font-weight: 700; color: var(--accent-green); letter-spacing: 0.5px; }
+
+        /* Sidebar */
+        .sidebar { 
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%; 
+            background: var(--bg-sidebar); border-right: 1px solid var(--border-color); 
+            z-index: 4000; transition: var(--transition); padding: 20px; overflow-y: auto; 
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            z-index: 3900; display: none; backdrop-filter: blur(4px); 
+        }
+        .sidebar-overlay.active { display: block; }
+        
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+
+        .menu-item { 
+            display: flex; align-items: center; padding: 14px 15px; color: var(--text-muted); 
+            text-decoration: none; border-radius: 10px; margin-bottom: 8px; transition: 0.2s; cursor: pointer; 
+        }
+        .menu-item i { margin-right: 12px; width: 20px; height: 20px; }
+        .menu-item:hover, .active-link { background: var(--bg-active); color: white; }
+
+        .dropdown-container { margin-bottom: 8px; }
+        .dropdown-trigger { justify-content: space-between !important; }
+        .chevron-icon { transition: transform 0.3s ease; width: 16px !important; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+        .dropdown-content { display: none; padding-left: 20px; margin-top: 5px; }
+        .dropdown-content.show { display: block; }
         .sub-menu-item { 
-            color: var(--text-muted); text-decoration: none; padding: 8px 12px; 
-            font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border-radius: 8px; transition: all 0.2s ease;
+            display: block; padding: 12px 15px; color: var(--text-muted); 
+            text-decoration: none; font-size: 0.9rem; border-radius: 8px; transition: 0.2s; 
         }
-        
-        .chevron-icon { margin-left: auto; transition: 0.3s; width: 14px; opacity: 0.5; }
-        .rotate { transform: rotate(180deg); }
+        .sub-menu-item:hover { color: var(--accent-green); background: rgba(0, 255, 136, 0.05); }
+        .active-sub { color: var(--accent-green) !important; font-weight: 600; background: rgba(0, 255, 136, 0.08); }
 
-        /* MAIN CONTENT */
-        .main-wrapper { width: 100%; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; padding-top: 70px; }
-        .container { padding: 30px 20px; max-width: 1100px; width: 100%; margin: 0 auto; }
-        
-        .graph-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; margin-bottom: 20px; position: relative;}
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .stat-card {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            padding: 20px; border-radius: 15px; display: flex; flex-direction: column; gap: 5px; transition: 0.3s; cursor: pointer;
+        /* Main Content */
+        .main-wrapper { width: 100%; height: 100vh; overflow-y: auto; padding-top: 70px; -webkit-overflow-scrolling: touch; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+        /* Optimized Hero Section with Background */
+        .hero-section { 
+            background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(28, 33, 40, 0.9) 100%);
+            border: 1px solid var(--border-color); border-radius: 24px; 
+            padding: clamp(30px, 8vw, 60px) 20px; text-align: center; margin-bottom: 30px; 
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        .stat-card span { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-        .stat-card h3 { font-size: 1.3rem; font-weight: 700; }
+        .hero-section::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
 
-        /* CARD HOVER EFFECTS */
-        .profile-stat:hover { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        .bucket-stat:hover { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(144, 238, 144, 0.3); }
-        .damage-stat:hover { border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-        .aging-stat:hover { border-color: var(--accent-yellow); box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+        .hero-section h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; color: #fff; margin-bottom: 12px; position: relative; }
+        .hero-section p { color: var(--text-muted); font-size: clamp(0.9rem, 2.5vw, 1.1rem); margin-bottom: 25px; max-width: 650px; margin-inline: auto; line-height: 1.6; position: relative; }
+        
+        .status-badge { 
+            display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 255, 136, 0.1); 
+            color: var(--accent-green); padding: 8px 18px; border-radius: 50px; font-size: 0.8rem; 
+            font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2); position: relative;
+        }
+        .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        .profile-stat h3 { color: var(--accent-blue); }
-        .bucket-stat h3 { color: var(--accent-green); }
-        .damage-stat h3 { color: var(--accent-red); }
-        .aging-stat h3 { color: var(--accent-yellow); }
+        .section-label { 
+            color: var(--accent-green); font-size: 0.75rem; font-weight: 800; 
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; 
+            display: flex; align-items: center; gap: 10px; 
+        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
 
-        /* MODAL */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            display: none; align-items: center; justify-content: center;
-            z-index: 3000; padding: 20px; backdrop-filter: blur(8px);
+        /* Responsive Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
+        @media (min-width: 480px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .stat-card { 
+            background: var(--bg-card); border: 1px solid var(--border-color); 
+            padding: 24px; border-radius: 18px; cursor: pointer; position: relative; 
+            overflow: hidden; transition: var(--transition); z-index: 1; 
+        }
+        .stat-card:active { transform: scale(0.98); }
+        .stat-card::before { 
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; 
+            height: 100%; transition: var(--transition); z-index: -1; opacity: 0.15; 
+        }
+        .card-blue::before { background: var(--accent-blue); }
+        .card-green::before { background: var(--accent-green); }
+        .card-red::before { background: var(--accent-red); }
+        .card-yellow::before { background: var(--accent-yellow); }
+        .stat-card:hover::before { left: 0; }
+        
+        .stat-card span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px; }
+        .stat-card h3 { font-size: 1.5rem; color: #fff; font-weight: 700; }
+
+        /* Modal */
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); 
+            display: none; align-items: center; justify-content: center; 
+            z-index: 5000; padding: 15px; backdrop-filter: blur(10px); 
         }
         .modal.active { display: flex; }
-        .modal-content {
-            background: var(--bg-sidebar); border: 1px solid var(--border-color);
-            border-radius: 20px; width: 100%; max-width: 450px; padding: 25px; animation: slideUp 0.3s ease-out;
+        .modal-content { 
+            background: var(--bg-sidebar); border: 1px solid var(--border-color); 
+            border-radius: 24px; width: 100%; max-width: 850px; padding: clamp(15px, 5vw, 25px); 
+            max-height: 90vh; display: flex; flex-direction: column;
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-controls { 
+            background: #000; padding: 12px; border-radius: 14px; 
+            margin-bottom: 15px; display: flex; flex-wrap: wrap;
+            justify-content: space-between; border: 1px solid var(--border-color); 
+            align-items: center; gap: 10px;
+        }
+        .table-container { overflow-x: auto; width: 100%; flex: 1; border-radius: 12px; }
+        .statement-table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        .statement-table th { 
+            background: var(--bg-active); color: var(--text-muted); 
+            padding: 12px 15px; text-align: left; font-size: 0.7rem; 
+            text-transform: uppercase; position: sticky; top: 0;
+        }
+        .statement-table td { padding: 14px 15px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); color: #ccc; }
 
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .date-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; color: white; font-size: 0.8rem; outline: none; }
-        
-        .table-wrap { max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; }
-        .statement-table { width: 100%; border-collapse: collapse; }
-        .statement-table th { background: var(--bg-active); color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; padding: 10px; text-align: left; }
-        .statement-table td { padding: 12px 10px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); color: white; }
-        
-        .btn-action { width: 100%; padding: 12px; border-radius: 10px; border: none; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        input[type="date"] { 
+            color-scheme: dark; background: #1c2128; color: #fff; 
+            border: 1px solid #333; padding: 8px 12px; border-radius: 8px; 
+            font-size: 0.9rem; outline: none;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <img src="Src/logo.png" alt="Logo" class="logo-img">
-        <div class="company-name">ULTRA ALUMINIUM</div>
-    </div>
-
-    <div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
-
-    <aside class="side-menu" id="menu">
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span style="font-weight:bold; color:var(--accent-green); letter-spacing: 1px;">ULTRA MENU</span>
+            <button onclick="toggleMenu()" style="background:var(--bg-active); border:none; color:white; width: 32px; height: 32px; border-radius: 50%; cursor:pointer;">&times;</button>
+        </div>
         <a href="../index.html" class="menu-item"><i data-lucide="home"></i> Home</a>
-        
         <div class="dropdown-container">
-            <div class="menu-item" onclick="toggleDropdown('exSub', this)">
-                <i data-lucide="factory"></i> Extrusion <i data-lucide="chevron-down" class="chevron-icon"></i>
+            <div class="menu-item dropdown-trigger active-link" onclick="toggleDrop('extrusionContent', 'exChevron')">
+                <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="factory"></i> Extrusion</div>
+                <i data-lucide="chevron-down" class="chevron-icon rotate" id="exChevron"></i>
             </div>
-            <div class="dropdown-content" id="exSub">
-                <a href="..\Bucket Income\index.html" class="sub-menu-item">Bucket income</a>
-                <a href="..\Profile Income\index.html" class="sub-menu-item">Profile income</a>
-                <a href="..\Aging Details\index.html" class="sub-menu-item">Aging Details</a>
-                <a href="#" class="sub-menu-item">Overview</a>
+            <div class="dropdown-content show" id="extrusionContent">
+                <a href="../Bucket income/index.html" class="sub-menu-item">• Bucket income</a>
+                <a href="../Profile Income/index.html" class="sub-menu-item">• Profile income</a>
+                <a href="../Aging Details/index.html" class="sub-menu-item">• Aging Details</a>
+                <a href="#" class="sub-menu-item active-sub">• Overview</a>
             </div>
         </div>
+        <a href="#" class="menu-item"><i data-lucide="package"></i> Records</a>
+    </nav>
 
-    </aside>
+    <header class="header">
+        <button class="menu-btn" onclick="toggleMenu()"><i data-lucide="menu"></i></button>
+        <img src="Src/logo.png" class="logo-img">
+        <div class="company-name">ULTRA ALUMINIUM</div>
+    </header>
 
     <div class="main-wrapper">
         <main class="container">
-            <div class="graph-section">
-                <h4 style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase;">Factory Weight Analysis</h4>
-                <div style="height: 250px;"><canvas id="weightGraph"></canvas></div>
-            </div>
+            <section class="hero-section">
+                <h1>Extrusion Overview</h1>
+                <p>Real-time production monitoring and performance analytics. Track extrusion output, bucket processing, and material aging across the department.</p>
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    System Online
+                </div>
+            </section>
+
+            <div class="section-label">Extrusion Operations</div>
 
             <div class="stats-grid">
-                <div class="stat-card profile-stat" onclick="openReport('Profile Income', 'var(--accent-blue)', 'profile')">
-                    <span>Profile Income</span><h3>12.45 Ton</h3>
+                <div class="stat-card card-blue" onclick="openReport('Profile Income', 'var(--accent-blue)', 'profile')">
+                    <span>Profile Income</span><h3 id="profileTon">0.000 Ton</h3>
                 </div>
-                <div class="stat-card bucket-stat" onclick="openReport('Bucket Income', 'var(--accent-green)', 'bucket')">
-                    <span>Bucket Income</span><h3>428 Items</h3>
+                <div class="stat-card card-green" onclick="openReport('Bucket Income', 'var(--accent-green)', 'bucket')">
+                    <span>Bucket Income</span><h3 id="bucketCount">0 Items</h3>
                 </div>
-                <div class="stat-card damage-stat" onclick="openReport('Damage Report', 'var(--accent-red)', 'damage')">
-                    <span>Total Damage</span><h3>0.85 Ton</h3>
+                <div class="stat-card card-red" onclick="openReport('Damage Report', 'var(--accent-red)', 'damage')">
+                    <span>Total Damage</span><h3 id="damageTon">0.000 Ton</h3>
                 </div>
-                <div class="stat-card aging-stat" onclick="openReport('Aging Summary', 'var(--accent-yellow)', 'aging')">
-                    <span>Total Aging</span><h3>8.24 Ton</h3>
+                <div class="stat-card card-yellow" onclick="openReport('Aging Summary', 'var(--accent-yellow)', 'aging')">
+                    <span>Total Aging</span><h3 id="agingTon">0.000 Ton</h3>
                 </div>
             </div>
         </main>
     </div>
 
     <div class="modal" id="reportModal">
-        <div class="modal-content" id="modalBox">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle" style="display:flex; align-items:center; gap:10px;">
-                    <i data-lucide="file-text"></i> <span>Title</span>
-                </h3>
-                <button class="menu-btn" onclick="closeAll()" style="font-size:30px;">×</button>
+                <h3 id="modalTitle" style="font-weight: 700;">Details</h3>
+                <button onclick="closeAll()" style="background:none; border:none; color:white; font-size:32px; cursor:pointer;">&times;</button>
             </div>
-            <div class="date-row">
-                <div><label style="font-size:0.6rem; color:var(--text-muted);">From Date</label><input type="date" class="date-input"></div>
-                <div><label style="font-size:0.6rem; color:var(--text-muted);">To Date</label><input type="date" class="date-input"></div>
+            <div class="modal-controls">
+                <input type="date" id="reportDate" onchange="filterDataByDate()">
+                <div id="modalSummary" style="font-weight:bold; color:var(--accent-green);">Total: 0</div>
             </div>
-            <div class="table-wrap">
+            <div class="table-container">
                 <table class="statement-table">
                     <thead id="tableHead"></thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
-            <button class="btn-action" id="modalBtn" onclick="closeAll()">Download Report</button>
         </div>
     </div>
 
-    <script>
-        lucide.createIcons();
+<script>
+    window.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
 
-        function toggleMenu() {
-            document.getElementById("menu").classList.toggle("active");
-            document.getElementById("mainOverlay").classList.toggle("active");
+    function toggleMenu() { 
+        document.getElementById('sidebar').classList.toggle('active'); 
+        document.getElementById('overlay').classList.toggle('active'); 
+    }
+
+    function toggleDrop(contentId, chevronId) {
+        const content = document.getElementById(contentId);
+        const chevron = document.getElementById(chevronId);
+        content.classList.toggle('show');
+        chevron.classList.toggle('rotate');
+    }
+    
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxsz1gKycvj0y-aNkx6HjXfr8TYVYmD6ls9Fq9f-5AuLr76hbTppS971YT_LRSNVdLq/exec";
+    let globalData = [], activeType = '';
+
+    window.onload = () => {
+        document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+        fetchData();
+    };
+
+    async function fetchData() {
+        try {
+            const res = await fetch(SHEET_URL);
+            globalData = await res.json();
+            updateDashboard();
+        } catch (e) { console.error(e); }
+    }
+
+    function updateDashboard() {
+        const today = new Date().toLocaleDateString();
+        const pSum = globalData.filter(r => r.category === "profile" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.outputWeight) || 0), 0);
+        const bCnt = globalData.filter(r => r.category === "bucket" && new Date(r.date).toLocaleDateString() === today).length;
+        const aSum = globalData.filter(r => r.category === "aging" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.weight) || 0), 0);
+        const dSum = globalData.filter(r => r.category === "damage" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.damageWeight) || 0), 0);
+
+        document.getElementById('profileTon').innerText = (pSum/1000).toFixed(3) + " Ton";
+        document.getElementById('bucketCount').innerText = bCnt + " Items";
+        document.getElementById('agingTon').innerText = (aSum/1000).toFixed(3) + " Ton";
+        document.getElementById('damageTon').innerText = (dSum/1000).toFixed(3) + " Ton";
+    }
+
+    function openReport(title, color, type) {
+        activeType = type;
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalTitle').style.color = color.includes('var') ? color : `var(--${color})`;
+        document.getElementById('reportModal').classList.add('active');
+        filterDataByDate();
+    }
+
+    function formatTime(timeStr) {
+        if (!timeStr) return '-';
+        const date = new Date(timeStr);
+        return isNaN(date.getTime()) ? timeStr : date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function filterDataByDate() {
+        const dateInput = document.getElementById('reportDate').value;
+        const date = new Date(dateInput).toLocaleDateString();
+        const head = document.getElementById('tableHead');
+        const body = document.getElementById('tableBody');
+        const summary = document.getElementById('modalSummary');
+        body.innerHTML = '';
+        let total = 0;
+
+        const filtered = globalData.filter(r => new Date(r.date).toLocaleDateString() === date && r.category === activeType);
+
+        if (activeType === 'profile') {
+            head.innerHTML = '<tr><th>Profile</th><th>Type</th><th>Length</th><th>Qty</th></tr>';
+            filtered.forEach(row => {
+                total += (parseFloat(row.outputWeight) || 0);
+                const pairs = [{l:"3.65", q:row.valK}, {l:"6.10", q:row.valL}, {l:"6.50", q:row.valM}, {l:row.valN, q:row.valO}];
+                pairs.forEach(p => { if(p.q > 0) body.innerHTML += `<tr><td>${row.profile}</td><td>ULR</td><td>${p.l}m</td><td>${p.q}</td></tr>`; });
+            });
+            summary.innerText = "Total: " + (total/1000).toFixed(3) + " Ton";
+        } 
+        else if (activeType === 'bucket') {
+            head.innerHTML = '<tr><th>Bucket No</th><th>Profile</th><th>Length</th><th>Qty</th></tr>';
+            filtered.forEach(row => { 
+                body.innerHTML += `<tr><td style="color:var(--accent-green)">#${row.bucketNo}</td><td>${row.profile}</td><td>${row.length}m</td><td>${row.qty}</td></tr>`; 
+            });
+            summary.innerText = "Count: " + filtered.length + " Buckets";
+        } 
+        else if (activeType === 'aging') {
+            head.innerHTML = '<tr><th>Bucket No</th><th>IN Time</th><th>OUT Time</th><th>Weight (kg)</th></tr>';
+            filtered.forEach(row => {
+                const w = parseFloat(row.weight) || 0;
+                total += w;
+                body.innerHTML += `<tr><td style="color:var(--accent-yellow)">#${row.bucketNo}</td><td>${formatTime(row.inTime)}</td><td>${formatTime(row.outTime)}</td><td>${w.toFixed(2)}</td></tr>`;
+            });
+            summary.innerText = "Count: " + filtered.length + " | Total: " + (total/1000).toFixed(3) + " Ton";
         }
-
-        function toggleDropdown(id, el) {
-            document.getElementById(id).classList.toggle("show");
-            const icon = el.querySelector(".chevron-icon");
-            if(icon) icon.classList.toggle("rotate");
-            event.stopPropagation();
+        else if (activeType === 'damage') {
+            head.innerHTML = '<tr><th>Profile</th><th>Length</th><th>Dmg Qty</th><th>Dmg Weight (kg)</th></tr>';
+            filtered.forEach(row => {
+                const dw = parseFloat(row.damageWeight) || 0;
+                total += dw;
+                body.innerHTML += `<tr><td style="color:var(--accent-red); font-weight:bold;">${row.profile}</td><td>${row.length}m</td><td>${row.damageQty}</td><td>${dw.toFixed(2)}</td></tr>`;
+            });
+            summary.innerText = "Total Damage: " + (total/1000).toFixed(3) + " Ton";
         }
-
-        function openReport(title, color, type) {
-            const modal = document.getElementById('reportModal');
-            const box = document.getElementById('modalBox');
-            const tableHead = document.getElementById('tableHead');
-            const tableBody = document.getElementById('tableBody');
-            
-            document.getElementById('modalTitle').querySelector('span').innerText = title;
-            document.getElementById('modalTitle').style.color = color;
-            box.style.borderColor = color;
-            box.style.boxShadow = `0 0 25px ${color}50`;
-            document.getElementById('modalBtn').style.backgroundColor = color;
-
-            if(type === 'profile') {
-                tableHead.innerHTML = '<tr><th>Profile</th><th>Length</th><th>Qty</th></tr>';
-                tableBody.innerHTML = '<tr><td>P-102 Section</td><td>6.0m</td><td>120</td></tr>';
-            } else {
-                tableHead.innerHTML = '<tr><th>Item</th><th>Detail</th><th>Value</th></tr>';
-                tableBody.innerHTML = '<tr><td>Sample Data</td><td>General</td><td>10.5</td></tr>';
-            }
-            modal.classList.add('active');
-        }
-
-        function closeAll() {
-            document.getElementById("reportModal").classList.remove("active");
-            document.getElementById("menu").classList.remove("active");
-            document.getElementById("mainOverlay").classList.remove("active");
-        }
-
-        const ctx = document.getElementById('weightGraph').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['W1', 'W2', 'W3', 'W4'],
-                datasets: [
-                    { data: [18, 32, 25, 45], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' },
-                    { data: [15, 22, 20, 30], borderColor: 'rgba(255, 255, 255, 0.1)', borderDash: [5, 5], tension: 0.4 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-    </script>
+    }
+    
+    function closeAll() { document.getElementById('reportModal').classList.remove('active'); }
+</script>
 </body>
 </html>
