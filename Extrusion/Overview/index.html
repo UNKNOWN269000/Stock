@@ -293,7 +293,7 @@
         const dSum = globalData.filter(r => r.category === "damage" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.damageWeight) || 0), 0);
 
         document.getElementById('profileTon').innerText = (pSum/1000).toFixed(3) + " Ton";
-        document.getElementById('bucketCount').innerText = bCnt + " Items";
+        document.getElementById('bucketCount').innerText = bCnt + " Buckets";
         document.getElementById('agingTon').innerText = (aSum/1000).toFixed(3) + " Ton";
         document.getElementById('damageTon').innerText = (dSum/1000).toFixed(3) + " Ton";
     }
