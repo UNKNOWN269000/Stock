@@ -139,8 +139,8 @@
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
             <div class="form-group"><label>Die No</label><input type="number" id="dieNo" required></div>
-            <div class="form-group"><label>Length</label><input type="number" id="bBatch" required></div>
-            <div class="form-group"><label>Qty</label><input type="number" id="bQty" required></div>
+            <div class="form-group"><label>Billet Length</label><input type="number" id="bBatch" required></div>
+            <div class="form-group"><label>Billet Qty</label><input type="number" id="bQty" required></div>
         </div>
         <div class="form-group">
             <label>Lengths</label>
@@ -156,6 +156,12 @@
             <div class="form-group"><label>In (kg)</label><input type="number" step="0.01" id="inW" required oninput="calcYield()"></div>
             <div class="form-group"><label>Out (kg)</label><input type="number" step="0.01" id="outW" required oninput="calcYield()"></div>
         </div>
+
+        <div class="form-group">
+                <label>Off Cut (kg)</label>
+                <input type="number" step="0.01" id="offCutVal" required>
+        </div>
+
         <div class="form-group"><label>Yield</label><input type="text" id="yld" readonly style="color:var(--accent-green); font-weight:800;"></div>
         <div style="display:flex; gap:12px;"><button type="submit" class="btn btn-save">Add Entry</button><button type="button" class="btn btn-cancel" onclick="closeModal()">Close</button></div>
     </form>
@@ -190,41 +196,48 @@
 
     document.getElementById('cOther').addEventListener('change', function() { document.getElementById('otherVal').style.display = this.checked ? 'block' : 'none'; });
 
-    function saveEntry() {
-        const entry = {
-            id: Date.now(),
-            profile: document.getElementById('pName').value,
-            type: document.getElementById('pType').value,
-            dieNo: document.getElementById('dieNo').value,
-            billetBatch: document.getElementById('bBatch').value,
-            billetQty: document.getElementById('bQty').value,
-            qty365: document.getElementById('c365').checked ? document.getElementById('q365').value : "",
-            qty610: document.getElementById('c610').checked ? document.getElementById('q610').value : "",
-            qty650: document.getElementById('c650').checked ? document.getElementById('q650').value : "",
-            otherLen: document.getElementById('cOther').checked ? document.getElementById('otherVal').value : "",
-            otherQty: document.getElementById('cOther').checked ? document.getElementById('qOther').value : "",
-            input: document.getElementById('inW').value,
-            output: document.getElementById('outW').value,
-            yield: document.getElementById('yld').value
-        };
-        sessionData.push(entry); render(); closeModal();
+   function saveEntry() {
+    const entry = {
+        id: Date.now(),
+        profile: document.getElementById('pName').value,
+        type: document.getElementById('pType').value,
+        dieNo: document.getElementById('dieNo').value,
+        billetBatch: document.getElementById('bBatch').value,
+        billetQty: document.getElementById('bQty').value,
+        qty365: document.getElementById('c365').checked ? document.getElementById('q365').value : "",
+        qty610: document.getElementById('c610').checked ? document.getElementById('q610').value : "",
+        qty650: document.getElementById('c650').checked ? document.getElementById('q650').value : "",
+        otherLen: document.getElementById('cOther').checked ? document.getElementById('otherVal').value : "",
+        otherQty: document.getElementById('cOther').checked ? document.getElementById('qOther').value : "",
+        input: document.getElementById('inW').value,
+        output: document.getElementById('outW').value,
+        offCut: document.getElementById('offCutVal').value, // <-- Add this line
+        yield: document.getElementById('yld').value
+    };
+    sessionData.push(entry); 
+    render(); 
+    closeModal();
     }
 
     function render() {
-        const area = document.getElementById('displayArea'); area.innerHTML = "";
-        if(sessionData.length === 0) { area.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No entries yet.</div>'; return; }
-        sessionData.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'data-entry';
-            div.innerHTML = `<i data-lucide="trash-2" class="delete-btn" onclick="remove(${item.id})"></i>
-                <div style="font-weight:700; color:var(--accent-blue);">${item.profile} (${item.type})</div>
-                <div class="data-grid">
-                    <div><b>Billet</b>B:${item.billetBatch} | Q:${item.billetQty}</div>
-                    <div><b>Weights</b>In:${item.input} | Out:${item.output}</div>
-                </div>`;
-            area.appendChild(div);
-        });
-        lucide.createIcons();
+    const area = document.getElementById('displayArea'); 
+    area.innerHTML = "";
+    if(sessionData.length === 0) { 
+        area.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No entries yet.</div>'; 
+        return; 
+    }
+    sessionData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'data-entry';
+        div.innerHTML = `<i data-lucide="trash-2" class="delete-btn" onclick="remove(${item.id})"></i>
+            <div style="font-weight:700; color:var(--accent-blue);">${item.profile} (${item.type})</div>
+            <div class="data-grid">
+                <div><b>Billet</b>B:${item.billetBatch} | Q:${item.billetQty}</div>
+                <div><b>Weights</b>In:${item.input} | Out:${item.output} | Off:${item.offCut}</div> 
+            </div>`; // <-- Added | Off:${item.offCut}
+        area.appendChild(div);
+    });
+    lucide.createIcons();
     }
 
     function remove(id) { sessionData = sessionData.filter(i => i.id !== id); render(); }
@@ -236,7 +249,7 @@
     }
 
     // PASTE YOUR NEW URL HERE
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbya7V3M7yfp0SDAIWVkH38u4F197y3JqTOUInmlx1sHNxd2FI0LUPRevYrPDFlMqwIt/exec'; 
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzD2-RRQWLSDBcVlZ2wv6F4GS85InbrZOuegts7PJl9oewMWzrVw5rL4dbsDanDWE6t/exec'; 
     
     const overlay = document.getElementById('statusOverlay');
     const statusText = overlay.querySelector('h2');
