@@ -255,6 +255,21 @@
     </div>
 
 <script>
+    function updateOnlineStatus() {
+        const badge = document.getElementById('statusBadge');
+        const text = document.getElementById('statusText');
+        if (navigator.onLine) {
+            badge.className = 'status-badge online';
+            text.textContent = 'System Online';
+        } else {
+            badge.className = 'status-badge offline';
+            text.textContent = 'System Offline';
+        }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus()
+
     window.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
 
     function toggleMenu() { 
