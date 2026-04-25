@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-dark: #07080a; --bg-sidebar: #0d1117; --bg-card: #12161c;
-            --bg-active: #1c2128; --accent-green: #00ff88; --accent-blue: #3b82f6;
+            --bg-active: rgba(0, 255, 136, 0.05); --accent-green: #15ff00; --accent-blue: #3b82f6;
             --accent-red: #ef4444; --accent-yellow: #f59e0b; --text-main: #ffffff;
             --text-muted: #9aa0a6; --border-color: #21262d; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -95,7 +95,7 @@
             pointer-events: none;
         }
 
-        .hero-section h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; color: #fff; margin-bottom: 12px; position: relative; }
+        .hero-section h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero-section p { color: var(--text-muted); font-size: clamp(0.9rem, 2.5vw, 1.1rem); margin-bottom: 25px; max-width: 650px; margin-inline: auto; line-height: 1.6; position: relative; }
         
         .status-badge { 
@@ -181,7 +181,7 @@
     
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <span style="font-weight:bold; color:var(--accent-green); letter-spacing: 1px;">ULTRA MENU</span>
+            <span style="font-weight:bold; color:var(--accent-green); letter-spacing: 1px;">Overview Menu</span>
             <button onclick="toggleMenu()" style="background:var(--bg-active); border:none; color:white; width: 32px; height: 32px; border-radius: 50%; cursor:pointer;">&times;</button>
         </div>
         <a href="../index.html" class="menu-item"><i data-lucide="home"></i> Home</a>
@@ -223,7 +223,7 @@
                     <span>Profile Income</span><h3 id="profileTon">0.000 Ton</h3>
                 </div>
                 <div class="stat-card card-green" onclick="openReport('Bucket Income', 'var(--accent-green)', 'bucket')">
-                    <span>Bucket Income</span><h3 id="bucketCount">0 Buckets</h3>
+                    <span>Bucket Income</span><h3 id="bucketCount">0 Items</h3>
                 </div>
                 <div class="stat-card card-red" onclick="openReport('Damage Report', 'var(--accent-red)', 'damage')">
                     <span>Total Damage</span><h3 id="damageTon">0.000 Ton</h3>
@@ -293,7 +293,7 @@
         const dSum = globalData.filter(r => r.category === "damage" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.damageWeight) || 0), 0);
 
         document.getElementById('profileTon').innerText = (pSum/1000).toFixed(3) + " Ton";
-        document.getElementById('bucketCount').innerText = bCnt + " Buckets";
+        document.getElementById('bucketCount').innerText = bCnt + " Items";
         document.getElementById('agingTon').innerText = (aSum/1000).toFixed(3) + " Ton";
         document.getElementById('damageTon').innerText = (dSum/1000).toFixed(3) + " Ton";
     }
