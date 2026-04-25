@@ -10,7 +10,7 @@
             --bg-dark: #0d0f14;
             --bg-card: #161b22;
             --bg-inner: #0d1117;
-            --accent-green: #4ade80;
+            --accent-green: #43df50;
             --accent-blue: #38bdf8;
             --text-main: #ffffff;
             --text-muted: #9aa0a6;
@@ -38,11 +38,11 @@
             overflow-y: auto;
         }
         .side-menu.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; transition: 0.3s; }
+        .overlay { position: fixed; inset: 0; background: rgba(1, 176, 245, 0.897)7); backdrop-filter: blur(4px); display: none; z-index: 1400; transition: 0.3s; }
         .overlay.active { display: block; }
 
         .menu-item { color: white; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 15px; cursor: pointer; transition: 0.2s; border-radius: 10px; }
-        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item:hover { background: rgba(0, 204, 255, 0.05); }
         
         .dropdown-content { display: none; flex-direction: column; padding-left: 20px; background: rgba(0,0,0,0.2); }
         .dropdown-content.show { display: flex; }
@@ -51,8 +51,8 @@
         .nested-content.show { display: flex; }
 
         .sub-menu-item { color: var(--text-muted); text-decoration: none; padding: 12px; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; border-radius: 8px; }
-        .sub-menu-item:hover { color: white; }
-        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; }
+        .sub-menu-item:hover { color: rgb(7, 237, 253); }
+        .sub-menu-item.active-sub { color: var(--accent-blue); font-weight: 600; }
         
         .chevron-icon { transition: transform 0.3s; width: 18px; height: 18px; }
         .chevron-icon.rotate { transform: rotate(180deg); }
@@ -102,12 +102,21 @@
         .loader { width: 50px; height: 50px; border: 5px solid #1e293b; border-top: 5px solid var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .delete-btn { position: absolute; top: 15px; right: 15px; color: #ff6b6b; cursor: pointer; }
+
+        .logo-img {
+            height: 45px; width: 45px; margin-right: 12px;
+            object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--accent-green2);
+        }
+
+        .welcome-card h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; background: linear-gradient(to right, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <img src="Src/logo.png" alt="Logo" class="logo-img">
     <div class="company-name">ULTRA ALUMINIUM</div>
 </div>
 
@@ -168,7 +177,7 @@
 </div>
 
 <div class="container">
-    <div class="page-header"><h1>Profile Income</h1></div>
+    <div class="welcome-card"><h1>Profile Income</h1></div>
     <div class="card">
         <button class="add-main-btn" onclick="openModal()">+ Add New Entry</button>
         <div class="inner-frame" id="displayArea"><div style="color:var(--text-muted); text-align:center; padding:20px;">No entries yet.</div></div>
