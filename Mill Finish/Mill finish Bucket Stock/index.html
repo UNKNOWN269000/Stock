@@ -135,6 +135,43 @@
             right: 0;
         }
 
+        .filter-footer {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-apply {
+            flex: 2;
+            background: var(--accent-green);
+            color: #080a0c;
+            border: none;
+            border-radius: 4px;
+            padding: 8px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-clear {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        /* Active Filter Icon Highlight */
+        .filter-active-icon {
+            color: var(--accent-green) !important;
+            fill: rgba(74, 222, 128, 0.2);
+        }
+
         .dropdown-search { width: 100%; background: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; color: white; padding: 10px; margin-bottom: 10px; outline: none; }
         .options-list { max-height: 180px; overflow-y: auto; }
         .filter-option { display: flex; align-items: center; gap: 10px; padding: 8px; font-size: 0.8rem; cursor: pointer; border-radius: 4px; }
@@ -232,7 +269,11 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzZiuM7RMx4DR15zAR2hOP_YFY5K3QepB0Tw4QWc-FlTxW6nZmTKi3U5teUARb4Z4wO/exec";
     let stockData = [];
+    
+    // activeFilters: What is actually applied to the table
+    // stagedFilters: What the user is currently checking in the dropdown
     let activeFilters = { b: [], p: [], l: [], s: [] };
+    let stagedFilters = { b: [], p: [], l: [], s: [] };
     let currentSearchTerm = "";
 
     function toggleSidebar() {
@@ -244,7 +285,7 @@
         const sub = document.getElementById(id);
         const isOpen = sub.classList.toggle('open');
         const icon = document.getElementById('millFinishIcon');
-        icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        if(icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
     }
 
     function toggleNested(id, event) {
@@ -252,7 +293,7 @@
         const nested = document.getElementById(id);
         const isOpen = nested.classList.toggle('open');
         const icon = document.getElementById('transferIcon');
-        icon.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+        if(icon) icon.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
     }
 
     async function fetchSheetData() {
@@ -262,12 +303,16 @@
             renderTable(stockData);
             setupFilters();
         } catch (error) {
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="text-align:center; color:#ff4a4a; padding:30px;">Data Sync Failed. Check URL.</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="14" style="text-align:center; color:#ff4a4a; padding:30px;">Data Sync Failed.</td></tr>`;
         }
     }
 
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:30px; color:var(--text-muted);">No matching records found.</td></tr>`;
+            return;
+        }
         tbody.innerHTML = data.map(i => `
             <tr>
                 <td style="color:var(--accent-green); font-weight:700;">${i.b}</td>
@@ -283,9 +328,15 @@
         document.querySelectorAll('th[data-key]').forEach(th => {
             const key = th.getAttribute('data-key');
             const dropdown = th.querySelector('.filter-dropdown');
+            
             th.querySelector('.th-content').onclick = (e) => {
                 e.stopPropagation();
+                // Close other open filters
                 document.querySelectorAll('.filter-dropdown').forEach(d => d !== dropdown && d.classList.remove('show'));
+                
+                // Copy current active filters to staged area so checkboxes match the table
+                stagedFilters[key] = [...activeFilters[key]];
+                
                 dropdown.classList.toggle('show');
                 if(dropdown.classList.contains('show')) buildDropdown(key, dropdown, "");
             };
@@ -294,56 +345,72 @@
 
     function buildDropdown(key, dropdown, searchTerm = "") {
         currentSearchTerm = searchTerm;
+        // Get unique values from the column
         const allValues = [...new Set(stockData.map(item => String(item[key])))].sort();
         const filteredValues = allValues.filter(v => v.toLowerCase().includes(searchTerm.toLowerCase()));
         
         dropdown.innerHTML = `
             <input type="text" class="dropdown-search" placeholder="Search..." value="${currentSearchTerm}" 
                    onclick="event.stopPropagation()" oninput="updateSearch(event, '${key}', this)">
-            <div class="options-list">
+            <div class="options-list" onclick="event.stopPropagation()">
                 <label class="filter-option" onclick="handleSelectAll(event, '${key}')">
-                    <input type="checkbox" ${activeFilters[key].length === 0 ? 'checked' : ''}> <b>(Select All)</b>
+                    <input type="checkbox" ${stagedFilters[key].length === 0 ? 'checked' : ''}> <b>(Select All)</b>
                 </label>
                 ${filteredValues.map(val => {
-                    const isChecked = activeFilters[key].length === 0 || activeFilters[key].includes(val);
+                    const isChecked = stagedFilters[key].includes(val);
                     return `<label class="filter-option" onclick="handleToggleValue(event, '${key}', '${val}')">
                         <input type="checkbox" ${isChecked ? 'checked' : ''}> ${val}
                     </label>`;
                 }).join('')}
             </div>
+            <div style="margin-top:10px; display:flex; gap:5px;" onclick="event.stopPropagation()">
+                <button onclick="applyFilters('${key}')" style="flex:1; background:var(--accent-green); border:none; border-radius:4px; padding:8px; font-weight:bold; cursor:pointer;">Apply</button>
+                <button onclick="clearFilter('${key}')" style="flex:1; background:transparent; border:1px solid var(--border-color); color:white; border-radius:4px; padding:8px; cursor:pointer;">Clear</button>
+            </div>
         `;
+        
         const input = dropdown.querySelector('.dropdown-search');
         if (input && searchTerm !== "") {
             input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
         }
     }
 
-    function updateSearch(e, key, input) { buildDropdown(key, input.parentElement, input.value); }
+    function updateSearch(e, key, input) { 
+        buildDropdown(key, input.parentElement, input.value); 
+    }
 
     function handleSelectAll(e, key) {
-        e.stopPropagation();
-        activeFilters[key] = [];
-        applyFilters();
+        stagedFilters[key] = []; // Empty array means "Show All"
         buildDropdown(key, document.querySelector(`th[data-key="${key}"] .filter-dropdown`), currentSearchTerm);
     }
 
     function handleToggleValue(e, key, val) {
-        e.stopPropagation();
-        const allValues = [...new Set(stockData.map(item => String(item[key])))];
-        if (activeFilters[key].length === 0) activeFilters[key] = [...allValues];
-        const idx = activeFilters[key].indexOf(val);
-        idx > -1 ? activeFilters[key].splice(idx, 1) : activeFilters[key].push(val);
-        if (activeFilters[key].length === allValues.length) activeFilters[key] = [];
-        applyFilters();
+        const idx = stagedFilters[key].indexOf(val);
+        if (idx > -1) {
+            stagedFilters[key].splice(idx, 1);
+        } else {
+            stagedFilters[key].push(val);
+        }
         buildDropdown(key, document.querySelector(`th[data-key="${key}"] .filter-dropdown`), currentSearchTerm);
     }
 
-    function applyFilters() {
-        const filtered = stockData.filter(item => Object.keys(activeFilters).every(key => 
-            activeFilters[key].length === 0 || activeFilters[key].includes(String(item[key]))
-        ));
+    function applyFilters(key) {
+        activeFilters[key] = [...stagedFilters[key]];
+        
+        const filtered = stockData.filter(item => {
+            return Object.keys(activeFilters).every(k => {
+                return activeFilters[k].length === 0 || activeFilters[k].includes(String(item[k]));
+            });
+        });
+        
         renderTable(filtered);
+        document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
+    }
+
+    function clearFilter(key) {
+        activeFilters[key] = [];
+        stagedFilters[key] = [];
+        applyFilters(key);
     }
 
     window.onclick = () => document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
