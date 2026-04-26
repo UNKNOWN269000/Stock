@@ -9,7 +9,7 @@
         :root {
             --bg-dark: #080a0c;
             --bg-card: rgba(22, 27, 34, 0.8);
-            --accent-green: #4ade80;
+            --accent-green: #56de4a;
             --text-main: #ffffff;
             --text-muted: #8b949e;
             --border-color: rgba(48, 54, 61, 0.8);
@@ -89,7 +89,7 @@
         /* --- GLASS HEADING --- */
         .page-header { text-align: center; padding: 25px 10px; width: 100%; display: flex; justify-content: center; flex-shrink: 0; }
         .glass-title-container {
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: rgba(154, 238, 161, 0.03); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 15px 40px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
@@ -344,34 +344,38 @@
     }
 
     function buildDropdown(key, dropdown, searchTerm = "") {
-        currentSearchTerm = searchTerm;
-        // Get unique values from the column
-        const allValues = [...new Set(stockData.map(item => String(item[key])))].sort();
-        const filteredValues = allValues.filter(v => v.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-        dropdown.innerHTML = `
-            <input type="text" class="dropdown-search" placeholder="Search..." value="${currentSearchTerm}" 
-                   onclick="event.stopPropagation()" oninput="updateSearch(event, '${key}', this)">
-            <div class="options-list" onclick="event.stopPropagation()">
-                <label class="filter-option" onclick="handleSelectAll(event, '${key}')">
-                    <input type="checkbox" ${stagedFilters[key].length === 0 ? 'checked' : ''}> <b>(Select All)</b>
-                </label>
-                ${filteredValues.map(val => {
-                    const isChecked = stagedFilters[key].includes(val);
-                    return `<label class="filter-option" onclick="handleToggleValue(event, '${key}', '${val}')">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''}> ${val}
-                    </label>`;
-                }).join('')}
+         currentSearchTerm = searchTerm;
+         const allValues = [...new Set(stockData.map(item => String(item[key])))].sort();
+         const filteredValues = allValues.filter(v => v.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+     dropdown.innerHTML = `
+        <input type="text" class="dropdown-search" placeholder="Search..." value="${currentSearchTerm}" 
+               onclick="event.stopPropagation()" oninput="updateSearch(event, '${key}', this)">
+         <div class="options-list" onclick="event.stopPropagation()">
+            <label class="filter-option" onclick="handleSelectAll(event, '${key}')">
+                <input type="checkbox" ${stagedFilters[key].length === 0 ? 'checked' : ''}> <b>(Select All)</b>
+            </label>
+            ${filteredValues.map(val => {
+                const isChecked = stagedFilters[key].includes(val);
+                return `<label class="filter-option" onclick="handleToggleValue(event, '${key}', '${val}')">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''}> ${val}
+                </label>`;
+            }).join('')}
             </div>
-            <div style="margin-top:10px; display:flex; gap:5px;" onclick="event.stopPropagation()">
-                <button onclick="applyFilters('${key}')" style="flex:1; background:var(--accent-green); border:none; border-radius:4px; padding:8px; font-weight:bold; cursor:pointer;">Apply</button>
-                <button onclick="clearFilter('${key}')" style="flex:1; background:transparent; border:1px solid var(--border-color); color:white; border-radius:4px; padding:8px; cursor:pointer;">Clear</button>
-            </div>
+         <div style="margin-top:10px; display:flex; gap:5px;" onclick="event.stopPropagation()">
+            <button onclick="applyFilters('${key}')" style="flex:1; background:var(--accent-green); border:none; border-radius:4px; padding:8px; font-weight:bold; cursor:pointer; color:#000;">Apply</button>
+            <button onclick="clearFilter('${key}')" style="flex:1; background:transparent; border:1px solid var(--border-color); color:white; border-radius:4px; padding:8px; cursor:pointer;">Clear</button>
+        </div>
         `;
-        
+    
+     // --- FIX FOR CURSOR JUMPING ---
         const input = dropdown.querySelector('.dropdown-search');
-        if (input && searchTerm !== "") {
-            input.focus();
+        if (input) {
+        input.focus();
+        // This moves the cursor to the end of the text
+        const val = input.value;
+        input.value = '';
+        input.value = val;
         }
     }
 
