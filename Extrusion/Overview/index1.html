@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" style="overflow-y: auto; height: auto;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Ultra Aluminium Pvt Ltd - Website Under Maintenance">
+    <meta name="theme-color" content="#0b0f19">
+    <title>System Upgrading | Ultra Aluminium Pvt Ltd</title>
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0b0f19;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .mono {
+            font-family: 'Space Mono', monospace;
+        }
+        /* Custom Neon Animations */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), 0 0 60px rgba(16, 185, 129, 0.2); }
+        }
+        .animate-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+        .floating-element {
+            animation: float 6s infinite ease-in-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        @keyframes rotate-gear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-slideUp {
+            animation: slideUp 0.8s ease-out forwards;
+        }
+        .animate-fadeIn {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        .animate-shimmer {
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 1000px 100%;
+        }
+        .animate-rotate {
+            animation: rotate-gear 10s linear infinite;
+        }
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+        }
+        /* Scanlines Effect */
+        .scanlines {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Mobile Optimizations */
+        @media (max-width: 640px) {
+            .floating-element {
+                animation: float 4s infinite ease-in-out;
+            }
+            h1 {
+                font-size: 1.75rem !important;
+            }
+            h2 {
+                font-size: 1.25rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-200 scanlines min-h-screen flex flex-col justify-between">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-[#0b0f19] z-50 flex items-center justify-center transition-opacity duration-500">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-emerald-400 mono text-sm animate-pulse">LOADING SYSTEM...</p>
+        </div>
+    </div>
+    
+    <!-- Matrix/Gears Canvas Background -->
+    <canvas id="bgCanvas" class="fixed top-0 left-0 w-full h-full -z-10 opacity-30 pointer-events-none"></canvas>
+
+    <!-- Top Navigation / Status -->
+    <header class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-10 animate-fadeIn">
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-black font-bold text-lg sm:text-xl shadow-lg shadow-emerald-500/50 animate-pulse">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <span class="text-lg sm:text-xl font-bold tracking-wider text-white mono">ADMINISTER<span class="text-emerald-400">TEAM</span></span>
+        </div>
+        <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3 sm:px-4 py-1.5 rounded-full backdrop-blur-sm">
+            <span class="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-emerald-500"></span>
+            </span>
+            <span class="text-emerald-400 text-[10px] sm:text-xs font-semibold tracking-wider uppercase mono hidden sm:inline">Status: Rebuilding</span>
+            <span class="text-emerald-400 text-[10px] sm:text-xs font-semibold uppercase mono sm:hidden">Live</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center max-w-5xl mx-auto px-4 py-8 sm:py-12 z-10 w-full">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-8 sm:mb-12 relative animate-slideUp" style="animation-delay: 0.1s;">
+            <div class="floating-element absolute -top-12 sm:-top-16 left-1/2 -translate-x-1/2 opacity-10 pointer-events-none">
+                <i class="fa-solid fa-gear text-[80px] sm:text-[120px] text-emerald-400 animate-rotate"></i>
+            </div>
+            <div class="floating-element absolute top-0 right-10 sm:right-20 opacity-5 pointer-events-none" style="animation-delay: 1s;">
+                <i class="fa-solid fa-bolt text-[40px] sm:text-[60px] text-cyan-400"></i>
+            </div>
+            <div class="floating-element absolute top-10 left-10 sm:left-20 opacity-5 pointer-events-none" style="animation-delay: 2s;">
+                <i class="fa-solid fa-circle text-[30px] sm:text-[50px] text-teal-400"></i>
+            </div>
+            <span class="inline-block px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs sm:text-sm font-bold tracking-[0.2em] uppercase mb-4 mono animate-shimmer">
+                <i class="fa-solid fa-spinner fa-spin mr-2"></i>System Upgrade in Progress
+            </span>
+            <h1 class="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight leading-tight animate-slideUp" style="animation-delay: 0.2s;">
+                Ultra Aluminium <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Pvt Ltd</span>
+            </h1>
+            <h2 class="text-lg sm:text-2xl md:text-4xl font-bold text-gray-300 mb-4 sm:mb-6 tracking-tight leading-snug animate-slideUp" style="animation-delay: 0.3s;">
+                We're Crafting Something <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 animate-gradient">Extraordinary</span>
+            </h2>
+            <p class="text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed px-4 animate-slideUp" style="animation-delay: 0.4s;">
+                Our team is currently updating our platform to bring you an incredible new experience. We'll be back online in no time.
+            </p>
+        </div>
+
+        <!-- Progress Bar & Countdown -->
+        <div class="w-full glass border border-slate-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-10 mb-8 sm:mb-12 shadow-2xl relative animate-glow max-w-4xl animate-slideUp" style="animation-delay: 0.5s;">
+            <!-- Progress -->
+            <div class="mb-6 sm:mb-10">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-300 font-medium text-xs sm:text-sm">Deployment Progress</span>
+                    <span class="text-emerald-400 font-bold mono text-xs sm:text-sm" id="progressText">87%</span>
+                </div>
+                <div class="w-full h-3 sm:h-4 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50 p-0.5">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out shadow-lg shadow-emerald-500/20 relative" style="width: 87%">
+                        <div class="absolute inset-0 bg-white/20 animate-shimmer"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-2 text-[10px] sm:text-xs text-slate-500 mono">
+                    <span class="hidden xs:inline">INIT</span>
+                    <span>OPTIMIZING</span>
+                    <span class="hidden sm:inline">TESTING</span>
+                    <span>LAUNCH</span>
+                </div>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div class="grid grid-cols-4 gap-2 sm:gap-4 md:gap-8 text-center" id="countdown">
+                <div class="bg-slate-950/60 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800/80 hover:border-emerald-500/30 transition duration-300">
+                    <span class="text-lg sm:text-2xl md:text-4xl font-bold text-white mono" id="days">00</span>
+                    <span class="block text-[9px] sm:text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1">Days</span>
+                </div>
+                <div class="bg-slate-950/60 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800/80 hover:border-emerald-500/30 transition duration-300">
+                    <span class="text-lg sm:text-2xl md:text-4xl font-bold text-emerald-400 mono" id="hours">00</span>
+                    <span class="block text-[9px] sm:text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1">Hours</span>
+                </div>
+                <div class="bg-slate-950/60 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800/80 hover:border-emerald-500/30 transition duration-300">
+                    <span class="text-lg sm:text-2xl md:text-4xl font-bold text-teal-400 mono" id="minutes">00</span>
+                    <span class="block text-[9px] sm:text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1">Mins</span>
+                </div>
+                <div class="bg-slate-950/60 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-800/80 hover:border-emerald-500/30 transition duration-300 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-emerald-500/5 animate-pulse"></div>
+                    <span class="text-lg sm:text-2xl md:text-4xl font-bold text-cyan-400 mono relative z-10" id="seconds">00</span>
+                    <span class="block text-[9px] sm:text-[10px] md:text-xs text-slate-400 uppercase tracking-widest mt-1 relative z-10">Secs</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Area / Tabs -->
+        <div class="w-full max-w-4xl flex flex-col items-center animate-slideUp" style="animation-delay: 0.6s;">
+            <!-- Tabs Navigation -->
+            <div class="flex flex-wrap justify-center gap-2 bg-slate-900/80 border border-slate-800 p-2 rounded-2xl mb-6 sm:mb-8 backdrop-blur-sm">
+                <button onclick="switchTab('subscribe')" id="tab-subscribe" class="tab-btn px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 text-white bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25 cursor-pointer hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-envelope mr-1.5 sm:mr-2"></i><span class="hidden sm:inline">Stay Updated</span><span class="sm:hidden">Notify</span>
+                </button>
+                <button onclick="switchTab('game')" id="tab-game" class="tab-btn px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-gamepad mr-1.5 sm:mr-2"></i><span class="hidden sm:inline">Play Game</span><span class="sm:hidden">Game</span>
+                </button>
+                <button onclick="switchTab('updates')" id="tab-updates" class="tab-btn px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-rocket mr-1.5 sm:mr-2"></i><span class="hidden sm:inline">What's New</span><span class="sm:hidden">New</span>
+                </button>
+            </div>
+
+            <!-- Tab: Subscribe -->
+            <div id="panel-subscribe" class="tab-panel w-full glass border border-slate-700/60 p-5 sm:p-8 rounded-2xl sm:rounded-3xl text-center">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white text-2xl sm:text-3xl mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold mb-2 text-white">Get Notified On Launch</h3>
+                <p class="text-slate-400 text-xs sm:text-sm mb-6 px-4">Leave your email and be the first to know when we are back online!</p>
+                <form onsubmit="handleSubscribe(event)" class="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+                    <div class="flex-grow relative">
+                        <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="email" id="subEmail" required placeholder="Enter your email address..." class="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-sm text-white placeholder-slate-500 outline-none transition duration-200">
+                    </div>
+                    <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 active:scale-95 transition-all duration-200 shadow-lg shadow-emerald-500/30 flex items-center justify-center cursor-pointer group">
+                        <span>Notify Me</span>
+                        <i class="fa-solid fa-paper-plane ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+                <div id="subSuccess" class="hidden mt-4 text-emerald-400 text-sm font-medium flex items-center justify-center animate-slideUp">
+                    <i class="fa-solid fa-circle-check mr-2"></i> Subscribed successfully! Standby for deployment updates.
+                </div>
+            </div>
+
+            <!-- Tab: Game (Maintenance Brick Breaker) -->
+            <div id="panel-game" class="tab-panel hidden w-full glass border border-slate-700/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center">
+                <div class="text-center mb-4">
+                    <div class="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl text-white text-xl sm:text-2xl mb-2 shadow-lg shadow-purple-500/30">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-semibold text-white">Bug Destroyer</h3>
+                    <p class="text-slate-400 text-xs mt-1">Defend the system and break the maintenance barrier!</p>
+                    <div class="flex justify-center gap-4 mt-2 text-emerald-400 font-bold mono text-xs sm:text-sm">
+                        <span class="bg-slate-900/80 px-3 py-1 rounded-lg border border-slate-700">Score: <span id="gameScore">0</span></span>
+                        <span class="bg-slate-900/80 px-3 py-1 rounded-lg border border-slate-700">Lives: <span id="gameLives">3</span></span>
+                    </div>
+                </div>
+                <div class="relative border border-slate-700 bg-slate-950 rounded-xl overflow-hidden shadow-inner w-full max-w-md">
+                    <canvas id="gameCanvas" width="480" height="320" class="w-full h-auto block"></canvas>
+                    <div id="gameOverlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center">
+                        <i class="fa-solid fa-gamepad text-3xl sm:text-4xl text-emerald-400 mb-2 animate-pulse"></i>
+                        <h4 class="text-white font-bold text-base sm:text-lg mb-1" id="overlayTitle">System Firewall Simulator</h4>
+                        <p class="text-slate-400 text-xs mb-4 max-w-xs">Use Left/Right arrow keys or slide your finger to move the paddle and smash the bugs.</p>
+                        <button onclick="startGame()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-sm rounded-lg hover:opacity-90 active:scale-95 transition cursor-pointer shadow-lg shadow-emerald-500/30">
+                            <span id="overlayBtnText">Initialize Game</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: What's New -->
+            <div id="panel-updates" class="tab-panel hidden w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <div class="glass border border-slate-700/60 p-5 sm:p-6 rounded-2xl hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl flex items-center justify-center text-xl mb-4 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <h4 class="text-white font-semibold text-base mb-2">3x Faster Performance</h4>
+                    <p class="text-slate-400 text-xs leading-relaxed">Rebuilt from the ground up with the latest server technology for instant loading.</p>
+                </div>
+                <div class="glass border border-slate-700/60 p-5 sm:p-6 rounded-2xl hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-xl flex items-center justify-center text-xl mb-4 shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h4 class="text-white font-semibold text-base mb-2">Modern Redesign</h4>
+                    <p class="text-slate-400 text-xs leading-relaxed">A stunning, intuitive visual interface designed for better accessibility.</p>
+                </div>
+                <div class="glass border border-slate-700/60 p-5 sm:p-6 rounded-2xl hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group sm:col-span-2 md:col-span-1">
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white rounded-xl flex items-center justify-center text-xl mb-4 shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 class="text-white font-semibold text-base mb-2">Ironclad Security</h4>
+                    <p class="text-slate-400 text-xs leading-relaxed">Advanced data encryption and protection to keep your information safe.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer with Socials -->
+    <footer class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 border-t border-slate-800/50 flex flex-col sm:flex-row justify-between items-center z-10 text-xs text-slate-500 gap-4">
+        <div class="mono flex items-center">
+            <i class="fa-solid fa-copyright mr-1.5"></i>
+            <span>2026 Ultra Aluminium Pvt Ltd.</span>
+        </div>
+        <div class="flex space-x-4">
+            <a href="#" class="w-9 h-9 bg-slate-800/50 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:text-slate-900 transition-all duration-300 hover:scale-110"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" class="w-9 h-9 bg-slate-800/50 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:text-slate-900 transition-all duration-300 hover:scale-110"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="w-9 h-9 bg-slate-800/50 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:text-slate-900 transition-all duration-300 hover:scale-110"><i class="fa-brands fa-discord"></i></a>
+            <a href="#" class="w-9 h-9 bg-slate-800/50 rounded-full flex items-center justify-center hover:bg-emerald-500 hover:text-slate-900 transition-all duration-300 hover:scale-110"><i class="fa-solid fa-envelope"></i></a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- COUNTDOWN TIMER ---
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 5);
+        targetDate.setHours(targetDate.getHours() + 14);
+
+        function updateCountdown() {
+            const now = new Date();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.getElementById('countdown').innerHTML = `<div class="col-span-4 text-center font-bold text-emerald-400 mono">LAUNCH READY</div>`;
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = days.toString().padStart(2, '0');
+            document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // --- PROGRESS BAR RANDOM INCREMENTER ---
+        let currentProgress = 87;
+        const progressEl = document.getElementById('progressBar');
+        const progressTextEl = document.getElementById('progressText');
+
+        const progressInterval = setInterval(() => {
+            if (currentProgress < 99.5) {
+                if (Math.random() > 0.6) {
+                    currentProgress += Math.random() > 0.5 ? 0.2 : 0.1;
+                    if (currentProgress > 99.5) currentProgress = 99.5;
+                    progressEl.style.width = `${currentProgress.toFixed(1)}%`;
+                    progressTextEl.innerText = `${currentProgress.toFixed(1)}%`;
+                }
+            } else {
+                clearInterval(progressInterval);
+            }
+        }, 5000);
+
+        // --- TABS SWITCHING ---
+        function switchTab(tabId) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            panels.forEach(p => {
+                p.classList.add('hidden');
+                p.classList.remove('animate-slideUp');
+            });
+            
+            const activePanel = document.getElementById(`panel-${tabId}`);
+            activePanel.classList.remove('hidden');
+            void activePanel.offsetWidth; // trigger reflow
+            activePanel.classList.add('animate-slideUp');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('text-white', 'bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600', 'shadow-lg', 'shadow-emerald-500/25');
+                btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+            });
+
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+            activeBtn.classList.add('text-white', 'bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600', 'shadow-lg', 'shadow-emerald-500/25');
+        }
+
+        // --- SUBSCRIBE HANDLER ---
+        function handleSubscribe(e) {
+            e.preventDefault();
+            const email = document.getElementById('subEmail').value;
+            if (email) {
+                document.getElementById('subSuccess').classList.remove('hidden');
+                document.getElementById('subEmail').value = '';
+                
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.8 },
+                    colors: ['#10b981', '#14b8a6', '#06b6d4']
+                });
+            }
+        }
+
+        // --- BACKGROUND CANVAS ANIMATION ---
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        let width = bgCanvas.width = window.innerWidth;
+        let height = bgCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = bgCanvas.width = window.innerWidth;
+            height = bgCanvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * -0.5 - 0.1;
+                this.color = Math.random() > 0.5 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(6, 182, 212, 0.1)';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y < 0) {
+                    this.y = height;
+                    this.x = Math.random() * width;
+                }
+                if (this.x < 0 || this.x > width) {
+                    this.x = Math.random() * width;
+                }
+            }
+
+            draw() {
+                bgCtx.fillStyle = this.color;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 100 }, () => new Particle());
+
+        function drawGrid() {
+            bgCtx.strokeStyle = 'rgba(16, 185, 129, 0.03)';
+            bgCtx.lineWidth = 1;
+
+            const gridSize = 50;
+            for (let x = 0; x < width; x += gridSize) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(x, 0);
+                bgCtx.lineTo(x, height);
+                bgCtx.stroke();
+            }
+
+            for (let y = 0; y < height; y += gridSize) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(0, y);
+                bgCtx.lineTo(width, y);
+                bgCtx.stroke();
+            }
+        }
+
+        function animateBg() {
+            bgCtx.clearRect(0, 0, width, height);
+            drawGrid();
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // --- MINI GAME: BUG DESTROYER (BRICK BREAKER) ---
+        const gameCanvas = document.getElementById('gameCanvas');
+        const ctx = gameCanvas.getContext('2d');
+        const overlay = document.getElementById('gameOverlay');
+        const scoreEl = document.getElementById('gameScore');
+        const livesEl = document.getElementById('gameLives');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayBtnText = document.getElementById('overlayBtnText');
+
+        // Make game canvas responsive
+        function resizeGameCanvas() {
+            const container = gameCanvas.parentElement;
+            const maxWidth = container.clientWidth;
+            if (maxWidth < 480) {
+                gameCanvas.style.width = '100%';
+                gameCanvas.style.height = 'auto';
+            }
+        }
+        window.addEventListener('resize', resizeGameCanvas);
+        resizeGameCanvas();
+
+        let score = 0;
+        let lives = 3;
+        let gameRunning = false;
+
+        let ballRadius = 8;
+        let x = gameCanvas.width / 2;
+        let y = gameCanvas.height - 30;
+        let dx = 3;
+        let dy = -3;
+
+        let paddleHeight = 10;
+        let paddleWidth = 75;
+        let paddleX = (gameCanvas.width - paddleWidth) / 2;
+        let rightPressed = false;
+        let leftPressed = false;
+
+        let brickRowCount = 4;
+        let brickColumnCount = 6;
+        let brickWidth = 65;
+        let brickHeight = 15;
+        let brickPadding = 10;
+        let brickOffsetTop = 30;
+        let brickOffsetLeft = 20;
+
+        let bricks = [];
+        function initBricks() {
+            bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
+            }
+        }
+
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+        gameCanvas.addEventListener("mousemove", mouseMoveHandler, false);
+
+        gameCanvas.addEventListener("touchmove", (e) => {
+            const rect = gameCanvas.getBoundingClientRect();
+            const relativeX = e.touches[0].clientX - rect.left;
+            if (relativeX > 0 && relativeX < gameCanvas.width) {
+                paddleX = relativeX - paddleWidth / 2;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        function keyDownHandler(e) {
+            if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+            else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+        }
+
+        function keyUpHandler(e) {
+            if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+            else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+        }
+
+        function mouseMoveHandler(e) {
+            const rect = gameCanvas.getBoundingClientRect();
+            const relativeX = e.clientX - rect.left;
+            if (relativeX > 0 && relativeX < gameCanvas.width) {
+                paddleX = relativeX - paddleWidth / 2;
+            }
+        }
+
+        function collisionDetection() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    let b = bricks[c][r];
+                    if (b.status === 1) {
+                        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                            score += 10;
+                            scoreEl.innerText = score;
+                            if (score === brickRowCount * brickColumnCount * 10) {
+                                gameWon();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#06b6d4";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#06b6d4";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, gameCanvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#10b981";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#10b981";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawBricks() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                        let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        if (r === 0) ctx.fillStyle = "rgba(239, 68, 68, 0.8)";
+                        else if (r === 1) ctx.fillStyle = "rgba(245, 158, 11, 0.8)";
+                        else if (r === 2) ctx.fillStyle = "rgba(16, 185, 129, 0.8)";
+                        else ctx.fillStyle = "rgba(6, 182, 212, 0.8)";
+                        
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            collisionDetection();
+
+            if (x + dx > gameCanvas.width - ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+            if (y + dy < ballRadius) {
+                dy = -dy;
+            } else if (y + dy > gameCanvas.height - ballRadius - 5) {
+                if (x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                    let hitPoint = x - (paddleX + paddleWidth / 2);
+                    dx = hitPoint * 0.15;
+                } else {
+                    lives--;
+                    livesEl.innerText = lives;
+                    if (!lives) {
+                        gameOver();
+                    } else {
+                        x = gameCanvas.width / 2;
+                        y = gameCanvas.height - 30;
+                        dx = 3;
+                        dy = -3;
+                        paddleX = (gameCanvas.width - paddleWidth) / 2;
+                    }
+                }
+            }
+
+            if (rightPressed && paddleX < gameCanvas.width - paddleWidth) {
+                paddleX += 7;
+            } else if (leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+
+            x += dx;
+            y += dy;
+
+            requestAnimationFrame(draw);
+        }
+
+        function startGame() {
+            overlay.classList.add('hidden');
+            score = 0;
+            lives = 3;
+            scoreEl.innerText = score;
+            livesEl.innerText = lives;
+            initBricks();
+            x = gameCanvas.width / 2;
+            y = gameCanvas.height - 30;
+            dx = 3;
+            dy = -3;
+            paddleX = (gameCanvas.width - paddleWidth) / 2;
+            gameRunning = true;
+            draw();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            overlay.classList.remove('hidden');
+            overlayTitle.innerText = "System Failure!";
+            overlayBtnText.innerText = "Retry Simulation";
+        }
+
+        function gameWon() {
+            gameRunning = false;
+            overlay.classList.remove('hidden');
+            overlayTitle.innerText = "Firewall Intact! All Bugs Patched.";
+            overlayBtnText.innerText = "Simulate Again";
+            
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.5 }
+            });
+        }
+
+        // --- PAGE LOAD ANIMATION ---
+        window.addEventListener('load', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 800);
+        });
+
+        // --- HANDLE VISIBILITY CHANGE (Pause game when tab is hidden) ---
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && gameRunning) {
+                gameRunning = false;
+                overlayTitle.innerText = "Game Paused";
+                overlayBtnText.innerText = "Resume";
+                overlay.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
