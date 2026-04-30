@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import logo from "../public/logo.png";
 
 type IconName =
   | "menu"
@@ -234,7 +235,7 @@ export default function App() {
           </button>
 
           <img
-            src="/logo.png"
+            src={logo}
             alt="Ultra Aluminium Logo"
             className="h-12 w-12 rounded-full border-2 border-[#8cff9c] bg-white object-contain shadow-[0_0_30px_rgba(49,255,112,0.18)]"
           />
