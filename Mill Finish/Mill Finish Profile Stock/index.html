@@ -11,6 +11,7 @@
             --bg-active: #1c2128; --accent-green: #90ee90; --accent-blue: #3b82f6;
             --accent-red: #ef4444; --accent-yellow: #f59e0b; --text-main: #ffffff;
             --text-muted: #9aa0a6; --border-color: #30363d; --transition: 0.3s;
+            --accent-blue2: #3ab0ff; --accent-pc: #b341ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #090b0f; color: var(--text-main); overflow: hidden; }
@@ -140,6 +141,10 @@
                                 <th>Total Qty</th>
                                 <th>Weight (KG)</th>
                                 <th>Status</th>
+                                <th>AN Stock</th>
+                                <th>AN Weight</th>
+                                <th>PC Stock</th>
+                                <th>PC Weight</th>
                             </tr>
                         </thead>
                         <tbody id="stockTableBody"></tbody>
@@ -151,7 +156,7 @@
 
     <script>
         lucide.createIcons();
-        const API_URL = "https://script.google.com/macros/s/AKfycbxwHsiDD1DXABB249lspi9cDTISsvWLm18Tf9b1kQPd1YjYmhDa04m_G8Zgd0aQauzs/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzMpK2aW9QoBmwnWNAb0Ncn3oTkfFuY2clYXdLYEjLocOvZdqQb2T1GcwWSAJY_k9RI/exec";
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -192,6 +197,10 @@
                     <td style="font-weight:bold;">${item.totalQty}</td>
                     <td style="color:var(--accent-yellow)">${Number(item.weight).toFixed(2)}</td>
                     <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    <td style="color:var(--accent-blue2)">${Number(item.ans).toFixed(0)}</td>
+                    <td style="color:var(--accent-blue2)">${Number(item.anweight).toFixed(2)}</td>
+                    <td style="color:var(--accent-pc)">${Number(item.pcs).toFixed(0)}</td>
+                    <td style="color:var(--accent-pc)">${Number(item.pcweight).toFixed(2)}</td>
                 `;
                 tableBody.appendChild(row);
             });
