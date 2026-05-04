@@ -374,11 +374,11 @@
         });
     }
 
-    function addBulkToQueue() {
+       function addBulkToQueue() {
         const inputs = document.querySelectorAll('.bulk-qty');
         const date = new Date().toLocaleDateString('en-GB');
         let added = 0;
-
+    
         inputs.forEach(inp => {
             const val = parseInt(inp.value);
             if (val > 0) {
@@ -388,14 +388,19 @@
                     name: inp.dataset.name, 
                     type: inp.dataset.type, 
                     len: inp.dataset.len, 
-                    rowid: inp.dataset.rowid,
+                    // CHANGE THIS LINE BELOW:
+                    "row id": inp.dataset.rowid, 
                     qty: val, 
                     date: date 
                 });
                 added++;
             }
         });
-
+    
+        if (added > 0) {
+            updateUI();
+        }
+    }
         if (added > 0) {
             updateUI();
         }
