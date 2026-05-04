@@ -1,17 +1,26 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Aluminium | Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bulk Transfer | Ultra Aluminium</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
+            --bg-dark: #090b0f;
+            --bg-card: #161b22;
+            --accent-pink: #e690ee;
+            --accent-green2: #90ee90;
+            --accent-red: #ff4d4d;
             --bg-dark: #080a0c;
             --bg-card: rgba(22, 27, 34, 0.7);
             --accent-green: #4ade80;
             --accent-glow: rgba(74, 222, 128, 0.1);
             --text-main: #ffffff;
+            --border-color: #30363d;
+            --accent-green: #e690ee;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --text-muted: #8b949e;
             --border-color: rgba(48, 54, 61, 0.8);
             --frame-max-width: 1200px;
@@ -19,18 +28,28 @@
             --top-nav-height: 70px;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+
         body { 
+            font-family: -apple-system, sans-serif; 
+            background: var(--bg-dark); 
             font-family: 'Inter', sans-serif; 
             background: radial-gradient(circle at top right, #161b22, #080a0c); 
             color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
             min-height: 100vh;
             display: flex; flex-direction: column; align-items: center; 
             padding: calc(var(--top-nav-height) + 20px) 15px 40px;
             overflow-x: hidden;
         }
 
+        .header {
+            position: sticky; top: 0; width: 100%; height: 70px;
+            background: rgba(13, 15, 20, 0.85); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(15px);
         /* TOP NAVIGATION */
         .top-nav {
             position: fixed; top: 0; left: 0; right: 0;
@@ -42,6 +61,10 @@
             padding: 0 15px; z-index: 2000;
         }
 
+        .logo-img {
+            height: 45px; width: 45px; margin-right: 12px;
+            object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--accent-green2);
         .top-nav-left, .top-nav-right { display: flex; align-items: center; gap: 12px; }
         .top-nav-logo span { font-weight: 800; letter-spacing: 1px; font-size: 1rem; }
 
@@ -52,6 +75,17 @@
             padding: 5px 12px; border-radius: 20px;
             font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
         }
+        .company-name { font-size: 1rem; font-weight: 800; color: var(--accent-green2); }
+
+        .wrapper { 
+            width: 100%; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 15px; 
+            gap: 10px; 
 
         /* SIDEBAR */
         .sidebar {
@@ -64,13 +98,35 @@
         }
         .sidebar.active { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,0.5); }
 
+        .search-bar-box { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 15px; 
+            margin-bottom: 10px;
         .sidebar-branding { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--border-color); }
         .logo-placeholder {
             width: 50px; height: 50px; background: var(--accent-green);
             border-radius: 12px; margin: 0 auto 10px;
             display: flex; align-items: center; justify-content: center; color: #000;
         }
+        
+        #searchInput { background: transparent; border: none; color: white; padding: 12px; width: 100%; outline: none; font-size: 1rem; }
 
+        .content-scroll { flex: 1; }
+        
+        .bucket-item { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            padding: 15px; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+            cursor: pointer; 
         .menu-heading { padding: 20px 25px 10px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 700; }
         .nav-item { margin: 2px 12px; }
         .nav-link {
@@ -78,9 +134,28 @@
             padding: 12px 15px; border-radius: 10px; color: var(--text-muted);
             text-decoration: none; font-size: 0.9rem; transition: 0.2s; cursor: pointer;
         }
+        .bucket-id { color: var(--accent-pink); font-weight: 700; }
         .nav-link:hover, .nav-link.active { background: var(--accent-glow); color: var(--accent-green); }
         .nav-link i { width: 18px; margin-right: 12px; }
 
+        .details-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: none; margin-bottom: 15px; }
+        .profile-group { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.8rem; }
+        .detail-label { color: #9aa0a6; }
+        
+        .qty-input-box { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+        .qty-input { width: 100%; background: #000; border: 1px solid var(--border-color); border-radius: 6px; color: white; padding: 10px; font-size: 0.85rem; outline: none; margin: 5px 0 10px; }
+
+        .queue-section { 
+            min-height: 200px; 
+            width: 100%; 
+            background: rgba(144, 238, 144, 0.03); 
+            border: 1px solid var(--accent-green); 
+            padding: 15px; 
+            border-radius: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            margin-top: 20px;
         .submenu { display: none; padding-left: 15px; margin-left: 15px; border-left: 1px solid var(--border-color); }
         .submenu.show { display: block; }
 
@@ -92,7 +167,18 @@
 
         /* MAIN LAYOUT */
         .container { width: 100%; max-width: var(--frame-max-width); }
+
+        .queue-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .record-item { background: #1a2029; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid var(--accent-green); display: flex; justify-content: space-between; align-items: center; }
         
+        .submit-btn { width: 100%; background: var(--accent-pink); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .sync-btn { background: var(--accent-green); color: #000; padding: 8px 20px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
+        
+        .side-menu {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 40px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
         .page-header { text-align: center; margin-bottom: 25px; }
         .page-header h2 { font-size: 1.8rem; font-weight: 900; }
         .page-header p { color: var(--accent-green); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 3px; }
@@ -104,6 +190,15 @@
             border-radius: 16px; padding: 15px 20px 15px 50px; color: white; font-size: 1rem;
             outline: none; transition: 0.3s;
         }
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
+        .overlay.active { display: block; }
+
+        .welcome-card h2 {
+            font-size: 1.5rem; margin: 20px 10px; font-weight: 800; 
+            background: linear-gradient(to right, #fff, var(--accent-green)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-align: center;
         .search-input:focus { border-color: var(--accent-green); box-shadow: 0 0 15px var(--accent-glow); }
         .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
@@ -115,13 +210,23 @@
         .dropdown-results.show { display: block; }
         .result-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
 
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; border-radius: 12px;
+            margin-bottom: 4px; font-size: 0.95rem;
         /* DATA DISPLAY */
         .entry-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: 20px; padding: 20px; backdrop-filter: blur(10px);
             margin-bottom: 25px; display: none;
         }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
 
+        .dropdown-content, .nested-content { display: none; flex-direction: column; padding-left: 15px; border-left: 1px solid var(--border-color); margin-left: 24px; }
+        .dropdown-content.show, .nested-content.show { display: flex; }
+        
+        .sub-menu-item { color: #9aa0a6; text-decoration: none; padding: 10px 14px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; border-radius: 8px; }
+        .sub-menu-item.active-link { color: var(--accent-green2); background: rgba(144, 238, 144, 0.1); font-weight: 600; }
         /* RESPONSIVE TABLE SYSTEM */
         .profile-list-header {
             display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr;
@@ -183,6 +288,11 @@
 </head>
 <body>
 
+<div class="header">
+    <button class="menu-btn" onclick="toggleMenu()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer; margin-right:15px;">☰</button>
+    <img src="Src/logo.png" alt="Logo" class="logo-img">
+    <div class="company-name">ULTRA ALUMINIUM</div>
+</div>
 <header class="top-nav">
     <div class="top-nav-left">
         <button style="background:none; border:none; color:white; cursor:pointer;" onclick="toggleSidebar()">
@@ -196,6 +306,11 @@
     </div>
 </header>
 
+<div class="side-menu" id="menu">
+    <a href="../index.html" class="menu-item"><i data-lucide="home"></i> Home</a>
+    <div class="dropdown-container">
+        <div class="menu-item" onclick="toggleDropdown('powderSub')">
+            <i data-lucide="palette"></i> Powder Coat
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <nav class="sidebar" id="sidebar">
     <div class="sidebar-branding">
@@ -209,6 +324,10 @@
             <span style="display:flex; align-items:center;"><i data-lucide="layers"></i> Mill Finish</span>
             <i data-lucide="chevron-down" size="14"></i>
         </div>
+        <div class="dropdown-content" id="powderSub">
+            <a href="index.html" class="sub-menu-item active-link">Mill Finish Transfer Stock</a>
+            <div class="menu-item" style="font-size: 0.85rem;" onclick="toggleDropdown('powderDamage')">
+                <i data-lucide="alert-triangle" style="width:14px"></i> Damage
         <div class="submenu show">
             <a href="../../Hardness Check/index.html" class="nav-link">Hardness Check</a>
             <a href="../../Mill finish Profile Stock/index.html" class="nav-link">Profile Stock</a>
@@ -217,6 +336,9 @@
                 <span>Transfer</span>
                 <i data-lucide="chevron-down" size="14"></i>
             </div>
+            <div class="nested-content" id="powderDamage">
+                <a href="#" class="sub-menu-item">Re-Powder</a>
+                <a href="#" class="sub-menu-item">Scrap</a>
             <div class="submenu show">
                 <a href="../../Transfer/Anodizing/index.html" class="nav-link">Anodizing</a>
                 <a href="../../Transfer/Powder Coat/index.html" class="nav-link active">Powder Coat</a>
@@ -224,20 +346,36 @@
             <a href="../../Overview/index.html" class="nav-link">Overview</a>
         </div>
     </div>
+</div>
 </nav>
 
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
+
+<div class="welcome-card">
+    <h2>Mill Finish To Powder Coat<br> Transfer Stock</h2>
+</div>
 <div class="container">
     <div class="page-header">
         <p>Production Unit</p>
         <h2>Transfer Powder Coat</h2>
     </div>
 
+<div class="wrapper">
+    <div class="search-bar-box">
+        <i data-lucide="search" style="color: #9aa0a6; width: 20px;"></i>
+        <input type="text" id="searchInput" placeholder="Search Bucket Number..." oninput="filterBuckets()">
     <div class="search-box">
         <i data-lucide="search" class="search-icon"></i>
         <input type="text" class="search-input" id="bucketSearch" placeholder="Search Bucket Number..." onkeyup="filterBuckets()">
         <div class="dropdown-results" id="searchResults"></div>
     </div>
 
+    <div class="content-scroll">
+        <div id="bucketDisplay"></div>
+        <div id="detailsPanel" class="details-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 id="det-bucket-title" style="color:var(--accent-pink);">Bucket</h2>
+                <button onclick="closeDetails()" style="background:none; border:none; color:#9aa0a6; cursor:pointer;"><i data-lucide="x"></i></button>
     <div class="entry-card" id="entryCard">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
             <div>
@@ -248,6 +386,8 @@
                 <span style="font-size:0.7rem; color:var(--text-muted)">DATE</span><br>
                 <span id="activeDate" style="font-weight:600;">-</span>
             </div>
+            <div id="profilesContainer"></div>
+            <button class="submit-btn" onclick="addToQueue()">Add to Queue</button>
         </div>
 
         <div class="profile-list-header">
@@ -261,11 +401,16 @@
         </button>
     </div>
 
+    <div class="queue-section">
+        <div class="queue-header">
+            <span style="color:var(--accent-green2); font-weight:800; font-size:0.8rem;">SUBMITTED RECORDS QUEUE</span>
+            <button class="sync-btn" onclick="finalSync()">FINAL SYNC</button>
     <div class="queue-frame">
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
             <span style="font-size:0.7rem; font-weight:800; letter-spacing:1px; color:var(--text-muted)">TRANSFER QUEUE</span>
             <span id="queueCounter" style="color:var(--accent-green); font-weight:900;">0</span>
         </div>
+        <div id="queueList" class="queue-list"></div>
         <div id="queueList" class="queue-grid"></div>
     </div>
 
@@ -283,6 +428,9 @@
 </div>
 
 <script>
+    lucide.createIcons();
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyBZA20HB307KUBaQ0rwRR5f_Kr4Y0CY-gQdwteu3Z0wIEUeyZoM4U019H4JuL_5w5o/exec';
+    let allData = [];
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyg2L3SASHIwT1ZFmoZ4jEqnQK53H0_AXPDLCLZzW56dyME3K5vI3Wly5fFuPaCA5X6/exec"; 
     let bucketDatabase = [], queue = [];
 
@@ -293,22 +441,50 @@
         document.getElementById('activeDate').innerText = now.toLocaleDateString('en-GB');
     };
 
+    async function loadData() {
     async function fetchSheetData() {
         try {
+            const response = await fetch(scriptURL);
+            allData = await response.json();
+            renderBuckets();
+        } catch (e) { console.error("Load failed:", e); }
             const resp = await fetch(SHEET_API_URL);
             bucketDatabase = await resp.json();
         } catch (e) { console.error("Sync Error", e); }
     }
 
+    function renderBuckets() {
+        if (!allData || allData.length <= 1) return;
+        const uniqueBuckets = [...new Set(allData.slice(1).map(row => row[0]).filter(b => b))];
+        document.getElementById('bucketDisplay').innerHTML = uniqueBuckets.map(num => `
+            <div class="bucket-item" data-id="${num}" onclick="showDetails('${num}')">
+                <span class="bucket-id">Bucket #${num}</span>
+                <i data-lucide="chevron-right" style="width:18px; color:#9aa0a6"></i>
+            </div>
+        `).join('');
+        lucide.createIcons();
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('sidebarOverlay').classList.toggle('active');
     }
 
+    function filterBuckets() {
+        const input = document.getElementById("searchInput").value.toUpperCase();
+        const items = document.getElementsByClassName("bucket-item");
+        for (let i = 0; i < items.length; i++) {
+            const val = items[i].getAttribute('data-id').toUpperCase();
+            items[i].style.display = (input === "" || val.includes(input)) ? "flex" : "none";
+        }
     function toggleSubmenu(el) {
         el.nextElementSibling.classList.toggle('show');
     }
 
+    function formatValue(val) {
+        if (!val || val === "-") return "-";
+        if (typeof val === 'string' && val.includes('T')) {
+            const date = new Date(val);
+            if (isNaN(date.getTime())) return val;
+            return date.getFullYear() === 1899 ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : date.toLocaleDateString('en-GB');
    function filterBuckets() {
         const val = document.getElementById('bucketSearch').value.toUpperCase();
         const res = document.getElementById('searchResults');
@@ -317,6 +493,7 @@
             res.classList.remove('show'); 
             return; 
         }
+        return val;
 
         const uniqueBuckets = [...new Set(bucketDatabase
             .filter(item => item.bucket && item.bucket.toString().includes(val))
@@ -332,9 +509,22 @@
         res.classList.add('show');
     }
 
+    function showDetails(bucketNum) {
+        const matchingRows = allData.filter(r => r[0].toString() === bucketNum.toString());
+        document.getElementById('bucketDisplay').style.display = 'none';
+        document.getElementById('det-bucket-title').innerText = "Bucket #" + bucketNum;
     function loadBucket(id) {
         const profiles = bucketDatabase.filter(b => b.bucket.toString() === id.toString());
-        
+
+        document.getElementById('profilesContainer').innerHTML = matchingRows.map(row => `
+            <div class="profile-group">
+                <div class="detail-row"><span class="detail-label">Extrusion Date</span><span>${formatValue(row[1])}</span></div>
+                <div class="detail-row"><span class="detail-label">Type</span><span>${row[4] || '-'}</span></div>
+                <div class="detail-row"><span class="detail-label">Length</span><span>${row[7] || '-'}</span></div>
+                <div class="detail-row"><span class="detail-label">Actual Qty</span><span>${row[8] || '-'}</span></div>
+                <div class="qty-input-box">
+                    <label style="font-size:0.7rem; color:var(--accent-green2)">PRODUCTION QTY</label>
+                    <input type="number" class="qty-input" placeholder="Enter output...">
         document.getElementById('activeBucket').innerText = "#" + id;
         document.getElementById('profileContainer').innerHTML = profiles.map((p, i) => `
             <div class="profile-row">
@@ -355,6 +545,7 @@
                 </div>
             </div>
         `).join('');
+        document.getElementById('detailsPanel').style.display = 'block';
         
         setupEnterKey();
         document.getElementById('searchResults').classList.remove('show');
@@ -362,6 +553,9 @@
         lucide.createIcons();
     }
 
+    function closeDetails() {
+        document.getElementById('detailsPanel').style.display = 'none';
+        document.getElementById('bucketDisplay').style.display = 'block';
     function setupEnterKey() {
         const inputs = document.querySelectorAll('.bulk-qty');
         inputs.forEach((inp, i) => {
@@ -374,38 +568,39 @@
         });
     }
 
-       function addBulkToQueue() {
-	        const inputs = document.querySelectorAll('.bulk-qty');
-	        const date = new Date().toLocaleDateString('en-GB');
-	        let added = 0;
-	    
-	        inputs.forEach(inp => {
-	            const val = parseInt(inp.value);
-	            if (val > 0) {
-	                queue.push({ 
-	                    id: Date.now() + Math.random(), 
-	                    bucket: inp.dataset.bucket, 
-	                    name: inp.dataset.name, 
-	                    type: inp.dataset.type, 
-	                    len: inp.dataset.len, 
-	                    // CHANGE THIS LINE BELOW:
-	                    "row id": inp.dataset.rowid, 
-	                    qty: val, 
-	                    date: date 
-	                });
-	                added++;
-	            }
-	        });
-	    
-	        if (added > 0) {
-	            updateUI();
-	        }
-	   	 }
-	        if (added > 0) {
-	            updateUI();
-	        }
-	    }
+    function toggleMenu() {
+        document.getElementById("menu").classList.toggle("active");
+        document.getElementById("mainOverlay").classList.toggle("active");
+    function addBulkToQueue() {
+        const inputs = document.querySelectorAll('.bulk-qty');
+        const date = new Date().toLocaleDateString('en-GB');
+        let added = 0;
 
+        inputs.forEach(inp => {
+            const val = parseInt(inp.value);
+            if (val > 0) {
+                queue.push({ 
+                    id: Date.now() + Math.random(), 
+                    bucket: inp.dataset.bucket, 
+                    name: inp.dataset.name, 
+                    type: inp.dataset.type, 
+                    len: inp.dataset.len, 
+                    rowid: inp.dataset.rowid,
+                    qty: val, 
+                    date: date 
+                });
+                added++;
+            }
+        });
+
+        if (added > 0) {
+            updateUI();
+        }
+    }
+
+    function closeAll() {
+        document.getElementById("menu").classList.remove("active");
+        document.getElementById("mainOverlay").classList.remove("active");
     function updateUI() {
         document.getElementById('queueList').innerHTML = queue.map(item => `
             <div style="background:#1c2128; padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
@@ -424,11 +619,14 @@
         lucide.createIcons();
     }
 
+    function toggleDropdown(id) {
+        document.getElementById(id).classList.toggle('show');
     function removeItem(id) { 
         queue = queue.filter(q => q.id !== id); 
         updateUI(); 
     }
 
+    loadData();
     async function finalSubmit() {
         const btn = document.getElementById('submitBtn');
         btn.innerHTML = '<span>Sending...</span>'; 
@@ -451,4 +649,4 @@
     }
 </script>
 </body>
-</html>
+</html
