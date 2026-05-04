@@ -251,7 +251,7 @@
         </div>
 
         <div class="profile-list-header">
-            <span>Profile</span><span>Type</span><span>Len</span><span>Stock</span><span>Transfer</span>
+            <span>Profile</span><span>Row ID</span><span>Type</span><span>Len</span><span>Stock</span><span>Transfer</span>
         </div>
 
         <div id="profileContainer"></div>
@@ -283,7 +283,7 @@
 </div>
 
 <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwXjJ1rkDE95vBe7LTmot1gtpzwjZ-l_d0RHyrqxcWoA2C_LImAD1BFJepmb4E4Mekc/exec"; 
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyg2L3SASHIwT1ZFmoZ4jEqnQK53H0_AXPDLCLZzW56dyME3K5vI3Wly5fFuPaCA5X6/exec"; 
     let bucketDatabase = [], currentBucket = null, queue = [];
 
     window.onload = () => {
@@ -309,25 +309,52 @@
         el.nextElementSibling.classList.toggle('show');
     }
 
-    function filterBuckets() {
+   function filterBuckets() {
         const val = document.getElementById('bucketSearch').value.toUpperCase();
         const res = document.getElementById('searchResults');
-        if (!val) { res.classList.remove('show'); return; }
-        const filtered = bucketDatabase.filter(b => b.id.toString().includes(val));
-        res.innerHTML = filtered.map(b => `<div class="result-item" onclick="loadBucket('${b.id}')"><b>#${b.id}</b> <span>${b.profiles.length} Profiles</span></div>`).join('');
+        
+        if (!val) { 
+            res.classList.remove('show'); 
+            return; 
+        }
+
+        // Get unique bucket IDs that match the search
+        const uniqueBuckets = [...new Set(bucketDatabase
+            .filter(item => item.bucket.toString().includes(val))
+            .map(item => item.bucket))];
+
+            res.innerHTML = uniqueBuckets.map(id => `
+            <div class="result-item" onclick="loadBucket('${id}')">
+                <b>#${id}</b> 
+                <span>${bucketDatabase.filter(b => b.bucket === id).length} Items</span>
+            </div>
+        `).join('');
+        
         res.classList.add('show');
     }
 
     function loadBucket(id) {
-        currentBucket = bucketDatabase.find(b => b.id.toString() === id);
+        // Filter the database for all rows matching this bucket ID
+        const profiles = bucketDatabase.filter(b => b.bucket === id);
+        
         document.getElementById('activeBucket').innerText = "#" + id;
-        document.getElementById('profileContainer').innerHTML = currentBucket.profiles.map((p, i) => `
+        document.getElementById('profileContainer').innerHTML = profiles.map((p, i) => `
             <div class="profile-row">
                 <div class="p-name">${p.name}</div>
+                <div><span class="p-label">Row ID</span>${p["row id"]}</div>
                 <div><span class="p-label">Type</span>${p.type}</div>
                 <div><span class="p-label">Len</span>${p.len}</div>
                 <div><span class="p-label">Stock</span>${p.qty}</div>
-                <div><span class="p-label">Transfer Qty</span><input type="number" class="qty-input bulk-qty" data-index="${i}" placeholder="0"></div>
+                <div>
+                    <span class="p-label">Transfer Qty</span>
+                    <input type="number" class="qty-input bulk-qty" 
+                        data-bucket="${p.bucket}" 
+                        data-name="${p.name}" 
+                        data-type="${p.type}" 
+                        data-len="${p.len}" 
+                        data-rowid="${p["row id"]}" 
+                        placeholder="0">
+                </div>
             </div>
         `).join('');
         
