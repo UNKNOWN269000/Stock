@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Aluminium - Production System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+            --header-bg: #0d0f14;
+            --accent-green: #56de4a;
+            --border-color: rgba(255,255,255,0.05);
+            --text-muted: #9ca3af;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: black; color: white; }
+
+        .side-menu {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 40px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
+        }
+        .side-menu.active { left: 0; }
+        
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(4px); display: none; z-index: 1400; 
+        }
+        .overlay.active { display: block; }
+
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; border-radius: 12px;
+            margin-bottom: 4px; font-size: 0.95rem;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(208, 144, 238, 0.1); font-weight: 600; }
+        
+        /* DROPDOWN LOGIC */
+        .dropdown-container { display: flex; flex-direction: column; }
+        .dropdown-content { 
+            display: none; flex-direction: column; padding-left: 15px; 
+            border-left: 1px solid var(--border-color); margin-left: 24px; margin-bottom: 8px;
+        }
+        .dropdown-content.show { display: flex; }
+        
+        .sub-menu-item {
+            color: var(--text-muted); text-decoration: none; padding: 10px 14px;
+            font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 10px; border-radius: 8px;
+        }
+        .sub-menu-item:hover { color: var(--accent-green); background: rgba(255,255,255,0.03); }
+        .sub-menu-item.active-link { color: var(--accent-green); background: rgba(86, 222, 74, 0.1); font-weight: 600; }
+        
+        .nested-content {
+            display: none; flex-direction: column; padding-left: 15px;
+            border-left: 1px dotted var(--border-color); margin-bottom: 5px;
+        }
+        .nested-content.show { display: flex; }
+
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-once {
+            animation: spin 0.6s linear;
+        }
+
+        .page-heading {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2e; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-black min-h-screen text-white flex flex-col">
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="overlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="side-menu" id="menu">
+        <a href="#" class="menu-item">
+            <i data-lucide="home"></i> Home
+        </a>
+
+        <div class="dropdown-container">
+            <div class="menu-item" onclick="toggleDropdown('powderSub', this, event)">
+                <i data-lucide="palette"></i> Powder Coat
+                <i data-lucide="chevron-down" class="chevron-icon rotate"></i>
+            </div>
+            <div class="dropdown-content show" id="powderSub">
+                <a href="#" class="sub-menu-item active-link">Mill Finish Transfer Stock</a>
+                <a href="#" class="sub-menu-item">Production</a>
+                <a href="#" class="sub-menu-item">Pending</a>
+                
+                <div class="dropdown-container">
+                    <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
+                        <i data-lucide="alert-triangle" style="width:14px"></i> Damage
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="nested-content" id="powderDamage">
+                        <a href="#" class="sub-menu-item">Re-Powder</a>
+                        <a href="#" class="sub-menu-item">Scrap</a>
+                    </div>
+                </div>
+                <a href="#" class="sub-menu-item">Overview</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-[#0d0f14] border-b border-white/5 h-[65px] px-6 flex items-center shrink-0 z-[1600] sticky top-0">
+        <button class="text-white focus:outline-none cursor-pointer mr-4 hover:text-[#56de4a] transition-colors flex items-center justify-center w-8 h-8" id="menu-toggle">
+            <i data-lucide="menu" class="w-6 h-6 block" id="menu-icon-bars"></i>
+            <i data-lucide="x" class="w-6 h-6 hidden" id="menu-icon-close"></i>
+        </button>
+        <div class="w-10 h-10 rounded-full overflow-hidden mr-4 border border-[#56de4a]/30 flex items-center justify-center shadow-lg">
+            <img src="Src/logo.png">
+        </div>
+        <div class="text-xl font-bold tracking-tighter uppercase text-[#56de4a]">ULTRA ALUMINIUM</div>
+    </header>
+
+    <div class="flex flex-1 relative">
+        <!-- Main Content -->
+        <main class="flex-1 p-8 bg-black relative min-w-0">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <h1 class="page-heading">MF to PC Transfer Stock</h1>
+                    
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="relative w-full md:w-80">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
+                            </div>
+                            <input type="text" placeholder="Search stock by ID or name..." class="w-full bg-[#0d0f14] border border-white/5 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-[#56de4a]/50 focus:ring-1 focus:ring-[#56de4a]/20 transition-all text-sm text-gray-200 placeholder-gray-600 shadow-sm">
+                        </div>
+                        
+                        <button id="api-refresh" class="bg-[#0d0f14] border border-white/5 p-3 rounded-xl hover:bg-white/5 hover:border-[#56de4a]/30 transition-all text-gray-400 hover:text-[#56de4a] cursor-pointer flex items-center justify-center group shrink-0" title="Refresh API">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 transition-transform duration-500 ease-in-out"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stock Content -->
+                <div id="stock-container" class="relative">
+                    <!-- Loading State -->
+                    <div id="loading-state" class="hidden py-20 text-center">
+                        <div class="inline-block w-8 h-8 border-4 border-[#56de4a]/20 border-t-[#56de4a] rounded-full animate-spin mb-4"></div>
+                        <p class="text-gray-500 animate-pulse">Fetching Serevr stock data...</p>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div id="table-wrapper" class="hidden overflow-x-auto rounded-2xl border border-white/5 bg-[#0d0f14]">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="border-b border-white/5 text-gray-400 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-semibold">Bucket No</th>
+                                    <th class="px-6 py-4 font-semibold">Type</th>
+                                    <th class="px-6 py-4 font-semibold">Profile</th>
+                                    <th class="px-6 py-4 font-semibold">Length</th>
+                                    <th class="px-6 py-4 font-semibold">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table-body" class="text-sm text-gray-300">
+                                <!-- Data rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="bg-[#0d0f14] border border-white/5 rounded-2xl p-12 text-center">
+                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="package" class="w-8 h-8 text-gray-600"></i>
+                        </div>
+                        <h2 class="text-xl font-medium text-gray-400 mb-2">No stock data available</h2>
+                        <p class="text-gray-600 text-sm max-w-xs mx-auto">Click the refresh button to load data from the system.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize everything when the document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            const menuToggle = document.getElementById('menu-toggle');
+            const sideMenu = document.getElementById('menu');
+            const overlay = document.getElementById('sidebar-overlay');
+            const barsIcon = document.getElementById('menu-icon-bars');
+            const closeIcon = document.getElementById('menu-icon-close');
+
+            function toggleSidebar() {
+                sideMenu.classList.toggle('active');
+                overlay.classList.toggle('active');
+                
+                // Toggle icons
+                if (sideMenu.classList.contains('active')) {
+                    barsIcon.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
+                } else {
+                    barsIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                }
+            }
+
+            // Close sidebar when clicking overlay
+            overlay.addEventListener('click', toggleSidebar);
+
+            // Toggle sidebar on menu button click
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSidebar();
+            });
+
+            // Prevent clicks inside side-menu from closing it
+            sideMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // API Integration
+            const API_URL = 'https://script.google.com/macros/s/AKfycbzher6dTD9R4UssKP6rzRqHHDaQ5YkpHJoLeYFE_bB2_lgvbAHZ903kLtM0fFB19a4I/exec';
+            let stockData = [];
+
+            async function fetchStock() {
+                const loading = document.getElementById('loading-state');
+                const table = document.getElementById('table-wrapper');
+                const empty = document.getElementById('empty-state');
+                
+                loading.classList.remove('hidden');
+                table.classList.add('hidden');
+                empty.classList.add('hidden');
+
+                try {
+                    const response = await fetch(API_URL);
+                    const data = await response.json();
+                    // Assuming data is an array based on standard Apps Script API patterns
+                    stockData = Array.isArray(data) ? data : (data.data || []);
+                    renderTable(stockData);
+                } catch (error) {
+                    console.error('API Error:', error);
+                    empty.classList.remove('hidden');
+                    empty.querySelector('h2').innerText = 'Failed to load data';
+                } finally {
+                    loading.classList.add('hidden');
+                }
+            }
+
+            function renderTable(data) {
+                const tbody = document.getElementById('stock-table-body');
+                const table = document.getElementById('table-wrapper');
+                const empty = document.getElementById('empty-state');
+
+                if (!data || data.length === 0) {
+                    table.classList.add('hidden');
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                table.classList.remove('hidden');
+                empty.classList.add('hidden');
+                
+                tbody.innerHTML = data.map(item => `
+                    <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                        <td class="px-6 py-4 text-[#56de4a] font-mono font-bold">#${item.bucketNo || '00'}</td>
+                        <td class="px-6 py-4 text-gray-400 font-medium">${item.type || 'N/A'}</td>
+                        <td class="px-6 py-4 font-bold text-white uppercase tracking-tight">${item.profile || 'N/A'}</td>
+                        <td class="px-6 py-4 text-gray-300 font-mono">${item.length || '0.0'}m</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-white/5 px-3 py-1 rounded-lg font-bold text-white border border-white/5">
+                                ${item.qty || 0}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+                lucide.createIcons(); // Re-initialize icons for new table rows
+            }
+
+            // Search Functionality
+            const searchInput = document.querySelector('input[type="text"]');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = stockData.filter(item => 
+                    (item.profile || '').toLowerCase().includes(term) ||
+                    (item.type || '').toLowerCase().includes(term) ||
+                    (item.bucketNo || '').toString().includes(term)
+                );
+                renderTable(filtered);
+            });
+
+            // Refresh button logic
+            const refreshBtn = document.getElementById('api-refresh');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    const icon = refreshBtn.querySelector('svg');
+                    if (icon) {
+                        icon.classList.add('animate-spin-once');
+                        setTimeout(() => icon.classList.remove('animate-spin-once'), 600);
+                    }
+                    fetchStock();
+                });
+            }
+
+            // Initial Load
+            fetchStock();
+        });
+
+        function toggleDropdown(id, element, event) {
+            if (event) event.stopPropagation();
+            const content = document.getElementById(id);
+            const chevron = element.querySelector('.chevron-icon');
+            
+            if (content) {
+                // Toggle show class as per user request
+                content.classList.toggle('show');
+                
+                // Rotate chevron
+                if (chevron) {
+                    chevron.classList.toggle('rotate');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
