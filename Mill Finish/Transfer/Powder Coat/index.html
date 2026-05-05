@@ -9,14 +9,16 @@
         :root {
             --bg-dark: #080a0c;
             --bg-card: rgba(22, 27, 34, 0.7);
-            --accent-green: #4ade80;
+            --accent-green: #4ee641;
             --accent-glow: rgba(74, 222, 128, 0.1);
             --text-main: #ffffff;
             --text-muted: #8b949e;
+            --accent-green2: #32e42c;
             --border-color: rgba(48, 54, 61, 0.8);
             --frame-max-width: 1200px;
             --sidebar-width: 280px;
             --top-nav-height: 70px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -120,18 +122,82 @@
             background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: 20px; padding: 20px; backdrop-filter: blur(10px);
             margin-bottom: 25px; display: none;
+            
         }
+
+        .logo-img { height: 45px; width: 45px; margin-right: 12px; border-radius: 50%; border: 2px solid var(--accent-green); object-fit: cover;
+        }
+
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .menu-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 24px; margin-right: 15px; }
+        .company-name { font-size: 1.1rem; font-weight: 700; color: var(--accent-green2); letter-spacing: 1px; }
+
+        /* SIDE MENU */
+        .side-menu {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 20px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
+        }
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
+        .overlay.active { display: block; }
+
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 12px; padding: 12px; cursor: pointer; transition: 0.2s; border-radius: 10px;
+            margin-bottom: 2px; font-size: 0.95rem;
+        }
+        .menu-item:hover { background: rgba(14, 241, 33, 0.308); }
+        .submenu-item.active-link { color: var(--accent-green2); background: rgba(19, 245, 11, 0.1); font-weight: 600; }
+
+        .dropdown-container { display: flex; flex-direction: column; }
+        .dropdown-content { 
+            display: none; flex-direction: column; padding-left: 30px; 
+            background: rgba(0,0,0,0.1); border-radius: 0 0 10px 10px;
+        }
+        .dropdown-content.show { display: flex; }
+        
+        .sub-menu-item {
+            color: var(--text-muted); text-decoration: none; padding: 10px;
+            font-size: 0.85rem; transition: 0.2s; display: block; border-radius: 8px;
+        }
+        .sub-menu-item:hover { color: var(--accent-green2); background: rgba(21, 236, 57, 0.164); }
+        .sub-menu-item.active-sub { color: var(--accent-green2); font-weight: 600; }
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 18px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        .nested-content { display: none; flex-direction: column; padding-left: 15px; border-left: 1px dotted var(--border-color); }
+        .nested-content.show { display: flex; }
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        .side-menu.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; z-index: 1400; }
+        .overlay.active { display: block; }
+
+
 
         /* RESPONSIVE TABLE SYSTEM */
         .profile-list-header {
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
             padding: 10px 15px; color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; font-weight: 800;
         }
 
         .profile-row {
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr 1.2fr;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
             align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.03);
             border-radius: 12px; margin-bottom: 6px; border: 1px solid transparent;
+        }
+
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--bg-dark); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(10px);
         }
 
         /* MOBILE SPECIFIC OVERRIDES */
@@ -170,7 +236,7 @@
         }
         .btn-submit {
             background: var(--accent-green); color: #080a0c; border: none;
-            padding: 18px 60px; border-radius: 16px; font-size: 1rem; font-weight: 900;
+            padding: 18px 90px; border-radius: 16px; font-size: 1rem; font-weight: 900;
             cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s;
         }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -183,48 +249,38 @@
 </head>
 <body>
 
-<header class="top-nav">
-    <div class="top-nav-left">
-        <button style="background:none; border:none; color:white; cursor:pointer;" onclick="toggleSidebar()">
-            <i data-lucide="menu"></i>
-        </button>
-        <div class="top-nav-logo"><span>ULTRA <span style="color:var(--text-muted)">ALU</span></span></div>
-    </div>
-    <div class="top-nav-right">
-        <div class="page-title-badge">Mill Finish</div>
-        <i data-lucide="user" size="20" style="color:var(--accent-green)"></i>
-    </div>
-</header>
+<div class="header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <img src="Src/logo.png" alt="Logo" class="logo-img">
+    <div class="company-name">ULTRA ALUMINIUM</div>
+</div>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-<nav class="sidebar" id="sidebar">
-    <div class="sidebar-branding">
-        <div class="logo-placeholder"><i data-lucide="factory" size="28"></i></div>
-        <h1 style="font-size: 1rem; color:#fff;">ULTRA ADMIN</h1>
-    </div>
+<div class="side-menu" id="menu">
+    <a href="../../index.html" class="menu-item"><i data-lucide="home"></i> Home</a>
 
-    <div class="menu-heading">Main Menu</div>
-    <div class="nav-item">
-        <div class="nav-link active" onclick="toggleSubmenu(this)">
-            <span style="display:flex; align-items:center;"><i data-lucide="layers"></i> Mill Finish</span>
-            <i data-lucide="chevron-down" size="14"></i>
+    <div class="dropdown-container">
+        <div class="menu-item" onclick="toggleDropdown('millSub', this)">
+            <i data-lucide="layers"></i> Mill Finish
+            <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
-        <div class="submenu show">
-            <a href="../../Hardness Check/index.html" class="nav-link">Hardness Check</a>
-            <a href="../../Mill finish Profile Stock/index.html" class="nav-link">Profile Stock</a>
-            <a href="../../Mill finish Bucket Stock/index.html" class="nav-link">Bucket Stock</a>
-            <div class="nav-link" onclick="toggleSubmenu(this)">
-                <span>Transfer</span>
-                <i data-lucide="chevron-down" size="14"></i>
+        <div class="dropdown-content" id="millSub">
+            <a href="../../Hardness Check/index.html" class="sub-menu-item">Hardness Check</a>
+            <a href="../../Mill finish Profile Stock/index.html" class="sub-menu-item">Profile Stock</a>
+            <a href="../../Mill finish Bucket Stock/index.html" class="sub-menu-item">Bucket Stock</a>
+            <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('millTransfer', this, event)">
+                <i data-lucide="repeat" style="width:14px"></i> Transfer
+                <i data-lucide="chevron-down" class="chevron-icon"></i>
             </div>
-            <div class="submenu show">
-                <a href="../../Transfer/Anodizing/index.html" class="nav-link">Anodizing</a>
-                <a href="../../Transfer/Powder Coat/index.html" class="nav-link active">Powder Coat</a>
+            <div class="nested-content" id="millTransfer">
+                <a href="../Anodizing/index.html" class="sub-menu-item">Anodizing</a>
+                <a href="../Powder Coat/index.html" class="sub-menu-item active-sub">Powder Coat</a>
             </div>
-            <a href="../../Overview/index.html" class="nav-link">Overview</a>
+            <a href="../../Overview/index.html" class="sub-menu-item">Overview</a>
         </div>
     </div>
-</nav>
+</div>
+
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
 
 <div class="container">
     <div class="page-header">
@@ -284,7 +340,7 @@
 
 <script>
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyg2L3SASHIwT1ZFmoZ4jEqnQK53H0_AXPDLCLZzW56dyME3K5vI3Wly5fFuPaCA5X6/exec"; 
-    let bucketDatabase = [], queue = [];
+    let bucketDatabase = [], currentBucket = null, queue = [];
 
     window.onload = () => {
         fetchSheetData();
@@ -300,15 +356,25 @@
         } catch (e) { console.error("Sync Error", e); }
     }
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
+    lucide.createIcons();
+
+    function toggleDropdown(id, element, event) {
+        if (event) event.stopPropagation();
+        const content = document.getElementById(id);
+        const chevron = element.querySelector('.chevron-icon');
+        if (content) content.classList.toggle('show');
+        if (chevron) chevron.classList.toggle('rotate');
     }
 
-    function toggleSubmenu(el) {
-        el.nextElementSibling.classList.toggle('show');
+    function toggleMenu() { 
+        document.getElementById("menu").classList.toggle("active"); 
+        document.getElementById("mainOverlay").classList.toggle("active"); 
     }
 
+    function closeAll() { 
+        document.getElementById("menu").classList.remove("active"); 
+        document.getElementById("mainOverlay").classList.remove("active");
+    }
    function filterBuckets() {
         const val = document.getElementById('bucketSearch').value.toUpperCase();
         const res = document.getElementById('searchResults');
@@ -318,8 +384,9 @@
             return; 
         }
 
+        // Get unique bucket IDs that match the search
         const uniqueBuckets = [...new Set(bucketDatabase
-            .filter(item => item.bucket && item.bucket.toString().includes(val))
+            .filter(item => item.bucket.toString().includes(val))
             .map(item => item.bucket))];
 
             res.innerHTML = uniqueBuckets.map(id => `
@@ -333,13 +400,14 @@
     }
 
     function loadBucket(id) {
-        const profiles = bucketDatabase.filter(b => b.bucket.toString() === id.toString());
+        // Filter the database for all rows matching this bucket ID
+        const profiles = bucketDatabase.filter(b => b.bucket === id);
         
         document.getElementById('activeBucket').innerText = "#" + id;
         document.getElementById('profileContainer').innerHTML = profiles.map((p, i) => `
             <div class="profile-row">
                 <div class="p-name">${p.name}</div>
-                <div><span class="p-label">Row ID</span>${p["row id"] || p.rowid || 'N/A'}</div>
+                <div><span class="p-label">Row ID</span>${p["row id"]}</div>
                 <div><span class="p-label">Type</span>${p.type}</div>
                 <div><span class="p-label">Len</span>${p.len}</div>
                 <div><span class="p-label">Stock</span>${p.qty}</div>
@@ -350,7 +418,7 @@
                         data-name="${p.name}" 
                         data-type="${p.type}" 
                         data-len="${p.len}" 
-                        data-rowid="${p["row id"] || p.rowid}" 
+                        data-rowid="${p["row id"]}" 
                         placeholder="0">
                 </div>
             </div>
@@ -375,43 +443,43 @@
     }
 
     function addBulkToQueue() {
-        const inputs = document.querySelectorAll('.bulk-qty');
-        const date = new Date().toLocaleDateString('en-GB');
-        let added = 0;
+		const inputs = document.querySelectorAll('.bulk-qty');
+		const date = new Date().toLocaleDateString('en-GB');
+		let added = 0;
 
-        inputs.forEach(inp => {
-            const val = parseInt(inp.value);
-            if (val > 0) {
-                queue.push({ 
-                    id: Date.now() + Math.random(), 
-                    bucket: inp.dataset.bucket, 
-                    name: inp.dataset.name, 
-                    type: inp.dataset.type, 
-                    len: inp.dataset.len, 
-                    rowid: inp.dataset.rowid,
-                    qty: val, 
-                    date: date 
-                });
-                added++;
-            }
-        });
+		inputs.forEach(inp => {
+			const val = parseInt(inp.value);
+			if (val > 0) {
+				queue.push({ 
+					id: Date.now() + Math.random(), 
+					bucket: inp.dataset.bucket, 
+					name: inp.dataset.name, 
+					type: inp.dataset.type, 
+					len: inp.dataset.len, 
+					// CHANGE THIS LINE BELOW:
+					"row id": inp.dataset.rowid, 
+					qty: val, 
+					date: date 
+				});
+				added++;
+			}
+		});
 
-        if (added > 0) {
-            updateUI();
-        }
-    }
+		if (added > 0) {
+			updateUI();
+		}
+	}
 
     function updateUI() {
         document.getElementById('queueList').innerHTML = queue.map(item => `
             <div style="background:#1c2128; padding:12px; border-radius:10px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size:0.8rem;"><b>#${item.bucket}</b> | ${item.name}</div>
+                <div style="font-size:0.8rem;"><b>${item.bucket}</b> | ${item.name}</div>
                 <div style="display:flex; align-items:center; gap:12px;">
                     <span style="color:var(--accent-green); font-weight:900;">${item.qty}</span>
                     <i data-lucide="trash-2" size="14" style="color:#ff4d4d; cursor:pointer;" onclick="removeItem(${item.id})"></i>
                 </div>
             </div>
         `).join('');
-        
         document.getElementById('queueCounter').innerText = queue.length;
         document.getElementById('submitBtn').disabled = queue.length === 0;
         document.getElementById('entryCard').style.display = 'none';
@@ -419,30 +487,16 @@
         lucide.createIcons();
     }
 
-    function removeItem(id) { 
-        queue = queue.filter(q => q.id !== id); 
-        updateUI(); 
-    }
+    function removeItem(id) { queue = queue.filter(q => q.id !== id); updateUI(); }
 
     async function finalSubmit() {
         const btn = document.getElementById('submitBtn');
-        btn.innerHTML = '<span>Sending...</span>'; 
-        btn.disabled = true;
-
+        btn.innerHTML = 'Sending...'; btn.disabled = true;
         try {
-            await fetch(SHEET_API_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                cache: 'no-cache',
-                body: JSON.stringify(queue) 
-            });
+            await fetch(SHEET_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(queue) });
             document.getElementById('successOverlay').style.display = 'flex';
             setTimeout(() => location.reload(), 1500);
-        } catch (e) { 
-            console.error(e);
-            btn.innerHTML = '<span>RETRY</span>'; 
-            btn.disabled = false; 
-        }
+        } catch (e) { btn.innerHTML = 'RETRY'; btn.disabled = false; }
     }
 </script>
 </body>
