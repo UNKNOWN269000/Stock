@@ -2,316 +2,454 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ULTRA ALUMINIUM | Portal</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-black: #000000;
-            --glass-white: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --text-white: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.5);
-            --gold-glow: #ffd700;
-            --gold-shadow: rgba(255, 215, 0, 0.3);
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #56de4a; 
+            --primary-dark: #47c23d; 
+            --bg-light: #000000; 
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+        }
 
-        body { 
-            background: var(--bg-black);
+        /* Glassmorphism Card */
+        .auth-card {
+            background: rgb(255, 255, 255)important;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            min-height: 640px;
+            display: flex;
+            width: 100%;
+        }
+
+        /* Centering Wrapper */
+        .page-wrapper {
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Stage for Logo and Card */
+        .stage {
+            position: relative;
+            width: 100%;
+            max-width: 950px;
+            z-index: 10;
+        }
+
+        /* Floating Logo */
+        .logo-box {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+        .logo-inner {
+            width: 90px;
+            height: 90px;
+            background: white;
+            border-radius: 50%;
+            padding: 6px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 5px solid #fff;
+        }
+
+        /* Main Auth Card */
+        .auth-card {
+            background: white;
+            border-radius: 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            min-height: 640px;
+            display: flex;
+            width: 100%;
+        }
+
+        /* Forms Track */
+        .forms-container {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.6s ease;
+        }
+
+        .forms-track {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .form-panel {
+            width: 50%;
+            padding: 80px 50px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Desktop Overlay Panel */
+        .overlay-container {
+            width: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.6s ease;
+            z-index: 50;
+        }
+
+        .overlay-track {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .overlay-panel {
+            width: 50%;
+            padding: 50px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            color: var(--text-white);
-            /* Fixed scrolling issue by removing overflow: hidden */
-            overflow-y: auto; 
-        }
-
-        .brand-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 40px;
-            flex-shrink: 0;
-        }
-
-        .brand-title {
-            color: var(--text-white);
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--glass-white);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 45px 35px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
             text-align: center;
-            margin-bottom: 20px;
         }
 
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 35px;
-            border: 1px solid var(--glass-border);
-            overflow: hidden;
-            flex-shrink: 0;
+        /* Interaction States */
+        .is-signup .forms-track { transform: translateX(-50%); }
+        .is-signup .overlay-track { transform: translateX(-50%); }
+
+        /* Mobile Viewport */
+        @media (max-width: 850px) {
+            .overlay-container { display: none; }
+            .forms-container { width: 100%; }
+            .stage { max-width: 480px; margin-top: 50px; }
+            .auth-card { min-height: 600px; border-radius: 24px; }
+            .form-panel { padding: 90px 30px 40px; }
+            .mobile-nav { display: flex !important; }
         }
 
-        .logo-img {
-            max-width: 90%;
-            height: auto;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 35px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            color: var(--text-muted);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            letter-spacing: 1px;
-        }
-
-        .tab.active {
-            color: var(--text-white);
-        }
-
-        .tab.active::after {
-            content: '';
+        /* Mobile Tabs */
+        .mobile-nav {
+            display: none;
             position: absolute;
-            bottom: -1px;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 2px;
-            background: var(--text-white);
+            height: 65px;
+            background: #fcfdfb;
+            z-index: 40;
+            border-bottom: 1px solid #edf2e9;
         }
 
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #94a3b8;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-tab.active {
+            color: var(--primary-dark);
+            background: white;
+            box-shadow: inset 0 -3px 0 var(--primary);
+        }
+
+        /* Inputs & Buttons */
         .input-group {
+            position: relative;
             margin-bottom: 18px;
         }
 
-        input, select {
+        .input-field {
             width: 100%;
-            height: 55px;
-            padding: 0 20px;
+            padding: 14px 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: var(--input-bg);
-            font-size: 16px;
-            color: white;
             outline: none;
-            transition: var(--transition);
+            transition: all 0.2s;
+            font-size: 0.95rem;
         }
 
-        input:focus, select:focus {
-            border-color: var(--gold-glow);
-            background: rgba(255, 215, 0, 0.05);
-            box-shadow: 0 0 15px var(--gold-shadow), inset 0 0 5px var(--gold-shadow);
+        .input-field:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(86, 222, 74, 0.1);
         }
 
-        select option {
-            background: #1a1a1a;
+        .primary-btn {
+            background: var(--primary);
             color: white;
-        }
-
-        .btn {
-            width: 100%;
-            height: 55px;
-            background: var(--text-white);
-            border: none;
-            border-radius: 14px;
-            color: #000;
             font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        .sso-btn {
-            width: 100%;
-            height: 52px;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px;
             border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: var(--transition);
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(86, 222, 74, 0.3);
+            margin-top: 10px;
         }
 
-        .sso-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--gold-glow);
-            color: var(--gold-glow);
+        .primary-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 15px 20px -5px rgba(86, 222, 74, 0.4);
         }
 
-        #signup-section, #pending-message {
-            display: none;
-        }
-
-        @media (max-width: 480px) {
-            body { justify-content: flex-start; padding-top: 40px; }
-            .container { padding: 35px 20px; }
-            .brand-title { font-size: 1.8rem; }
+        /* No Space Logic Hint */
+        .hint {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+            display: block;
         }
     </style>
 </head>
 <body>
+    <div class="page-wrapper">
+        <div class="stage" id="stage">
+            
+            <!-- Logo Container -->
+            <div class="logo-box">
+                <div class="logo-inner">
+                    <img src="Src/logo.png" class="w-full h-full object-cover rounded-full" alt="Logo">
+                </div>
+            </div>
 
-    <div class="brand-container">
-        <h1 class="brand-title">ULTRA ALUMINIUM</h1>
+            <div class="auth-card" id="auth-card">
+                
+                <!-- Mobile Navigation -->
+                <div class="mobile-nav">
+                    <div class="nav-tab active" id="tab-login" onclick="toggleMode(false)">Login</div>
+                    <div class="nav-tab" id="tab-signup" onclick="toggleMode(true)">Sign Up</div>
+                </div>
+
+                <!-- Forms Area -->
+                <div class="forms-container">
+                    <div class="forms-track">
+                        
+                        <!-- Login Form -->
+                        <div class="form-panel">
+                            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Welcome back</h2>
+                            <p class="text-slate-500 mb-8 font-medium text-sm">Sign in to access your dashboard.</p>
+                            
+                            <form id="loginForm" onsubmit="handleAuth(event, 'Login')">
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Username</label>
+                                    <input type="text" name="username" required class="input-field" placeholder="Enter username">
+                                </div>
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                                    <input type="password" name="password" required class="input-field" placeholder="••••••••">
+                                </div>
+                                <button type="submit" class="primary-btn flex justify-center items-center">
+                                    <span class="btn-text">Sign In</span>
+                                    <svg class="animate-spin h-5 w-5 text-white hidden loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Signup Form -->
+                        <div class="form-panel">
+                            <h2 class="text-3xl font-extrabold text-slate-900 mb-1">Create Account</h2>
+                            <p class="text-slate-500 mb-6 font-medium text-sm">Join your department portal.</p>
+                            
+                            <form id="signupForm" onsubmit="handleAuth(event, 'Registration')">
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Full Name</label>
+                                    <input type="text" name="fullname" required class="input-field" placeholder="Full Name">
+                                </div>
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Department</label>
+                                    <select name="department" required class="input-field bg-white cursor-pointer appearance-none">
+                                        <option value="" disabled selected>Select department</option>
+                                        <option value="Extrusion">Extrusion</option>
+                                        <option value="Mill Finish">Mill Finish</option>
+                                        <option value="Powder Coat">Powder Coat</option>
+                                        <option value="Anodizing">Anodizing</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Username</label>
+                                    <input type="text" name="username" required 
+                                           oninput="this.value = this.value.replace(/\s/g, '')"
+                                           class="input-field" placeholder="Username (no spaces)">
+                                    <span class="hint">Spaces are automatically removed.</span>
+                                </div>
+                                <div class="input-group">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                                    <input type="password" name="password" required class="input-field" placeholder="••••••••">
+                                </div>
+                                <button type="submit" class="primary-btn flex justify-center items-center">
+                                    <span class="btn-text">Create Account</span>
+                                    <svg class="animate-spin h-5 w-5 text-white hidden loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Desktop Overlay Container -->
+                <div class="overlay-container">
+                    <div class="overlay-track">
+                        <!-- Pane seen on Login form -->
+                        <div class="overlay-panel">
+                            <h2 class="text-4xl font-extrabold mb-4">Hello, Friend!</h2>
+                            <p class="text-white opacity-90 mb-10 text-lg font-medium leading-relaxed">Fill in your details and start your journey with us.</p>
+                            <button onclick="toggleMode(true)" class="px-12 py-3 border-2 border-white rounded-2xl font-bold hover:bg-white hover:text-[#47c23d] transition duration-300">SIGN UP</button>
+                        </div>
+                        <!-- Pane seen on Signup form -->
+                        <div class="overlay-panel">
+                            <h2 class="text-4xl font-extrabold mb-4">Welcome Back!</h2>
+                            <p class="text-white opacity-90 mb-10 text-lg font-medium leading-relaxed">Keep connected with us by logging in with your personal info.</p>
+                            <button onclick="toggleMode(false)" class="px-12 py-3 border-2 border-white rounded-2xl font-bold hover:bg-white hover:text-[#47c23d] transition duration-300">LOG IN</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="avatar-circle">
-            <img src="Src/logo.png" alt="Ultra Aluminium Logo" class="logo-img">
-        </div>
+<!-- Security overlay removed -->
 
-        <div class="tabs">
-            <div class="tab active" id="login-tab" onclick="showLogin()">LOGIN</div>
-            <div class="tab" id="signup-tab" onclick="showSignup()">SIGN UP</div>
-        </div>
-
-        <div id="login-section">
-            <form onsubmit="handleLogin(event)">
-                <div class="input-group">
-                    <input type="text" id="loginUser" placeholder="Username" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="loginPass" placeholder="Password" required>
-                </div>
-                <button type="submit" class="btn" id="loginBtn">Authenticate</button>
-            </form>
-        </div>
-
-        <div id="signup-section">
-            <div id="signup-form-wrapper">
-                <form onsubmit="handleSignUp(event)">
-                    <div class="input-group">
-                        <input type="text" id="fullName" placeholder="Full Name" required>
-                    </div>
-                    <div class="input-group">
-                        <select id="role" required>
-                            <option value="" disabled selected>Department</option>
-                            <option value="extrusion">Extrusion</option>
-                            <option value="mill">Mill Finish</option>
-                            <option value="anodizing">Anodizing</option>
-                            <option value="powder">Powder Coat</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="regUser" placeholder="Username" required>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" id="signupPass" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="btn">Register</button>
-                </form>
+    <!-- Success Modal -->
+    <div id="modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center hidden z-[200] p-4">
+        <div class="bg-white rounded-[32px] p-10 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-20 h-20 bg-green-50 text-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-green-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
             </div>
-            <div id="pending-message">
-                <p style="color: white; line-height: 1.6;">Access Request Sent.<br>Awaiting approval.</p>
-                <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Back</button>
-            </div>
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Perfect!</h3>
+            <p id="modal-msg" class="text-slate-500 mb-8 font-medium"></p>
+            <button onclick="closeModal()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-slate-800 transition shadow-xl">Continue</button>
         </div>
-
-        <button class="sso-btn">
-            <i data-lucide="shield"></i> SSO ACCESS
-        </button>
     </div>
 
     <script>
-        lucide.createIcons();
-
-        function showLogin() {
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('signup-section').style.display = 'none';
-            document.getElementById('login-tab').classList.add('active');
-            document.getElementById('signup-tab').classList.remove('active');
-        }
-
-        function showSignup() {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('signup-section').style.display = 'block';
-            document.getElementById('login-tab').classList.remove('active');
-            document.getElementById('signup-tab').classList.add('active');
-        }
+        const card = document.getElementById('auth-card');
+        const modal = document.getElementById('modal');
+        const modalMsg = document.getElementById('modal-msg');
+        const tabLogin = document.getElementById('tab-login');
+        const tabSignup = document.getElementById('tab-signup');
 
         const signupURL = 'https://script.google.com/macros/s/AKfycbwurb8SvR8DhzpDREEo5wNfinFoeTwtEBYoe9sMbEwNoJHvyzbWvtAn0gz3P9DrnEIF/exec';
         const loginURL = 'https://script.google.com/macros/s/AKfycbz8E82zWl2L9navtjjkEKJScklpnMiJ1bW1FmIUaa3MC-HdJ1UzqqW_vwZcP7c-Py7e/exec';
 
-        async function handleSignUp(event) {
-            event.preventDefault();
-            const data = {
-                name: document.getElementById('fullName').value,
-                role: document.getElementById('role').value,
-                username: document.getElementById('regUser').value,
-                password: document.getElementById('signupPass').value
-            };
-            try {
-                await fetch(signupURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-                document.getElementById('signup-form-wrapper').style.display = 'none';
-                document.getElementById('pending-message').style.display = 'block';
-            } catch (e) { alert("System error."); }
+        function toggleMode(isSignUp) {
+            if (isSignUp) {
+                card.classList.add('is-signup');
+                tabSignup.classList.add('active');
+                tabLogin.classList.remove('active');
+            } else {
+                card.classList.remove('is-signup');
+                tabLogin.classList.add('active');
+                tabSignup.classList.remove('active');
+            }
         }
 
-        async function handleLogin(event) {
-            event.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            btn.textContent = "VERIFYING...";
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
+        async function handleAuth(e, type) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const loader = submitBtn.querySelector('.loader');
             
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            const formData = new FormData(form);
+            const rawData = Object.fromEntries(formData.entries());
+
             try {
-                const res = await fetch(`${loginURL}?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`);
-                const result = await res.json();
-                if (result.status === "success" && result.link && result.link !== "Pending") {
-                    window.location.href = result.link;
+                let response;
+                if (type === 'Login') {
+                    const params = new URLSearchParams({
+                        username: rawData.username,
+                        password: rawData.password
+                    });
+                    response = await fetch(`${loginURL}?${params.toString()}`);
                 } else {
-                    alert(result.link === "Pending" ? "Pending admin approval." : "Invalid Credentials.");
-                    btn.textContent = "Authenticate";
+                    const signupData = {
+                        name: rawData.fullname,
+                        role: rawData.department,
+                        username: rawData.username,
+                        password: rawData.password
+                    };
+                    response = await fetch(signupURL, {
+                        method: 'POST',
+                        body: JSON.stringify(signupData)
+                    });
                 }
-            } catch (e) { 
-                alert("Connection failed."); 
-                btn.textContent = "Authenticate"; 
+
+                const result = await response.json();
+
+                if (type === 'Login') {
+                    if (result.status === 'success') {
+                        // Direct Redirect
+                        window.location.href = result.link;
+                    } else {
+                        alert('Error: ' + (result.message || 'Invalid credentials'));
+                        submitBtn.disabled = false;
+                        btnText.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                    }
+                } else {
+                    if (result.result === 'success') {
+                        modalMsg.innerText = 'Registration successful! Your account is now pending admin approval.';
+                        modal.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        btnText.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                    } else {
+                        alert('Error: ' + (result.message || 'Registration failed'));
+                        submitBtn.disabled = false;
+                        btnText.classList.remove('hidden');
+                        loader.classList.add('hidden');
+                    }
+                }
+
+            } catch (error) {
+                console.error('Auth Error:', error);
+                alert('Connection error or invalid response from server.');
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            if (card.classList.contains('is-signup')) {
+                toggleMode(false);
             }
         }
     </script>
