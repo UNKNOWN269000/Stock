@@ -12,7 +12,7 @@
             --bg-inner: #0d1117;
             --accent-orange: #f59e0b;
             --accent-green: #e690ee;
-            --accent-green2:  #56de4a;
+            --accent-green2: #22ca22;
             --accent-red: #ff4d4d;
             --text-main: #ffffff;
             --text-muted: #9aa0a6;
@@ -124,10 +124,10 @@
             border-radius: 30px; font-size: 0.85rem; font-weight: 700;
             transition: 0.3s;
         }
-        .status-badge.online { background: rgba(34, 197, 94, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.2); }
+        .status-badge.online { background: rgba(34, 197, 94, 0.1); color: #2ecc36; border: 1px solid rgb(23, 211, 38); }
         .status-badge.offline { background: rgba(255, 77, 77, 0.1); color: var(--accent-red); border: 1px solid rgba(255, 77, 77, 0.2); }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .online .status-dot { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+        .online .status-dot { background: #2ecc36; box-shadow: 0 0 10px #2ecc36; }
         .offline .status-dot { background: var(--accent-red); }
 
         /* DASHBOARD SECTION STYLING */
@@ -189,13 +189,20 @@
 
     <div class="dropdown-container">
         <div class="menu-item" onclick="toggleDropdown('powderSub', this, event)">
-            <i data-lucide="palette"></i> Powder Coat
+            <i data-lucide="bring-to-front"></i> Powder Coat
             <i data-lucide="chevron-down" class="chevron-icon"></i>
         </div>
         <div class="dropdown-content" id="powderSub">
             <a href="Transfer Stock/index.html" class="sub-menu-item">Mill Finish Transfer Stock</a>
-            <a href="#" class="sub-menu-item">Production</a>
-            <a href="#" class="sub-menu-item">Packing</a>
+            <a href="Production/index.html" class="sub-menu-item">Production</a>
+             <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderPacking', this, event)">
+                <i data-lucide="package-check" style="width:14px"></i>Packing
+                <i data-lucide="chevron-down" class="chevron-icon"></i>
+            </div>
+            <div class="nested-content" id="powderPacking">
+                <a href="Packing/PowderCoat/index.html" class="sub-menu-item">Powder Coat</a>
+                <a href="#" class="sub-menu-item">Wood Finish</a>
+            </div>
             <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
                 <i data-lucide="alert-triangle" style="width:14px"></i> Special Production
                 <i data-lucide="chevron-down" class="chevron-icon"></i>
@@ -236,19 +243,22 @@
                     <div class="icon-box"><i data-lucide="cpu"></i></div>
                     <h3>Production</h3>
                 </a>
-                <a href="#" class="action-card">
-                    <div class="icon-box"><i data-lucide="clock"></i></div>
-                    <h3>Packing</h3>
+                </a>
+                <a href="Packing/PowderCoat/index.html" class="action-card">
+                    <div class="icon-box"><i data-lucide="package-check"></i></div>
+                    <h3>PowderCoat Packing</h3>
                 </a>
                 <a href="#" class="action-card">
-                    <div class="icon-box"><i data-lucide="alert-circle"></i></div>
+                    <div class="icon-box"><i data-lucide="package-check"></i></div>
+                    <h3>Wood Finish Packing</h3>
+                </a>
+                <a href="#" class="action-card">
+                    <div class="icon-box"><i data-lucide="cpu"></i></div>
                     <h3>Re-Powder</h3>
                 </a>
-
                 <a href="#" class="action-card">
-                    <div class="icon-box"><i data-lucide="alert-circle"></i></div>
+                    <div class="icon-box"><i data-lucide="cpu"></i></div>
                     <h3>One Micron</h3>
-                    
                 </a>
                 <a href="#" class="action-card">
                     <div class="icon-box"><i data-lucide="eye"></i></div>
