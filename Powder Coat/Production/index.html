@@ -209,7 +209,8 @@
                     <div class="form-group relative">
                         <label class="form-label">Profile</label>
                         <div class="relative">
-                            <input type="text" id="profile-input" placeholder="    Search profile..." class="form-input pl-11" required autocomplete="off">
+                            <input type="text" id="profile-input" placeholder="Search profile..." class="form-input pl-11" required autocomplete="off">
+                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
                         </div>
                         <!-- Profile Suggestions Dropdown -->
                         <div id="profile-suggestions" class="absolute left-0 right-0 mt-1 bg-[#1a1c23] border border-white/10 rounded-xl shadow-2xl z-[2100] hidden max-h-48 overflow-y-auto">
@@ -274,20 +275,28 @@
     <div id="sidebar-overlay" class="overlay"></div>
 
     <div class="side-menu" id="menu">
-        <a href="../index.html" class="menu-item">
+        <a href="#" class="menu-item">
             <i data-lucide="home"></i> Home
         </a>
 
         <div class="dropdown-container">
             <div class="menu-item" onclick="toggleDropdown('powderSub', this, event)">
-                <i data-lucide="palette"></i> Powder Coat
+                <i data-lucide="bring-to-front"></i> Powder Coat
                 <i data-lucide="chevron-down" class="chevron-icon rotate"></i>
             </div>
             <div class="dropdown-content show" id="powderSub">
-                <a href="../Transfer Stock/index.html" class="sub-menu-item">Mill Finish Transfer Stock</a>
-                <a href="index.html" class="sub-menu-item active-link">Production</a>
-                <a href="#" class="sub-menu-item">Packing</a>
-                
+                <a href="#" class="sub-menu-item">Mill Finish Transfer Stock</a>
+                <a href="#" class="sub-menu-item active-link">Production</a>
+                <div class="dropdown-container">
+                    <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderPacking', this, event)">
+                        <i data-lucide="package-check" style="width:14px"></i> Packing
+                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                    </div>
+                    <div class="nested-content" id="powderPacking">
+                        <a href="../Packing/PowderCoat/index.html" class="sub-menu-item">Powder Coat</a>
+                        <a href="#" class="sub-menu-item">Wood Finish</a>
+                    </div>
+                </div>
                 <div class="dropdown-container">
                     <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
                         <i data-lucide="alert-triangle" style="width:14px"></i> Special Production
