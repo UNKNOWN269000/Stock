@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTRA ALUMINIUM | Industrial Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg-deep: #000000;
+            --bg-dark: #0d0f14;
+            --bg-charcoal: #0d0f14;
+            --neon-green: #56de4a;
+            --accent-green2: #56de4a;
+            --accent-green: #56de4a;
+            --accent-orange: #3663f7;
+            --burnt-orange: #3663f7;
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --sidebar-transition: cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-deep);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .tracking-tight-custom { letter-spacing: -0.05em; }
+        .tracking-wide-custom { letter-spacing: 0.15em; }
+        .company-name { font-size: 1.1rem; font-weight: 800; color: var(--accent-green2); letter-spacing: 0.5px; }
+
+        /* Header Styles */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(13, 15, 20, 0.85); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(15px);
+        }
+        .header .company-name { color: var(--accent-green2); }
+        .header .hamburger span { background: #fff; }
+        .header .text-white\/40 { color: var(--accent-green2); opacity: 0.6; }
+        .header .text-xs { color: var(--accent-green2); }
+
+        /* Hamburger Animation */
+        .hamburger {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: .3s ease-in-out;
+        }
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 9px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+        .hamburger span:nth-child(1) { top: 0px; }
+        .hamburger span:nth-child(2) { top: 8px; }
+        .hamburger span:nth-child(3) { top: 16px; }
+
+        .hamburger.open span:nth-child(1) { top: 8px; transform: rotate(135deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
+        .hamburger.open span:nth-child(3) { top: 8px; transform: rotate(-135deg); }
+
+        /* Sidebar & Menu Styles */
+        .side-menu {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 40px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
+        }
+        .side-menu.active { left: 0; }
+        
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(4px); display: none; z-index: 1400; 
+        }
+        .overlay.active { display: block; }
+
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; border-radius: 12px;
+            margin-bottom: 4px; font-size: 0.95rem;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(144, 177, 238, 0.1); font-weight: 600; }
+        
+        /* DROPDOWN LOGIC */
+        .dropdown-container { display: flex; flex-direction: column; }
+        .dropdown-content { 
+            display: none; flex-direction: column; padding-left: 15px; 
+            border-left: 1px solid var(--border-color); margin-left: 24px; margin-bottom: 8px;
+        }
+        .dropdown-content.show { display: flex; }
+        
+        .sub-menu-item {
+            color: var(--text-muted); text-decoration: none; padding: 10px 14px;
+            font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 10px; border-radius: 8px;
+        }
+        .sub-menu-item:hover { color: var(--accent-green); background: rgba(255,255,255,0.03); }
+        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; background: rgba(255,255,255,0.05); }
+        
+        .nested-content {
+            display: none; flex-direction: column; padding-left: 15px;
+            border-left: 1px dotted var(--border-color); margin-bottom: 5px;
+        }
+        .nested-content.show { display: flex; }
+
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        /* Heading Styles */
+        .page-heading {
+            font-size: 1.75rem; margin-bottom: 5px; font-weight: 800;
+            background: linear-gradient(to right, #fff, #3663f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        @media (min-width: 768px) {
+            .page-heading { font-size: 2.5rem; }
+        }
+        .sub-heading { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+        @media (min-width: 768px) {
+            .sub-heading { font-size: 1.1rem; }
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: #3663f7;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 18px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 20px rgba(54, 99, 247, 0.2);
+            width: auto;
+        }
+        @media (max-width: 640px) {
+            .btn-primary { width: 100%; max-width: 320px; }
+        }
+        .btn-primary:hover {
+            background-color: #4d77ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(54, 99, 247, 0.3);
+        }
+        .btn-primary:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+        
+        .view-label { color: #3663f7; font-[10px]; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .view-value { color: white; font-size: 1rem; font-weight: 500; margin-bottom: 12px; }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: #0d0f14;
+            width: calc(100% - 32px);
+            max-width: 420px;
+            max-height: 85vh;
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        @media (max-width: 640px) {
+            .modal-content {
+                border-radius: 24px 24px 0 0;
+                max-height: 100vh;
+                height: 100%;
+                position: fixed;
+                bottom: 0;
+            }
+            .modal-overlay {
+                padding: 0;
+                align-items: flex-end;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--bg-dark);
+            z-index: 10;
+        }
+
+        .modal-body { padding: 20px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        @media (min-width: 400px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #3663f7; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 16px; color: white; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .form-input:focus { outline: none; border-color: #3663f7; background: rgba(255,255,255,0.06); box-shadow: 0 0 15px rgba(54, 99, 247, 0.1); }
+        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/xml' fill='none' stroke='%233663f7' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; }
+
+ /* Modal Styles */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+
+            display: none;
+            z-index: 999;
+
+            /* ✅ FORCE PERFECT CENTER */
+            display: flex;
+            align-items: center !important;
+            justify-content: center !important;
+
+            padding: 16px;
+        }
+        .view-label { color: #3663f7; font-[10px]; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .view-value { color: white; font-size: 1rem; font-weight: 500; margin-bottom: 12px; }
+        .confirm-overlay.active { display: flex; }
+        
+        .confirm-content {
+            border-radius: 24px 24px 0 0;
+            max-height: 100vh;
+            height: auto;
+            position: relative;
+            bottom: auto;
+        }
+       @media (max-width: 640px) {
+            .confirm-overlay {
+                padding: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+           .confirm-content {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .confirm-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--bg-dark);
+            z-index: 10;
+        }
+
+        .confirm-body { padding: 20px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        @media (min-width: 400px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #3663f7; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 16px; color: white; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .form-input:focus { outline: none; border-color: #3663f7; background: rgba(255,255,255,0.06); box-shadow: 0 0 15px rgba(54, 99, 247, 0.1); }
+        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/xml' fill='none' stroke='%233663f7' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; }
+
+
+
+        /* Interaction Effects */
+        .btn-interact {
+            transition: transform 0.1s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+        .btn-interact:active {
+            transform: scale(0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-subtle);
+        }
+
+        /* Animations */
+        @keyframes checkmark {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-checkmark { animation: checkmark 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes cloud-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; filter: blur(2px); }
+            50% { transform: scale(1.1); opacity: 0.6; filter: blur(0px); }
+        }
+        @keyframes sync-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-cloud-pulse { animation: cloud-pulse 2.5s infinite ease-in-out; }
+        .animate-sync-spin { animation: sync-rotate 1s infinite linear; }
+
+        
+    </style>
+</head>
+<body class="bg-black">
+
+    <!-- Header -->
+    <header class="header justify-between">
+        <div class="flex items-center gap-6">
+            <button id="menu-toggle" class="btn-interact flex items-center justify-center">
+                <div class="hamburger" id="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-black/20 overflow-hidden bg-white/20 flex items-center justify-center">
+                    <img src="Src/logo.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <h1 class="company-name uppercase">
+                    Ultra Aluminium
+                </h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="side-menu">
+        <div class="space-y-1">
+            <a href="../index.html" class="menu-item btn-interact"><i data-lucide="home"></i> Home</a>
+
+            <div class="dropdown-container">
+                <div class="menu-item btn-interact" onclick="toggleDropdown('powderSub', this, event)">
+                    <i data-lucide="bring-to-front"></i> Anodizing
+                    <i data-lucide="chevron-down" class="chevron-icon rotate"></i>
+                </div>
+                <div class="dropdown-content show" id="powderSub">
+                    <a href="index.html" class="sub-menu-item active-sub">Binding</a>
+                    <a href="../Production/index.html" class="sub-menu-item">Production</a>
+                    <a href="../Packing/index.html" class="sub-menu-item">Packing</a>
+                    <a href="#" class="sub-menu-item">Overview</a>
+                </div>
+            </div>
+        </div>
+
+
+    </aside>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Main Content Placeholder -->
+    <main class="pt-[100px] min-h-screen p-8 flex flex-col items-center">
+        <div class="text-center w-full">
+            <h1 class="page-heading !mb-0">Binding</h1>
+            <p class="sub-heading !mt-0">Anodizing Section</p>
+            <div class="mt-4 flex justify-center">
+                <div class="w-24 h-px bg-[#56de4a] opacity-30"></div>
+            </div>
+            
+            <div class="mt-10 mb-20">
+                <button onclick="openBindingModal()" class="btn-primary btn-interact">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Binding
+                </button>
+            </div>
+
+            <div class="max-w-4xl mx-auto w-full text-left">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Recent Submissions</h2>
+                    <span id="submission-count" class="bg-white/5 px-3 py-1 rounded-full text-[10px] font-bold text-gray-400 border border-white/5 uppercase">0 Records</span>
+                </div>
+                <div class="bg-[#0d0f14] border border-white/5 rounded-[32px] overflow-hidden min-h-[200px] shadow-2xl relative">
+                    <div id="empty-submissions" class="py-24 text-center">
+                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="inbox" class="w-8 h-8 text-gray-700"></i></div>
+                        <p class="text-gray-500 text-lg font-bold">Queue is Empty</p>
+                    </div>
+                    <div id="submission-list" class="divide-y divide-white/5 max-h-[600px] overflow-y-auto hidden"></div>
+                </div>
+                <div class="mt-12 mb-20 text-center">
+                    <button id="final-submit" class="bg-[var(--accent-orange)] text-black font-black px-12 py-5 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_50px_rgba(0,68,255,0.15)] cursor-pointer flex items-center gap-3 mx-auto uppercase tracking-wider text-lg disabled:opacity-30 disabled:grayscale" disabled><i data-lucide="send" class="w-6 h-6"></i> Final Submit to System</button>
+                    <p id="final-submit-hint" class="text-gray-600 text-xs mt-4 uppercase font-bold tracking-widest">Add a record to proceed</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Binding Modal -->
+    <div id="bindingModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold uppercase tracking-widest text-[#3663f7]">New Binding Record</h3>
+                <button onclick="toggleModal('bindingModal')" class="text-white/40 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bindingForm" class="form-grid">
+                    <!-- Dates -->
+                    <div class="form-group">
+                        <label class="form-label">Binding Date</label>
+                        <input type="date" name="bindingDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Extrusion Date</label>
+                        <input type="date" name="extrusionDate" class="form-input">
+                    </div>
+                    
+                    <!-- Core Details -->
+                    <div class="form-group">
+                        <label class="form-label">Billet Batch</label>
+                        <input type="number" name="billetBatch" class="form-input" placeholder="0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Profile</label>
+                        <div class="relative">
+                            <input type="text" name="profile" class="form-input w-full pl-10" placeholder="Search profile...">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/30"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Bucket No</label>
+                        <input type="text" name="bucketNo" class="form-input" placeholder="Enter bucket ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Rack No</label>
+                        <input type="text" name="fullRackNo" class="form-input" placeholder="e.g. 101, 102">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">One Full Rack Qty</label>
+                        <input type="number" name="oneFullRackQty" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Pcs Rack No</label>
+                        <input type="text" name="pcsRackNo" class="form-input" placeholder="e.g. 5, 10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Pcs Qty</label>
+                        <input type="text" name="pcsQty" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Binding Qty</label>
+                        <input type="number" name="totalBindingQty" class="form-input font-bold text-[#3663f7]">
+                    </div>
+                    
+                    <!-- Dropdowns -->
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-input">
+                            <option value="" disabled selected>Select Type</option>
+                            <option value="ULR">ULR</option>
+                            <option value="PRM">PRM</option>
+                            <option value="ULR PRM">ULR PRM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Surface</label>
+                        <select name="surface" class="form-input">
+                            <option value="" disabled selected>Select Surface</option>
+                            <option value="Natural">Natural</option>
+                            <option value="Bronze">Bronze</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Binding Team</label>
+                        <select name="bindingTeam" class="form-input">
+                            <option value="" disabled selected>Select Team</option>
+                            <option value="Team A">Team A</option>
+                            <option value="Team B">Team B</option>
+                            <option value="Team C">Team C</option>
+                            <option value="Team D">Team D</option>
+                            <option value="Team E">Team E</option>
+                            <option value="Team F">Team F</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Average Time</label>
+                        <input type="time" name="averageTime" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Rejection Qty</label>
+                        <input type="number" name="rejectionQty" class="form-input text-red-400">
+                    </div>
+                </form>
+                
+                <div class="mt-10 flex gap-4">
+                    <button type="button" onclick="saveBindingRecord()" class="btn-primary flex-1 justify-center">Save Record</button>
+                    <button type="button" onclick="toggleModal('bindingModal')" class="flex-1 px-6 py-2 border border-white/10 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div id="viewModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-bold uppercase tracking-widest text-[#3663f7]">Record Details</h3>
+                <button onclick="toggleModal('viewModal')" class="text-white/40 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="viewModalBody" class="divide-y divide-white/5">
+                <!-- Details injected here -->
+            </div>
+            <div class="p-8 text-center bg-[#0d0f14]">
+                <button onclick="toggleModal('viewModal')" class="bg-[#3663f7] text-white font-black px-10 py-4 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_30px_rgba(54,99,247,0.15)] cursor-pointer flex items-center justify-center gap-3 mx-auto uppercase tracking-wider text-sm">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    Dismiss View
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="confirm-content shadow-2xl !max-w-[480px] !rounded-[40px] !bg-[#14161c]">
+            <div id="confirm-state-ask" class="p-12 text-center">
+                <div class="w-20 h-20 bg-[#3663f7]/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-[#3663f7]/20">
+                    <i data-lucide="help-circle" class="w-10 h-10 text-[#3663f7]"></i>
+                </div>
+                <h3 class="text-3xl font-black text-white uppercase tracking-tight mb-3">Are you sure?</h3>
+                <p class="text-gray-400 mb-10 text-base font-medium opacity-80">Ready to submit all <span id="confirm-count" class="text-white font-bold">0</span> records in the queue?</p>
+                <div class="flex gap-4">
+                    <button onclick="closeConfirmModal()" class="flex-1 px-8 py-5 rounded-[20px] bg-white/[0.03] border border-white/5 font-bold text-gray-300 hover:bg-white/10 transition-all cursor-pointer">Cancel</button>
+                    <button onclick="finalPush()" class="flex-[1.5] bg-[#3663f7] text-white font-black px-8 py-5 rounded-[20px] hover:shadow-[0_0_30px_rgba(54,99,247,0.3)] active:scale-95 transition-all cursor-pointer uppercase tracking-wider">Yes, Submit</button>
+                </div>
+            </div>
+            <div id="confirm-state-loading" class="p-20 text-center hidden">
+                <div class="relative w-28 h-28 mx-auto mb-8">
+                    <i data-lucide="cloud" class="w-28 h-28 text-[#3663f7] animate-cloud-pulse absolute inset-0"></i>
+                    <div class="absolute inset-0 flex items-center justify-center"><i data-lucide="refresh-cw" class="w-10 h-10 text-[#3663f7] animate-sync-spin"></i></div>
+                </div>
+                <h3 class="text-xl font-black text-white uppercase tracking-[0.2em]">Syncing</h3>
+            </div>
+            <div id="confirm-state-success" class="p-16 text-center hidden">
+                <div class="w-20 h-20 bg-[#3663f7] rounded-full flex items-center justify-center mx-auto mb-6 animate-checkmark shadow-[0_0_40px_rgba(0,68,255, 0.4)]"><i data-lucide="check" class="w-10 h-10 text-black stroke-[4px]"></i></div>
+                <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Success!</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const submissionList = document.getElementById('submission-list');
+        const emptySubmissions = document.getElementById('empty-submissions');
+        const submissionCount = document.getElementById('submission-count');
+        const finalSubmitBtn = document.getElementById('final-submit');
+        const finalSubmitHint = document.getElementById('final-submit-hint');
+        const modalTitle = document.querySelector('#bindingModal h3');
+
+        let records = [];
+        let editingIndex = -1;
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.toggle('active');
+            hamburgerIcon.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        function toggleDropdown(id, element, event) {
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById(id);
+            const icon = element ? element.querySelector('.chevron-icon') : null;
+            if (dropdown) dropdown.classList.toggle('show');
+            if (icon) icon.classList.toggle('rotate');
+        }
+
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            const isOpen = modal.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+            return isOpen;
+        }
+
+        function openBindingModal(editIdx = -1) {
+            editingIndex = editIdx;
+            const form = document.getElementById('bindingForm');
+            
+            if (editingIndex > -1) {
+                modalTitle.innerText = "Edit Binding Record";
+                const record = records[editingIndex];
+                Object.keys(record).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) input.value = record[key];
+                });
+            } else {
+                modalTitle.innerText = "New Binding Record";
+                form.reset();
+            }
+            toggleModal('bindingModal');
+        }
+
+        function saveBindingRecord() {
+            const form = document.getElementById('bindingForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Basic Validation
+            if (!data.profile || !data.totalBindingQty) {
+                alert('Please fill in required fields (Profile and Total Binding Qty)');
+                return;
+            }
+
+            if (editingIndex > -1) {
+                records[editingIndex] = data;
+            } else {
+                records.push(data);
+            }
+
+            updateSubmissionsList();
+            toggleModal('bindingModal');
+            form.reset();
+            editingIndex = -1;
+        }
+
+        function removeRecord(index) {
+             {
+                records.splice(index, 1);
+                updateSubmissionsList();
+            }
+        }
+
+        function viewRecord(index) {
+            const record = records[index];
+            const viewBody = document.getElementById('viewModalBody');
+            
+            const labelsMap = {
+                bindingDate: "Binding Date",
+                extrusionDate: "Extrusion Date",
+                billetBatch: "Billet Batch",
+                profile: "Profile",
+                bucketNo: "Bucket No",
+                fullRackNo: "Full Rack No",
+                oneFullRackQty: "One Full Rack Qty",
+                pcsRackNo: "Pcs Rack No",
+                pcsQty: "Pcs Qty",
+                totalBindingQty: "Total Binding Qty",
+                type: "Type",
+                surface: "Surface",
+                bindingTeam: "Binding Team",
+                averageTime: "Average Time",
+                rejectionQty: "Rejection Qty"
+            };
+
+            viewBody.innerHTML = Object.keys(labelsMap).map(key => `
+                <div class="px-8 py-4 flex items-center justify-between group hover:bg-white/[0.01] transition-colors">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#3663f7] opacity-80">${labelsMap[key]}</span>
+                    <span class="text-white font-bold text-right">${record[key] || 'N/A'}</span>
+                </div>
+            `).join('');
+
+            toggleModal('viewModal');
+            lucide.createIcons();
+        }
+
+        function updateSubmissionsList() {
+            if (records.length === 0) {
+                emptySubmissions.classList.remove('hidden');
+                submissionList.classList.add('hidden');
+                finalSubmitBtn.disabled = true;
+                finalSubmitHint.innerText = 'Add a record to proceed';
+            } else {
+                emptySubmissions.classList.add('hidden');
+                submissionList.classList.remove('hidden');
+                finalSubmitBtn.disabled = false;
+                finalSubmitHint.innerText = 'Ready for system processing';
+            }
+
+            submissionCount.innerText = `${records.length} ${records.length === 1 ? 'Record' : 'Records'}`;
+            
+            submissionList.innerHTML = records.map((record, index) => `
+                <div class="p-4 sm:p-6 flex items-start sm:items-center justify-between group hover:bg-white/[0.02] transition-colors">
+                    <div class="flex items-start sm:items-center gap-4 sm:gap-6">
+                        <div onclick="viewRecord(${index})" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#3663f7]/10 flex-shrink-0 flex items-center justify-center border border-[#3663f7]/20 cursor-pointer hover:bg-[#3663f7]/20 transition-all">
+                            <i data-lucide="layers" class="w-5 h-5 sm:w-6 sm:h-6 text-[#3663f7]"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-base sm:text-lg leading-tight">${record.profile}</h4>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                                <span class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-500 flex items-center gap-1">
+                                    <i data-lucide="calendar" class="w-3 h-3"></i> ${record.bindingDate}
+                                </span>
+                                <span class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-[#3663f7] flex items-center gap-1">
+                                    <i data-lucide="package" class="w-3 h-3"></i> QTY: ${record.totalBindingQty}
+                                </span>
+                                <span class="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-500 flex items-center gap-1">
+                                    <i data-lucide="users" class="w-3 h-3"></i> ${record.bindingTeam}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-1 sm:gap-2">
+                        <button onclick="openBindingModal(${index})" class="p-2 sm:p-3 rounded-xl hover:bg-[#3663f7]/10 text-gray-600 hover:text-[#3663f7] transition-all opacity-100 sm:opacity-0 group-hover:opacity-100">
+                            <i data-lucide="pencil" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        </button>
+                        <button onclick="removeRecord(${index})" class="p-2 sm:p-3 rounded-xl hover:bg-red-500/10 text-gray-600 hover:text-red-500 transition-all opacity-100 sm:opacity-0 group-hover:opacity-100">
+                            <i data-lucide="trash-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Close sidebar or modal on Esc key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (sidebar.classList.contains('active')) toggleSidebar();
+                const activeModal = document.querySelector('.modal-overlay.active');
+                if (activeModal) toggleModal(activeModal.id);
+            }
+        });
+
+        // Final Submit Logic
+        finalSubmitBtn.addEventListener('click', () => {
+            document.getElementById('confirm-count').innerText = records.length;
+            document.getElementById('confirm-state-ask').classList.remove('hidden');
+            document.getElementById('confirm-state-loading').classList.add('hidden');
+            document.getElementById('confirm-state-success').classList.add('hidden');
+            toggleModal('confirm-modal');
+        });
+
+        function closeConfirmModal() {
+            toggleModal('confirm-modal');
+        }
+
+        // GOOGLE WEB APP URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwS53A9F5dvSML7TwglEvZSMcL5jNUGJorMBZAB_zCXMHDATR2bv3rP6XLnKdFu1G1o/exec";
+
+        function finalPush() {
+            if (SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+                alert("Please paste your Google Script URL into the SCRIPT_URL variable in the code.");
+                return;
+            }
+
+            const askState = document.getElementById('confirm-state-ask');
+            const loadingState = document.getElementById('confirm-state-loading');
+            const successState = document.getElementById('confirm-state-success');
+
+            askState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            lucide.createIcons();
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important for Google Script
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ records: records })
+            })
+            .then(() => {
+                loadingState.classList.add('hidden');
+                successState.classList.remove('hidden');
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    toggleModal('confirm-modal');
+                    records = [];
+                    updateSubmissionsList();
+                }, 2000);
+            })
+            .catch(err => {
+                alert("Error connecting to system: " + err);
+                askState.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
