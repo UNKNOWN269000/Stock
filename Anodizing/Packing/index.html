@@ -282,7 +282,7 @@
         .confirm-body { padding: 20px; }
         
         .form-grid {
-            display: grid;
+            display: list-item;
             grid-template-columns: 1fr;
             gap: 10px;
         }
@@ -462,10 +462,10 @@
                                 <span class="text-sm font-bold text-gray-400 group-hover:text-white uppercase">Premium Full Pack</span>
                             </label>
                             <div id="premium-frame" class="hidden p-4 bg-[#56de4a]/5 border border-[#56de4a]/20 rounded-2xl space-y-4">
-                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="premiumPackNo" id="premium-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(,/[^0-9-]/g,'')"></div>
+                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="premiumPackNo" id="premium-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <div><label class="form-label !text-[10px]">One Bundle Qty</label><input type="text" name="premiumOneQty" id="premium-one-qty" class="form-input !py-2" oninput="calcTotal('premium')"></div>
-                                    <div><label class="form-label !text-[10px]">Total Bundles</label><input type="text" name="premiumTotalBundle" id="premium-total-bundle" class="form-input !py-2" oninput="calcTotal('premium')"></div>
+                                    <div><label class="form-label !text-[10px]">One Bundle Qty</label><input type="number" name="premiumOneQty" id="premium-one-qty" class="form-input !py-2" oninput="calcTotal('premium')"></div>
+                                    <div><label class="form-label !text-[10px]">Total Bundles</label><input type="number" name="premiumTotalBundle" id="premium-total-bundle" class="form-input !py-2" oninput="calcTotal('premium')"></div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><label class="form-label !text-[10px]">Total Qty</label><input type="number" name="premiumTotalQty" id="premium-total-qty" class="form-input !py-2 bg-black/40" readonly></div>
@@ -473,11 +473,11 @@
                                 </div>
                                 <label class="flex items-center gap-2 cursor-pointer pt-2 border-t border-[#56de4a]/10"><input type="checkbox" name="premiumPcsEnabled" id="premium-pcs-check" onchange="togglePackingFrame('premium-pcs-frame', this.checked)" class="w-4 h-4 accent-purple-500"><span class="text-[11px] font-black text-gray-500 uppercase">Premium Pcs Details</span></label>
                                 <div id="premium-pcs-frame" class="hidden p-3 bg-black/20 border border-white/5 rounded-xl space-y-3">
-                                    <div class="form-group mb-0"><label class="form-label !text-[9px]">Pcs Pack No (Numbers, - , allowed)</label><input type="text" name="premiumPcsPackNo" id="premium-pcs-pack-no" class="form-input !py-1.5 !text-xs" oninput="this.value=this.value.replace(,/[^0-9,-]/g,'')"></div>
+                                    <div class="form-group mb-0"><label class="form-label !text-[9px]">Pcs Pack No (Numbers, - , allowed)</label><input type="text" name="premiumPcsPackNo" id="premium-pcs-pack-no" class="form-input !py-1.5 !text-xs" oninput="this.value=this.value.replace(/[^0-9,-]/g,'')"></div>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <div><label class="form-label !text-[9px]">Bundle Qty</label><input type="text" name="premiumPcsOneQty" id="premium-pcs-one-qty" class="form-input !py-1.5 !text-xs"></div>
-                                        <div><label class="form-label !text-[9px]">Total Qty</label><input type="text" name="premiumPcsTotalQty" id="premium-pcs-total-qty" class="form-input !py-1.5 !text-xs"></div>
-                                        <div><label class="form-label !text-[9px]">Avg Weight</label><input type="text" step="0.001" name="premiumPcsAvgWeight" id="premium-pcs-avg-weight" class="form-input !py-1.5 !text-xs"></div>
+                                        <div><label class="form-label !text-[9px]">Bundle Qty</label><input type="number" name="premiumPcsOneQty" id="premium-pcs-one-qty" class="form-input !py-1.5 !text-xs"></div>
+                                        <div><label class="form-label !text-[9px]">Total Qty</label><input type="number" name="premiumPcsTotalQty" id="premium-pcs-total-qty" class="form-input !py-1.5 !text-xs"></div>
+                                        <div><label class="form-label !text-[9px]">Avg Weight</label><input type="number" step="0.001" name="premiumPcsAvgWeight" id="premium-pcs-avg-weight" class="form-input !py-1.5 !text-xs"></div>
                                     </div>
                                 </div>
                             </div>
@@ -490,7 +490,7 @@
                                 <span class="text-sm font-bold text-gray-400 group-hover:text-white uppercase">Non Brand Full Pack</span>
                             </label>
                             <div id="nonbrand-frame" class="hidden p-4 bg-white/5 border border-white/10 rounded-2xl space-y-4">
-                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="nonBrandPackNo" id="nonbrand-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(,/[^0-9-]/g,'')"></div>
+                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="nonBrandPackNo" id="nonbrand-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div><label class="form-label !text-[10px]">One Bundle Qty</label><input type="number" name="nonBrandOneQty" id="nonbrand-one-qty" class="form-input !py-2" oninput="calcTotal('nonbrand')"></div>
                                     <div><label class="form-label !text-[10px]">Total Bundles</label><input type="number" name="nonBrandTotalBundle" id="nonbrand-total-bundle" class="form-input !py-2" oninput="calcTotal('nonbrand')"></div>
@@ -501,10 +501,10 @@
                                 </div>
                                 <label class="flex items-center gap-2 cursor-pointer pt-2 border-t border-white/10"><input type="checkbox" name="nonBrandPcsEnabled" id="nonbrand-pcs-check" onchange="togglePackingFrame('nonbrand-pcs-frame', this.checked)" class="w-4 h-4 accent-purple-500"><span class="text-[11px] font-black text-gray-500 uppercase">Non Brand Pcs Details</span></label>
                                 <div id="nonbrand-pcs-frame" class="hidden p-3 bg-black/20 border border-white/5 rounded-xl space-y-3">
-                                    <div class="form-group mb-0"><label class="form-label !text-[9px]">Pcs Pack No (Numbers, - , allowed)</label><input type="text" name="nonBrandPcsPackNo" id="nonbrand-pcs-pack-no" class="form-input !py-1.5 !text-xs" oninput="this.value=this.value.replace(,/[^0-9,-]/g,'')"></div>
+                                    <div class="form-group mb-0"><label class="form-label !text-[9px]">Pcs Pack No (Numbers, - , allowed)</label><input type="text" name="nonBrandPcsPackNo" id="nonbrand-pcs-pack-no" class="form-input !py-1.5 !text-xs" oninput="this.value=this.value.replace(/[^0-9,-]/g,'')"></div>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <div><label class="form-label !text-[9px]">Bundle Qty</label><input type="text" name="nonBrandPcsOneQty" id="nonbrand-pcs-one-qty" class="form-input !py-1.5 !text-xs"></div>
-                                        <div><label class="form-label !text-[9px]">Total Qty</label><input type="text" name="nonBrandPcsTotalQty" id="nonbrand-pcs-total-qty" class="form-input !py-1.5 !text-xs"></div>
+                                        <div><label class="form-label !text-[9px]">Bundle Qty</label><input type="number" name="nonBrandPcsOneQty" id="nonbrand-pcs-one-qty" class="form-input !py-1.5 !text-xs"></div>
+                                        <div><label class="form-label !text-[9px]">Total Qty</label><input type="number" name="nonBrandPcsTotalQty" id="nonbrand-pcs-total-qty" class="form-input !py-1.5 !text-xs"></div>
                                         <div><label class="form-label !text-[9px]">Avg Weight</label><input type="number" step="0.001" name="nonBrandPcsAvgWeight" id="nonbrand-pcs-avg-weight" class="form-input !py-1.5 !text-xs"></div>
                                     </div>
                                 </div>
@@ -518,9 +518,9 @@
                                 <span class="text-sm font-bold text-gray-400 group-hover:text-white uppercase">Weight Bar Pack</span>
                             </label>
                             <div id="weightbar-frame" class="hidden p-4 bg-blue-500/5 border border-blue-500/20 rounded-2xl space-y-4">
-                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="weightBarPackNo" id="weightbar-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(,/[^0-9-]/g,'')"></div>
+                                <div class="form-group mb-0"><label class="form-label !text-[10px]">Pack No</label><input type="text" name="weightBarPackNo" id="weightbar-pack-no" class="form-input !py-2" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <div><label class="form-label !text-[10px]">Bundle Qty</label><input type="text" name="weightBarBundleQty" id="weightbar-one-qty" class="form-input !py-2"></div>
+                                    <div><label class="form-label !text-[10px]">Bundle Qty</label><input type="number" name="weightBarBundleQty" id="weightbar-one-qty" class="form-input !py-2"></div>
                                     <div><label class="form-label !text-[10px]">Avg Weight</label><input type="number" step="0.001" name="weightBarAvgWeight" id="weightbar-avg-weight" class="form-input !py-2"></div>
                                 </div>
                             </div>
