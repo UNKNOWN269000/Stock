@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTRA ALUMINIUM | Industrial Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg-deep: #000000;
+            --bg-dark: #0d0f14;
+            --bg-charcoal: #0d0f14;
+            --neon-green: #56de4a;
+            --accent-green2: #56de4a;
+            --accent-green: #56de4a;
+            --accent-orange: #3663f7;
+            --burnt-orange: #3663f7;
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --sidebar-transition: cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-deep);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .tracking-tight-custom { letter-spacing: -0.05em; }
+        .tracking-wide-custom { letter-spacing: 0.15em; }
+        .company-name { font-size: 1.1rem; font-weight: 800; color: var(--accent-green2); letter-spacing: 0.5px; }
+
+        /* Header Styles */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(13, 15, 20, 0.85); display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000; backdrop-filter: blur(15px);
+        }
+        .header .company-name { color: var(--accent-green2); }
+        .header .hamburger span { background: #fff; }
+        .header .text-white\/40 { color: var(--accent-green2); opacity: 0.6; }
+        .header .text-xs { color: var(--accent-green2); }
+
+        /* Hamburger Animation */
+        .hamburger {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            cursor: pointer;
+            transition: .3s ease-in-out;
+        }
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 9px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+        .hamburger span:nth-child(1) { top: 0px; }
+        .hamburger span:nth-child(2) { top: 8px; }
+        .hamburger span:nth-child(3) { top: 16px; }
+
+        .hamburger.open span:nth-child(1) { top: 8px; transform: rotate(135deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
+        .hamburger.open span:nth-child(3) { top: 8px; transform: rotate(-135deg); }
+
+        /* Sidebar & Menu Styles */
+        .side-menu {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%;
+            background: var(--bg-dark); border-right: 1px solid var(--border-color);
+            padding: 90px 15px 40px; transition: var(--transition); z-index: 1500;
+            overflow-y: auto;
+        }
+        .side-menu.active { left: 0; }
+        
+        .overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(4px); display: none; z-index: 1400; 
+        }
+        .overlay.active { display: block; }
+
+        .menu-item {
+            color: white; text-decoration: none; display: flex; align-items: center; 
+            gap: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; border-radius: 12px;
+            margin-bottom: 4px; font-size: 0.95rem;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); }
+        .menu-item.active-link { color: var(--accent-green); background: rgba(144, 177, 238, 0.1); font-weight: 600; }
+        
+        /* DROPDOWN LOGIC */
+        .dropdown-container { display: flex; flex-direction: column; }
+        .dropdown-content { 
+            display: none; flex-direction: column; padding-left: 15px; 
+            border-left: 1px solid var(--border-color); margin-left: 24px; margin-bottom: 8px;
+        }
+        .dropdown-content.show { display: flex; }
+        
+        .sub-menu-item {
+            color: var(--text-muted); text-decoration: none; padding: 10px 14px;
+            font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 10px; border-radius: 8px;
+        }
+        .sub-menu-item:hover { color: var(--accent-green); background: rgba(255,255,255,0.03); }
+        .sub-menu-item.active-sub { color: var(--accent-green); font-weight: 600; background: rgba(255,255,255,0.05); }
+        
+        .nested-content {
+            display: none; flex-direction: column; padding-left: 15px;
+            border-left: 1px dotted var(--border-color); margin-bottom: 5px;
+        }
+        .nested-content.show { display: flex; }
+
+        .chevron-icon { margin-left: auto; transition: transform 0.3s; width: 16px; }
+        .chevron-icon.rotate { transform: rotate(180deg); }
+
+        /* Heading Styles */
+        .page-heading {
+            font-size: 1.75rem; margin-bottom: 5px; font-weight: 800;
+            background: linear-gradient(to right, #fff, #3663f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        @media (min-width: 768px) {
+            .page-heading { font-size: 2.5rem; }
+        }
+        .sub-heading { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+        @media (min-width: 768px) {
+            .sub-heading { font-size: 1.1rem; }
+        }
+
+        /* Modern Label Button Styles */
+        .btn-modern {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            height: 56px;
+            border-radius: 18px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: color 0.3s, border-color 0.3s, transform 0.2s;
+        }
+
+        .btn-modern span {
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: var(--y, 50%);
+            left: var(--x, 50%);
+            width: 0;
+            height: 0;
+            background: var(--hover-color, #3663f7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 1;
+        }
+
+        .btn-modern:hover::before {
+            width: 350px;
+            height: 350px;
+        }
+
+        .btn-modern.active::before {
+            width: 350px;
+            height: 350px;
+            transition: none;
+        }
+
+        .btn-modern:active { transform: scale(0.96); }
+        
+        /* Binding - Ocean Blue */
+        .btn-binding { --hover-color: #0077be; }
+        .btn-binding:hover, .btn-binding.active { 
+            color: #fff; 
+            border-color: #0077be;
+            box-shadow: 0 0 20px rgba(0, 119, 190, 0.2);
+        }
+        
+        /* Wood Prod - Sky Blue */
+        .btn-wood-prod { --hover-color: #00d2ff; }
+        .btn-wood-prod:hover, .btn-wood-prod.active { 
+            color: #000; 
+            border-color: #00d2ff;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+        }
+
+        /* Powder Prod - Light Green */
+        .btn-powder-prod { --hover-color: #56de4a; }
+        .btn-powder-prod:hover, .btn-powder-prod.active { 
+            color: #000; 
+            border-color: #56de4a;
+            box-shadow: 0 0 20px rgba(86, 222, 74, 0.2);
+        }
+        
+        /* Powder Pack - Orange */
+        .btn-powder-pack { --hover-color: #ff8c00; }
+        .btn-powder-pack:hover, .btn-powder-pack.active { 
+            color: #000; 
+            border-color: #ff8c00;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.2);
+        }
+
+        /* Wood Pack - Purple */
+        .btn-wood-pack { --hover-color: #a855f7; }
+        .btn-wood-pack:hover, .btn-wood-pack.active { 
+            color: #fff; 
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: rgba(54, 99, 247, 0.1);
+            border: 1px solid rgba(54, 99, 247, 0.3);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            width: auto;
+        }
+        @media (max-width: 640px) {
+            .btn-primary { width: 100%; max-width: 320px; }
+        }
+
+        .btn-primary span, .btn-primary i {
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: var(--y, 50%);
+            left: var(--x, 50%);
+            width: 0;
+            height: 0;
+            background: #3663f7;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 1;
+        }
+
+        .btn-primary:hover::before {
+            width: 450px;
+            height: 450px;
+        }
+
+        .btn-primary:hover {
+            border-color: #3663f7;
+            box-shadow: 0 10px 25px rgba(54, 99, 247, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+        
+        .view-label { color: #3663f7; font-[10px]; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .view-label { color: #3663f7; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .view-value { color: white; font-size: 1rem; font-weight: 500; margin-bottom: 12px; }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: #0d0f14;
+            width: calc(100% - 32px);
+            max-width: 420px;
+            max-height: 85vh;
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        @media (max-width: 640px) {
+            .modal-content {
+                border-radius: 24px 24px 0 0;
+                max-height: 100vh;
+                height: 100%;
+                position: fixed;
+                bottom: 0;
+            }
+            .modal-overlay {
+                padding: 0;
+                align-items: flex-end;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--bg-dark);
+            z-index: 10;
+        }
+
+        .modal-body { padding: 20px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        @media (min-width: 400px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #3663f7; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 16px; color: white; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .form-input:focus { outline: none; border-color: #3663f7; background: rgba(255,255,255,0.06); box-shadow: 0 0 15px rgba(54, 99, 247, 0.1); }
+        select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/xml' fill='none' stroke='%233663f7' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; }
+
+        /* Confirm Styles */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            z-index: 2500;
+            padding: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-overlay.active { display: flex !important; }
+        
+        .confirm-content {
+            background: #14161c;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        @media (max-width: 640px) {
+            .confirm-overlay {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+           .confirm-content {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: calc(100% - 32px);
+                max-width: 380px;
+                border-radius: 32px;
+            }
+        }
+
+        /* Responsive Modal Header Logic */
+        .responsive-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .responsive-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.25rem 1rem;
+            }
+            .responsive-header .ml-auto {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* Professional Table Refinements */
+        .db-table { border-collapse: collapse; width: 100%; }
+        .db-table th { 
+            white-space: nowrap; 
+            backdrop-filter: blur(10px);
+            background: rgba(13, 15, 20, 0.9) !important;
+            text-align: center !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .db-table td { 
+            padding: 1rem 1.25rem; 
+            font-size: 0.85rem; 
+            color: rgba(255,255,255,0.7);
+            text-align: center !important;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 15, 20, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .loading-overlay.active { display: flex; }
+        .db-table tr:hover td { 
+            color: #fff; 
+            background: rgba(255,255,255,0.01); 
+        }
+        .num-data { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; font-weight: 500; }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 99px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+        .status-dot { 
+            width: 6px; 
+            height: 6px; 
+            border-radius: 50%; 
+            background: currentColor; 
+        }
+
+        /* Online State */
+        .is-online { color: #56de4a !important; border-color: rgba(86, 222, 74, 0.2) !important; }
+        .is-online .status-dot {
+            animation: status-bling 1.5s infinite;
+            box-shadow: 0 0 8px #56de4a;
+        }
+
+        /* Offline State */
+        .is-offline { color: #ff4444 !important; border-color: rgba(255, 68, 68, 0.2) !important; }
+        .is-offline .status-dot {
+            animation: none;
+            box-shadow: 0 0 4px #ff4444;
+        }
+
+        /* Slow/High Ping State */
+        .is-slow { color: #ffcc00 !important; border-color: rgba(255, 204, 0, 0.2) !important; }
+        .is-slow .status-dot {
+            animation: status-bling 2s infinite;
+            box-shadow: 0 0 8px #ffcc00;
+        }
+
+        @keyframes status-bling {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        /* Interaction Effects */
+        .btn-interact {
+            transition: transform 0.1s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+        .btn-interact:active {
+            transform: scale(0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-subtle);
+        }
+
+        /* Welcome Card Styling */
+        .welcome-card {
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 32px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 48px;
+            backdrop-filter: blur(10px);
+        }
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: #3663f7;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .welcome-card h2 { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4em; color: #3663f7; margin-bottom: 12px; }
+        .welcome-card h1 { font-size: 2.25rem; font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; }
+        .welcome-card p { font-size: 0.9rem; color: rgba(255,255,255,0.4); font-weight: 500; line-height: 1.6; }
+
+        /* Animations */
+        @keyframes checkmark {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-checkmark { animation: checkmark 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes cloud-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; filter: blur(2px); }
+            50% { transform: scale(1.1); opacity: 0.6; filter: blur(0px); }
+        }
+        @keyframes sync-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-cloud-pulse { animation: cloud-pulse 2.5s infinite ease-in-out; }
+        .animate-sync-spin { animation: sync-rotate 1s infinite linear; }
+    </style>
+</head>
+<body class="bg-black">
+
+    <!-- Header -->
+    <header class="header justify-between">
+        <div class="flex items-center gap-6">
+            <button id="menu-toggle" class="btn-interact flex items-center justify-center">
+                <div class="hamburger" id="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-black/20 overflow-hidden bg-white/20 flex items-center justify-center">
+                    <img src="Src/logo.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <h1 class="company-name uppercase">
+                    Ultra Aluminium
+                </h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="side-menu">
+        <div class="space-y-1" id="menu">
+            <a href="../index.html" class="menu-item">
+                <i data-lucide="home"></i> Home
+            </a>
+
+            <div class="dropdown-container">
+                <div class="menu-item" onclick="toggleDropdown('powderSub', this, event)">
+                    <i data-lucide="bring-to-front"></i> Powder Coat
+                    <i data-lucide="chevron-down" class="chevron-icon rotate"></i>
+                </div>
+                <div class="dropdown-content show" id="powderSub">
+                    <a href="../Wood Finish Production/index.html" class="sub-menu-item">Wood Finish Production</a>
+                    <a href="../Powder Coat Production/index.html" class="sub-menu-item"> Powder Coat Production</a>
+                    
+                    <div class="dropdown-container">
+                        <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderPacking', this, event)">
+                            <i data-lucide="package-check" style="width:14px"></i> Packing
+                            <i data-lucide="chevron-down" class="chevron-icon"></i>
+                        </div>
+                        <div class="nested-content" id="powderPacking">
+                            <a href="../Packing/PowderCoat/index.html" class="sub-menu-item">Powder Coat</a>
+                            <a href="../Packing/Wood Finish/index.html" class="sub-menu-item">Wood Finish</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown-container">
+                        <div class="menu-item" style="font-size: 0.85rem; padding: 10px 14px; color: var(--text-muted);" onclick="toggleDropdown('powderDamage', this, event)">
+                            <i data-lucide="alert-triangle" style="width:14px"></i> Special Production
+                            <i data-lucide="chevron-down" class="chevron-icon"></i>
+                        </div>
+                        <div class="nested-content" id="powderDamage">
+                            <a href="#" class="sub-menu-item">Re-Powder</a>
+                            <a href="#" class="sub-menu-item">One Micron</a>
+                        </div>
+                    </div>
+                    
+                    <a href="index.html" class="sub-menu-item active-sub">Overview</a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Main Content Placeholder -->
+    <main class="pt-[100px] min-h-screen p-8 flex flex-col items-center">
+        <div class="welcome-card text-left relative">
+            <div class="relative z-10">
+                <h2>System Overview</h2>
+                <h1>Welcome Back</h1>
+                <p>Powder Coat Section is currently active. You can monitor logs, production quantities, and packing records in real-time.</p>
+
+                <div class="flex items-center gap-6 mt-8">
+                    <div id="currentDate" class="text-[10px] font-black uppercase tracking-widest text-[#56de4a]">Loading Date...</div>
+                </div>
+            </div>
+            <!-- Decorative Icon -->
+            <div class="absolute -right-8 -bottom-8 opacity-[0.03] rotate-12">
+                <i data-lucide="layers" class="w-64 h-64 text-white"></i>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-4 w-full mb-16">
+            <button class="btn-modern btn-wood-prod" onmousemove="updateMousePos(event, this)" onclick="openModal('woodProdModal')"><span>Wood Finish Production</span></button>
+            <button class="btn-modern btn-powder-prod" onmousemove="updateMousePos(event, this)" onclick="openModal('powderProdModal')"><span>Powder Coat Production</span></button>
+            <button class="btn-modern btn-powder-pack" onmousemove="updateMousePos(event, this)" onclick="openModal('powderPackModal')"><span>Powder Coat Packing</span></button>
+            <button class="btn-modern btn-wood-pack" onmousemove="updateMousePos(event, this)" onclick="openModal('woodPackModal')"><span>Wood Finish Packing</span></button>
+        </div>
+    </main>
+
+    <!-- Wood Finish Production Modal (Full Screen Table View) -->
+    <div id="woodProdModal" class="modal-overlay !p-0">
+        <div class="modal-content !max-w-full !w-full !h-full !max-h-full !rounded-none flex flex-col">
+            <div class="responsive-header border-b border-white/5 bg-[#0d0f14]">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#00d2ff]/10 flex items-center justify-center border border-[#00d2ff]/20 shadow-[0_0_20px_rgba(0,210,255,0.1)]">
+                        <i data-lucide="droplets" class="w-5 h-5 sm:w-6 sm:h-6 text-[#00d2ff]"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-base sm:text-xl font-black uppercase tracking-tighter text-white">Wood Finish Production Logs</h3>
+                            <div class="status-badge network-status is-online"><span class="status-dot"></span> <span class="status-text">Online</span></div>
+                        </div>
+                        <p class="text-[8px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest">Wood Finish section</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4 ml-auto w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-3 px-4 py-2 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl hover:border-white/20 transition-all flex-1 sm:flex-initial">
+                        <label class="hidden lg:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Log Filter:</label>
+                        <input type="date" onchange="fetchSheetData('wood-prod')" class="bg-transparent text-white text-[11px] sm:text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark] w-full sm:w-auto text-center sm:text-left">
+                    </div>
+                    <button onclick="toggleModal('woodProdModal')" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5">
+                        <i data-lucide="x" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body !p-0 flex-1 overflow-hidden relative">
+                <div id="wood-prodLoader" class="loading-overlay"></div>
+                <div class="h-full w-full overflow-x-auto overflow-y-auto custom-scrollbar">
+                    <table class="db-table w-full text-left min-w-[1800px]">
+                        <thead class="sticky top-0 z-20">
+                            <tr>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5">Base Color Prod Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5">Wood Finish Prod Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5">Profile</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5 text-right">Length</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5">Surface</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5 text-right">Qty</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5 text-right">Rejected Qty</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5 text-right">Electricity (Kwh)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#00d2ff] border-b border-white/5 text-right">Gas Reading</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wood-prodTableBody">
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td colspan="9" class="p-40 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5"><i data-lucide="database" class="w-8 h-8 text-gray-700"></i></div>
+                                        <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Awaiting Entry Synchronization</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/5 bg-[#0d0f14] flex justify-end">
+                <button onclick="toggleModal('woodProdModal')" class="px-12 py-4 bg-[#00d2ff] text-black font-black rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_40px_rgba(0,210,255,0.2)] uppercase tracking-widest text-xs">Exit Full View</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powder Coat Production Modal (Full Screen Table View) -->
+    <div id="powderProdModal" class="modal-overlay !p-0">
+        <div class="modal-content !max-w-full !w-full !h-full !max-h-full !rounded-none flex flex-col">
+            <div class="responsive-header border-b border-white/5 bg-[#0d0f14]">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#56de4a]/10 flex items-center justify-center border border-[#56de4a]/20 shadow-[0_0_20px_rgba(86,222,74,0.1)]">
+                        <i data-lucide="activity" class="w-6 h-6 text-[#56de4a]"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-base sm:text-xl font-black uppercase tracking-tighter text-white">Powder Coat Production Logs</h3>
+                            <div class="status-badge network-status is-online"><span class="status-dot"></span> <span class="status-text">Online</span></div>
+                        </div>
+                        <p class="text-[8px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest">Powder Coat Section</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4 ml-auto w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-3 px-4 py-2 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl hover:border-white/20 transition-all flex-1 sm:flex-initial">
+                        <label class="hidden lg:block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Log Filter:</label>
+                        <input type="date" id="prodDateFilter" onchange="fetchSheetData('powder-prod')" class="bg-transparent text-white text-[11px] sm:text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark] w-full sm:w-auto text-center sm:text-left">
+                    </div>
+                    <button onclick="toggleModal('powderProdModal')" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5">
+                        <i data-lucide="x" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body !p-0 flex-1 overflow-hidden relative">
+                <div id="powder-prodLoader" class="loading-overlay"></div>
+                <div class="h-full w-full overflow-x-auto overflow-y-auto custom-scrollbar">
+                    <table class="db-table w-full text-left min-w-[1800px]">
+                        <thead class="sticky top-0 z-20">
+                            <tr>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Extrusion Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Powder Coat Prod Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Colour</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Bucket No</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Billet Batch No</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Die No</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Profile</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5">Type</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5 text-right">Production Qty</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5 text-right">Damage Qty</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#56de4a] border-b border-white/5 text-right">Total Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="powder-prodTableBody">
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td colspan="11" class="p-40 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5"><i data-lucide="database" class="w-8 h-8 text-gray-700"></i></div>
+                                        <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Awaiting Entry Synchronization</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/5 bg-[#0d0f14] flex justify-between items-center">
+                <p class="text-[9px] text-gray-600 font-black uppercase tracking-widest">Ultra Aluminium | Cloud Data Service</p>
+                <button onclick="toggleModal('powderProdModal')" class="px-12 py-4 bg-[#56de4a] text-black font-black rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-[0_0_40px_rgba(86,222,74,0.2)] uppercase tracking-widest text-xs">Exit Full View</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powder Coat Packing Modal -->
+    <div id="powderPackModal" class="modal-overlay !p-0">
+        <div class="modal-content !max-w-full !w-full !h-full !max-h-full !rounded-none flex flex-col">
+            <div class="responsive-header border-b border-white/5 bg-[#0d0f14]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#ff8c00]/10 flex items-center justify-center border border-[#ff8c00]/20 shadow-[0_0_20px_rgba(255,140,0,0.1)]">
+                        <i data-lucide="package" class="w-6 h-6 text-[#ff8c00]"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-base sm:text-xl font-black uppercase tracking-tighter text-white">Powder Coat Packing Logs</h3>
+                            <div class="status-badge network-status is-online"><span class="status-dot"></span> <span class="status-text">Online</span></div>
+                        </div>
+                        <p class="text-[8px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest">Powder Coat Section</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 sm:gap-4 ml-auto w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-3 px-4 py-2 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl flex-1 sm:flex-initial">
+                        <input type="date" onchange="fetchSheetData('powder-pack')" class="bg-transparent text-white text-[11px] sm:text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark] w-full text-center sm:text-left">
+                    </div>
+                    <button onclick="toggleModal('powderPackModal')" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-white/5 text-white/40 hover:text-white border border-white/5">
+                        <i data-lucide="x" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body !p-0 flex-1 overflow-hidden relative">
+                <div id="powder-packLoader" class="loading-overlay"></div>
+                <div class="h-full w-full overflow-x-auto overflow-y-auto custom-scrollbar">
+                    <table class="db-table w-full text-left min-w-[5000px]">
+                        <thead class="sticky top-0 z-20">
+                            <tr>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Production Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Packing Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Bucket Number</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Production Type</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Color</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Profile Name</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Length</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5">Packing Type</th>
+                                <!-- Premium Full Pack -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Premium Pack No (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Prem One Bundle Qty (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Prem Total Bundle (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Prem Total Qty (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Prem Avg Weight (Full)</th>
+                                <!-- Premium Pcs -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Premium Pack No (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Premium Bundle Qty (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Premium Total Qty (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Premium Avg Weight (Pcs)</th>
+                                <!-- Non Brand Full -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-white/[0.02]">Non Brand Pack No (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-white/[0.02]">NB One Bundle Qty (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-white/[0.02]">NB Total Bundle (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-white/[0.02]">NB Total Qty (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-white/[0.02]">NB Avg Weight (Full)</th>
+                                <!-- Non Brand Pcs -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Non Brand Pack No (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">NB Bundle Qty (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">NB Total Qty (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">NB Avg Weight (Pcs)</th>
+                                <!-- Weight Bar -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Weight Bar Pack Number</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Weight Bar Total Qty</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right bg-orange-500/[0.02]">Weight Bar Avg Weight</th>
+                                <!-- Specific Column -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff8c00] border-b border-white/5 text-right">Re powder Bar Qty</th>
+                                <!-- Totals -->
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white border-b border-white/10 bg-[#ff8c00] text-right">Premium Total Packing</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white border-b border-white/10 bg-[#ff8c00] text-right">Non Brand Total Packing</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white border-b border-white/10 bg-[#ff8c00] text-right">Weight Bar Total Packing</th>
+                            </tr>
+                        </thead>
+                        <tbody id="powder-packTableBody">
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td colspan="33" class="p-40 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5"><i data-lucide="database" class="w-8 h-8 text-gray-700"></i></div>
+                                        <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Awaiting Entry Synchronization</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/5 bg-[#0d0f14] flex justify-end">
+                <button onclick="toggleModal('powderPackModal')" class="px-12 py-4 bg-[#ff8c00] text-black font-black rounded-2xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-widest text-xs">Exit Full View</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wood Finish Packing Modal -->
+    <div id="woodPackModal" class="modal-overlay !p-0">
+        <div class="modal-content !max-w-full !w-full !h-full !max-h-full !rounded-none flex flex-col">
+            <div class="responsive-header border-b border-white/5 bg-[#0d0f14]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#a855f7]/10 flex items-center justify-center border border-[#a855f7]/20 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+                        <i data-lucide="package-check" class="w-6 h-6 text-[#a855f7]"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h3 class="text-base sm:text-xl font-black uppercase tracking-tighter text-white">Wood Finish Packing Logs</h3>
+                            <div class="status-badge network-status is-online"><span class="status-dot"></span> <span class="status-text">Online</span></div>
+                        </div>
+                        <p class="text-[8px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest">Powder Coat section</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 sm:gap-4 ml-auto w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-3 px-4 py-2 bg-white/[0.02] border border-white/10 rounded-xl sm:rounded-2xl flex-1 sm:flex-initial">
+                        <input type="date" onchange="fetchSheetData('wood-pack')" class="bg-transparent text-white text-[11px] sm:text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark] w-full text-center sm:text-left">
+                    </div>
+                    <button onclick="toggleModal('woodPackModal')" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-white/5 text-white/40 hover:text-white border border-white/5">
+                        <i data-lucide="x" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body !p-0 flex-1 overflow-hidden relative">
+                <div id="wood-packLoader" class="loading-overlay"></div>
+                <div class="h-full w-full overflow-x-auto overflow-y-auto custom-scrollbar">
+                    <table class="db-table w-full text-left min-w-[2000px]">
+                        <thead class="sticky top-0 z-20">
+                            <tr>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5">Wood Finish Prod Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5">Packing Date</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5">Type</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5">Profile Name</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Length</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Pack No (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Qty (Full One)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Total Bundle (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Total Qty (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Avg Weight (Full)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Pack No (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Qty (Pcs One)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Total Qty (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-[#a855f7] border-b border-white/5 text-right">Avg Weight (Pcs)</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-[0.2em] text-white border-b border-white/10 bg-[#a855f7] text-right">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wood-packTableBody">
+                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                <td colspan="15" class="p-40 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/5"><i data-lucide="database" class="w-8 h-8 text-gray-700"></i></div>
+                                        <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-xs">Awaiting Entry Synchronization</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="p-6 border-t border-white/5 bg-[#0d0f14] flex justify-end">
+                <button onclick="toggleModal('woodPackModal')" class="px-12 py-4 bg-[#a855f7] text-white font-black rounded-2xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-widest text-xs">Exit Full View</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Central Configuration
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxw-incLz5koAV6_zm1TDSyU6bGIP7f_U6B-ixM1-YhE8ay6rexKF0UDGo_jrBqH8bf/exec";
+
+        // Network Status Logic
+        async function updateConnectivityStatus() {
+            const statusBadges = document.querySelectorAll('.network-status');
+            const isOnline = navigator.onLine;
+
+            if (!isOnline) {
+                statusBadges.forEach(badge => {
+                    badge.classList.remove('is-online', 'is-slow');
+                    badge.classList.add('is-offline');
+                    badge.querySelector('.status-text').innerText = 'Offline';
+                });
+                return;
+            }
+
+            // If online, check ping
+            try {
+                const start = Date.now();
+                // Using GET with a tiny parameter is more reliable for Google Scripts
+                const response = await fetch(`${SCRIPT_URL}?type=ping`, { 
+                    method: 'GET', 
+                    cache: 'no-store'
+                });
+                const latency = Date.now() - start;
+
+                statusBadges.forEach(badge => {
+                    const textEl = badge.querySelector('.status-text');
+                    badge.classList.remove('is-offline', 'is-online', 'is-slow');
+                    
+                    // Adjusted latency thresholds for Google Script (which is naturally a bit slower)
+                    if (latency > 3500) { 
+                        badge.classList.add('is-slow');
+                        textEl.innerText = 'High Ping';
+                    } else {
+                        badge.classList.add('is-online');
+                        textEl.innerText = 'Online';
+                    }
+                });
+            } catch (e) {
+                // Check if it's a real offline state or just a script response issue
+                if (!navigator.onLine) {
+                    updateConnectivityStatus(); // Re-run logic for offline
+                } else {
+                    // Script exists but returned an error or was blocked
+                    statusBadges.forEach(badge => {
+                        badge.classList.remove('is-online', 'is-slow');
+                        badge.classList.add('is-offline');
+                        badge.querySelector('.status-text').innerText = 'Sync Error';
+                    });
+                }
+            }
+        }
+
+        window.addEventListener('online', updateConnectivityStatus);
+        window.addEventListener('offline', updateConnectivityStatus);
+        // Periodic ping check every 30 seconds
+        setInterval(updateConnectivityStatus, 30000);
+
+        // Set Today's Date and Initial Network Status
+        window.addEventListener('DOMContentLoaded', () => {
+            updateConnectivityStatus();
+            
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            
+            // Set date for all date inputs automatically
+            const allDateInputs = document.querySelectorAll('input[type="date"]');
+            allDateInputs.forEach(input => {
+                input.value = today;
+            });
+
+            // Set formatted date for Welcome Card
+            const dateDisplay = document.getElementById('currentDate');
+            if (dateDisplay) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateDisplay.innerText = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.toggle('active');
+            hamburgerIcon.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        }
+
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        function updateMousePos(e, btn) {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            btn.style.setProperty('--x', x + 'px');
+            btn.style.setProperty('--y', y + 'px');
+        }
+
+        function toggleDropdown(id, element, event) {
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById(id);
+            const icon = element ? element.querySelector('.chevron-icon') : null;
+            if (dropdown) dropdown.classList.toggle('show');
+            if (icon) icon.classList.toggle('rotate');
+        }
+
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            const isOpen = modal.classList.toggle('active');
+            document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+        }
+
+        async function openModal(id) {
+            toggleModal(id);
+            
+            // Map modal ID to sheet target name
+            const targetMap = {
+                'woodProdModal': 'wood-prod',
+                'powderProdModal': 'powder-prod',
+                'powderPackModal': 'powder-pack',
+                'woodPackModal': 'wood-pack',
+                'bindingModal': 'binding'
+            };
+
+            const target = targetMap[id];
+            if (target) {
+                fetchSheetData(target);
+            }
+        }
+
+        async function fetchSheetData(target) {
+            const tableBodyId = target + 'TableBody';
+            const loaderId = target + 'Loader';
+            const tableBody = document.getElementById(tableBodyId);
+            const loader = document.getElementById(loaderId);
+            
+            let targetColor = '#3663f7';
+            if (target === 'wood-prod') targetColor = '#00d2ff';
+            if (target === 'powder-prod') targetColor = '#56de4a';
+            if (target === 'powder-pack') targetColor = '#ff8c00';
+            if (target === 'wood-pack') targetColor = '#a855f7';
+            if (target === 'binding') targetColor = '#0077be';
+            
+            if (loader) {
+                loader.innerHTML = `
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="relative w-24 h-24 mb-6">
+                            <i data-lucide="cloud" class="w-24 h-24 absolute inset-0 opacity-20 animate-cloud-pulse" style="color: ${targetColor};"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i data-lucide="refresh-cw" class="w-8 h-8 animate-sync-spin" style="color: ${targetColor};"></i>
+                            </div>
+                        </div>
+                        <h4 class="text-white text-xs font-black uppercase tracking-[0.4em] mb-2">Accessing Cloud Engine</h4>
+                        <p class="text-gray-600 text-[9px] uppercase font-bold tracking-widest">Establishing secure link...</p>
+                    </div>
+                `;
+                loader.classList.add('active');
+                lucide.createIcons();
+            }
+
+            try {
+                const activeModal = document.querySelector('.modal-overlay.active');
+                const filterInput = activeModal ? activeModal.querySelector('input[type="date"]') : null;
+                const filterValue = filterInput ? filterInput.value : '';
+                
+                const url = `${SCRIPT_URL}?target=${encodeURIComponent(target)}&date=${encodeURIComponent(filterValue)}&cb=${Date.now()}`;
+                
+                const response = await fetch(url, { method: 'GET' });
+                const text = await response.text();
+                
+                // Debugging: Log the raw response
+                console.log("Raw Response for " + target + ":", text);
+
+                const data = JSON.parse(text);
+
+                if (loader) loader.classList.remove('active');
+
+                if (data.result === 'success') {
+                    if (data.records && data.records.length > 0) {
+                        renderTable(target, data.records);
+                    } else {
+                        showEmptyState(target, "Zero records found for " + filterValue);
+                    }
+                } else {
+                    showEmptyState(target, "Cloud Logic Error: " + data.message);
+                }
+            } catch (error) {
+                if (loader) loader.classList.remove('active');
+                console.error("Critical Cloud Failure:", error);
+                showEmptyState(target, "System link failed. Verify Script URL and Deployment Permissions (must be 'Anyone').");
+            }
+        }
+
+        function formatDate(value) {
+            if (typeof value === 'string' && value.length > 10 && value.includes('T') && !isNaN(Date.parse(value))) {
+                const date = new Date(value);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return value;
+        }
+
+        function renderTable(target, records) {
+            const tableBody = document.getElementById(target + 'TableBody');
+            
+            tableBody.innerHTML = records.map(row => `
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    ${row.map(cell => {
+                        const displayValue = formatDate(cell);
+                        return `
+                            <td class="p-5 text-sm font-medium text-center">
+                                ${displayValue === "" ? '—' : displayValue}
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function showEmptyState(target, message) {
+            const tableBody = document.getElementById(target + 'TableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="30" class="p-40 text-center text-gray-600 font-bold uppercase tracking-widest text-xs">${message}</td>
+                </tr>
+            `;
+        }
+
+        // Close sidebar on Esc key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (sidebar.classList.contains('active')) toggleSidebar();
+                const activeModal = document.querySelector('.modal-overlay.active');
+                if (activeModal) toggleModal(activeModal.id);
+            }
+        });
+    </script>
+</body>
+</html>
