@@ -2,364 +2,762 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultra Aluminium | ERP System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Aluminium - Industrial Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --bg-dark: #07080a; --bg-sidebar: #0d1117; --bg-card: #12161c;
-            --bg-active: rgba(0, 255, 136, 0.05); --accent-green: #15ff00; --accent-blue: #3b82f6;
-            --accent-red: #ef4444; --accent-yellow: #f59e0b; --text-main: #ffffff;
-            --text-muted: #9aa0a6; --border-color: #21262d; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            height: 100vh; 
+        .header-blur {
+            background-color: rgba(13, 15, 20, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-transition {
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-content {
+            max-height: 0;
             overflow: hidden;
-            line-height: 1.5;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(-10px);
         }
+
+        .dropdown-content.show {
+            max-height: 500px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .rotate { transform: rotate(180deg); }
+        .active-link { color: #3663f7; background-color: rgba(54, 99, 247, 0.1) !important; }
+        .active-sub { color: #3663f7; font-weight: 700; }
+
+        .neon-green-text { color: #56de4a; }
+        .electric-blue-text { color: #3663f7; }
+        .dark-charcoal-bg { background-color: #0d0f14; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: rgba(86, 222, 74, 0.1);
+            border: 1px solid rgba(86, 222, 74, 0.2);
+            border-radius: 99px;
+            color: #56de4a;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #56de4a;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #56de4a;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
-        /* Header */
-        .header { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px; 
-            background: rgba(7, 8, 10, 0.8); 
-            backdrop-filter: blur(12px);
-            display: flex; align-items: center; padding: 0 20px; 
-            border-bottom: 1px solid var(--border-color); z-index: 2000; 
-        }
-        
-        .menu-btn { 
-            background: none; border: none; color: white; cursor: pointer; 
-            margin-right: 15px; display: flex; align-items: center; 
-            padding: 8px; border-radius: 8px; transition: 0.2s;
+        #menu-toggle.menu-open .line-1 { transform: translateY(11px) rotate(45deg); }
+        #menu-toggle.menu-open .line-2 { opacity: 0; }
+        #menu-toggle.menu-open .line-3 { transform: translateY(-11px) rotate(-45deg); }
+
+        @keyframes rotate-sync {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .logo-img { height: 38px; width: 38px; margin-right: 12px; border-radius: 50%; border: 1.5px solid var(--accent-green); }
-        .company-name { font-size: clamp(0.9rem, 4vw, 1.1rem); font-weight: 700; color: var(--accent-green); letter-spacing: 0.5px; }
-
-        /* Sidebar */
-        .sidebar { 
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%; 
-            background: var(--bg-sidebar); border-right: 1px solid var(--border-color); 
-            z-index: 4000; transition: var(--transition); padding: 20px; overflow-y: auto; 
+        .sync-icon-animation {
+            animation: rotate-sync 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-        .sidebar.active { left: 0; }
-        .sidebar-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
-            z-index: 3900; display: none; backdrop-filter: blur(4px); 
-        }
-        .sidebar-overlay.active { display: block; }
-        
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 
-        .menu-item { 
-            display: flex; align-items: center; padding: 14px 15px; color: var(--text-muted); 
-            text-decoration: none; border-radius: 10px; margin-bottom: 8px; transition: 0.2s; cursor: pointer; 
+        .welcome-card {
+            position: relative;
+            background: rgba(13, 15, 20, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            overflow: hidden;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
         }
-        .menu-item i { margin-right: 12px; width: 20px; height: 20px; }
-        .menu-item:hover, .active-link { background: var(--bg-active); color: white; }
 
-        .dropdown-container { margin-bottom: 8px; }
-        .dropdown-trigger { justify-content: space-between !important; }
-        .chevron-icon { transition: transform 0.3s ease; width: 16px !important; }
-        .chevron-icon.rotate { transform: rotate(180deg); }
-        .dropdown-content { display: none; padding-left: 20px; margin-top: 5px; }
-        .dropdown-content.show { display: block; }
-        .sub-menu-item { 
-            display: block; padding: 12px 15px; color: var(--text-muted); 
-            text-decoration: none; font-size: 0.9rem; border-radius: 8px; transition: 0.2s; 
-        }
-        .sub-menu-item:hover { color: var(--accent-green); background: rgba(0, 255, 136, 0.05); }
-        .active-sub { color: var(--accent-green) !important; font-weight: 600; background: rgba(0, 255, 136, 0.08); }
-
-        /* Main Content */
-        .main-wrapper { width: 100%; height: 100vh; overflow-y: auto; padding-top: 70px; -webkit-overflow-scrolling: touch; }
-        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-
-        /* Optimized Hero Section with Background */
-        .hero-section { 
-            background: linear-gradient(135deg, rgba(13, 17, 23, 0.8) 0%, rgba(28, 33, 40, 0.9) 100%);
-            border: 1px solid var(--border-color); border-radius: 24px; 
-            padding: clamp(30px, 8vw, 60px) 20px; text-align: center; margin-bottom: 30px; 
-            position: relative; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        .hero-section::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+        .card-glow {
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(54, 99, 247, 0.15) 0%, transparent 70%);
             pointer-events: none;
         }
 
-        .hero-section h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; background: linear-gradient(to right, #fff, var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-section p { color: var(--text-muted); font-size: clamp(0.9rem, 2.5vw, 1.1rem); margin-bottom: 25px; max-width: 650px; margin-inline: auto; line-height: 1.6; position: relative; }
-        
-        .status-badge { 
-            display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 255, 136, 0.1); 
-            color: var(--accent-green); padding: 8px 18px; border-radius: 50px; font-size: 0.8rem; 
-            font-weight: 600; border: 1px solid rgba(0, 255, 136, 0.2); position: relative;
-        }
-        .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-        .section-label { 
-            color: var(--accent-green); font-size: 0.75rem; font-weight: 800; 
-            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; 
-            display: flex; align-items: center; gap: 10px; 
-        }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
-
-        /* Responsive Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; }
-        @media (min-width: 480px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
-
-        .stat-card { 
-            background: var(--bg-card); border: 1px solid var(--border-color); 
-            padding: 24px; border-radius: 18px; cursor: pointer; position: relative; 
-            overflow: hidden; transition: var(--transition); z-index: 1; 
-        }
-        .stat-card:active { transform: scale(0.98); }
-        .stat-card::before { 
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; 
-            height: 100%; transition: var(--transition); z-index: -1; opacity: 0.15; 
-        }
-        .card-blue::before { background: var(--accent-blue); }
-        .card-green::before { background: var(--accent-green); }
-        .card-red::before { background: var(--accent-red); }
-        .card-yellow::before { background: var(--accent-yellow); }
-        .stat-card:hover::before { left: 0; }
-        
-        .stat-card span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px; }
-        .stat-card h3 { font-size: 1.5rem; color: #fff; font-weight: 700; }
-
-        /* Modal */
-        .modal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92); 
-            display: none; align-items: center; justify-content: center; 
-            z-index: 5000; padding: 15px; backdrop-filter: blur(10px); 
-        }
-        .modal.active { display: flex; }
-        .modal-content { 
-            background: var(--bg-sidebar); border: 1px solid var(--border-color); 
-            border-radius: 24px; width: 100%; max-width: 850px; padding: clamp(15px, 5vw, 25px); 
-            max-height: 90vh; display: flex; flex-direction: column;
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-controls { 
-            background: #000; padding: 12px; border-radius: 14px; 
-            margin-bottom: 15px; display: flex; flex-wrap: wrap;
-            justify-content: space-between; border: 1px solid var(--border-color); 
-            align-items: center; gap: 10px;
-        }
-        .table-container { overflow-x: auto; width: 100%; flex: 1; border-radius: 12px; }
-        .statement-table { width: 100%; border-collapse: collapse; min-width: 450px; }
-        .statement-table th { 
-            background: var(--bg-active); color: var(--text-muted); 
-            padding: 12px 15px; text-align: left; font-size: 0.7rem; 
-            text-transform: uppercase; position: sticky; top: 0;
-        }
-        .statement-table td { padding: 14px 15px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); color: #ccc; }
-
-        input[type="date"] { 
-            color-scheme: dark; background: #1c2128; color: #fff; 
-            border: 1px solid #333; padding: 8px 12px; border-radius: 8px; 
-            font-size: 0.9rem; outline: none;
+        .welcome-card h1 {
+            font-size: 1.875rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #56de4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        .welcome-card p { color: rgba(255, 255, 255, 0.5); font-size: 0.95rem; margin-bottom: 2rem; }
+
+        .hover-fill-btn {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .hover-fill-btn::before {
+            content: '';
+            position: absolute;
+            top: var(--mouse-y, 50%);
+            left: var(--mouse-x, 50%);
+            width: 0;
+            height: 0;
+            background: var(--fill-color, transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease-out, height 0.6s ease-out;
+            z-index: -1;
+            opacity: 0.12;
+        }
+
+        .hover-fill-btn:hover::before { width: 300%; height: 500%; }
+
+        /* Scrollable Modal Body */
+        #modal-body-table {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        /* Custom Scrollbar for Dark Theme */
+        #modal-body-table::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        #modal-body-table::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        #modal-body-table::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+        }
+        #modal-body-table::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .active-file-type {
+            background-color: rgba(54, 99, 247, 0.1) !important;
+            border-color: rgba(54, 99, 247, 0.5) !important;
+        }
+
+        .report-table-container {
+            width: 100%;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .report-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; }
+        .report-table th { padding: 12px 16px; background: rgba(255, 255, 255, 0.03); color: rgba(255, 255, 255, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.05); white-space: nowrap; position: sticky; top: 0; z-index: 10; }
+        .report-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); white-space: nowrap; }
+
+        @media (max-width: 640px) {
+            .welcome-card { padding: 2rem 1.5rem; }
+            .welcome-card h1 { font-size: 1.5rem; }
+            .main-wrapper main { padding-top: 100px !important; }
+        }
     </style>
 </head>
-<body>
+<body class="bg-black min-h-screen">
 
-    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
-    
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span style="font-weight:bold; color:var(--accent-green); letter-spacing: 1px;">Overview Menu</span>
-            <button onclick="toggleMenu()" style="background:var(--bg-active); border:none; color:white; width: 32px; height: 32px; border-radius: 50%; cursor:pointer;">&times;</button>
-        </div>
-        <a href="../index.html" class="menu-item"><i data-lucide="home"></i> Home</a>
-        <div class="dropdown-container">
-            <div class="menu-item dropdown-trigger active-link" onclick="toggleDrop('extrusionContent', 'exChevron')">
-                <div style="display:flex; align-items:center; gap:10px;"><i data-lucide="factory"></i> Extrusion</div>
-                <i data-lucide="chevron-down" class="chevron-icon rotate" id="exChevron"></i>
-            </div>
-            <div class="dropdown-content show" id="extrusionContent">
-                <a href="../Bucket income/index.html" class="sub-menu-item">• Bucket income</a>
-                <a href="../Profile Income/index.html" class="sub-menu-item">• Profile income</a>
-                <a href="../Aging Details/index.html" class="sub-menu-item">• Aging Details</a>
-                <a href="#" class="sub-menu-item active-sub">• Overview</a>
+    <header class="fixed top-0 left-0 right-0 h-[70px] z-[2000] header-blur flex items-center justify-between px-6">
+        <div class="flex items-center gap-6">
+            <button id="menu-toggle" class="relative w-8 h-6 flex flex-col justify-between cursor-pointer focus:outline-none z-[2001]">
+                <span class="line-1 w-full h-0.5 bg-white transition-all duration-300"></span>
+                <span class="line-2 w-full h-0.5 bg-white transition-all duration-300"></span>
+                <span class="line-3 w-full h-0.5 bg-white transition-all duration-300"></span>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden flex items-center justify-center shadow-lg">
+                    <img src="Src/logo.png" alt="Logo" class="w-7 h-7 object-contain">
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tighter neon-green-text uppercase">Ultra Aluminium</h1>
             </div>
         </div>
-    </nav>
-
-    <header class="header">
-        <button class="menu-btn" onclick="toggleMenu()"><i data-lucide="menu"></i></button>
-        <img src="Src/logo.png" class="logo-img">
-        <div class="company-name">ULTRA ALUMINIUM</div>
     </header>
 
-    <div class="main-wrapper">
-        <main class="container">
-            <section class="hero-section">
-                <h1>Extrusion Overview</h1>
-                <p>Real-time production monitoring and performance analytics. Track extrusion output, bucket processing, and material aging across the department.</p>
-                <div class="status-badge">
-                    <div class="status-dot"></div>
-                    System Online
+    <div id="sidebar-overlay" class="fixed inset-0 z-[1500] bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-[300px] z-[1600] dark-charcoal-bg border-r border-white/5 sidebar-transition -translate-x-full pt-[90px] px-4">
+        <nav class="flex flex-col gap-2">
+            <a href="#" class="flex items-center gap-4 p-4 rounded-[12px] text-[0.95rem] uppercase tracking-widest hover:bg-white/5 transition-colors group">
+                <i data-lucide="home" class="w-5 h-5 opacity-70"></i> Home
+            </a>
+            <div class="dropdown-container">
+                <div class="active-link flex items-center justify-between w-full p-4 rounded-[12px] text-[0.95rem] uppercase tracking-widest hover:bg-white/5 transition-colors group cursor-pointer" onclick="toggleDrop('extrusionContent', 'exChevron')">
+                    <div class="flex items-center gap-4"><i data-lucide="factory" class="w-5 h-5"></i> Extrusion</div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 rotate" id="exChevron"></i>
                 </div>
+                <div class="dropdown-content show flex flex-col pl-12 gap-1 mt-1" id="extrusionContent">
+                    <a href="../Bucket Income/index.html" class="p-3 rounded-[12px] text-[0.85rem] uppercase tracking-widest hover:text-white/80">• Bucket income</a>
+                    <a href="../Profile Income/index.html" class="p-3 rounded-[12px] text-[0.85rem] uppercase tracking-widest hover:text-white/80">• Profile income</a>
+                    <a href="../Aging Details/index.html" class="p-3 rounded-[12px] text-[0.85rem] uppercase tracking-widest hover:text-white/80">• Aging Details</a>
+                    <a href="index.html" class="active-sub p-3 rounded-[12px] text-[0.85rem] uppercase tracking-widest">• Overview</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <main class="pt-[120px] px-8 max-w-7xl mx-auto">
+            <section class="welcome-card mb-12">
+                <div class="card-glow"></div>
+                <h1>Extrusion Overview</h1>
+                <p>Real-time production monitoring and performance analytics. Track extrusion output and material aging.</p>
+                <div class="status-badge"><div class="status-dot"></div>System Online</div>
             </section>
 
-            <div class="section-label">Extrusion Operations</div>
+            <div class="w-full max-w-[600px] mx-auto mb-6">
+                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white/40 flex items-center gap-4">Extrusion Report<div class="h-[1px] flex-1 bg-white/5"></div></h3>
+            </div>
 
-            <div class="stats-grid">
-                <div class="stat-card card-blue" onclick="openReport('Profile Income', 'var(--accent-blue)', 'profile')">
-                    <span>Profile Income</span><h3 id="profileTon">0.000 Ton</h3>
-                </div>
-                <div class="stat-card card-green" onclick="openReport('Bucket Income', 'var(--accent-green)', 'bucket')">
-                    <span>Bucket Income</span><h3 id="bucketCount">0 Items</h3>
-                </div>
-                <div class="stat-card card-red" onclick="openReport('Damage Report', 'var(--accent-red)', 'damage')">
-                    <span>Total Damage</span><h3 id="damageTon">0.000 Ton</h3>
-                </div>
-                <div class="stat-card card-yellow" onclick="openReport('Aging Summary', 'var(--accent-yellow)', 'aging')">
-                    <span>Total Aging</span><h3 id="agingTon">0.000 Ton</h3>
-                </div>
+            <div class="flex flex-col gap-3 w-full max-w-[600px] mx-auto">
+                <button onclick="openReportModal('Profile Income', '#3b82f6', 'trending-up')" class="hover-fill-btn flex items-center justify-between p-5 rounded-2xl bg-[#0d0f14] border border-white/5 hover:border-white/10 transition-all group active:scale-[0.98] cursor-pointer" style="--fill-color: #3b82f6;">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-6 h-6 electric-blue-text"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold uppercase text-xs">Profile Income</div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider mt-0.5" id="dash-ton-profile" style="color: #3b82f6;">0.000 Ton</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-20 group-hover:opacity-100"></i>
+                </button>
+                <button onclick="openReportModal('Bucket Income', '#15ff00', 'database')" class="hover-fill-btn flex items-center justify-between p-5 rounded-2xl bg-[#0d0f14] border border-white/5 hover:border-white/10 transition-all group active:scale-[0.98] cursor-pointer" style="--fill-color: #15ff00;">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                            <i data-lucide="database" class="w-6 h-6 neon-green-text"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold uppercase text-xs">Bucket Income</div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider mt-0.5" id="dash-ton-bucket" style="color: #15ff00;">0 Buckets</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-20 group-hover:opacity-100"></i>
+                </button>
+                <button onclick="openReportModal('Damage Reports', '#ef4444', 'alert-octagon')" class="hover-fill-btn flex items-center justify-between p-5 rounded-2xl bg-[#0d0f14] border border-white/5 hover:border-white/10 transition-all group active:scale-[0.98] cursor-pointer" style="--fill-color: #ef4444;">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                            <i data-lucide="alert-octagon" class="w-6 h-6 text-red-500"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold uppercase text-xs">Damage Reports</div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider mt-0.5" id="dash-ton-damage" style="color: #ef4444;">0.000 Ton</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-20 group-hover:opacity-100"></i>
+                </button>
+                <button onclick="openReportModal('Aging Details', '#f59e0b', 'clock')" class="hover-fill-btn flex items-center justify-between p-5 rounded-2xl bg-[#0d0f14] border border-white/5 hover:border-white/10 transition-all group active:scale-[0.98] cursor-pointer" style="--fill-color: #f59e0b;">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                            <i data-lucide="clock" class="w-6 h-6 text-orange-400"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold uppercase text-xs">Aging Details</div>
+                            <div class="text-[10px] font-bold uppercase tracking-wider mt-0.5" id="dash-ton-aging" style="color: #f59e0b;">0.000 Ton</div>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-20 group-hover:opacity-100"></i>
+                </button>
             </div>
         </main>
     </div>
 
-    <div class="modal" id="reportModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle" style="font-weight: 700;">Details</h3>
-                <button onclick="closeAll()" style="background:none; border:none; color:white; font-size:32px; cursor:pointer;">&times;</button>
+    <div id="report-modal" class="fixed inset-0 z-[3000] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="toggleModal('report-modal')"></div>
+        <div class="relative w-full max-w-lg dark-charcoal-bg border border-white/10 rounded-[32px] max-h-[85vh] flex flex-col opacity-0 scale-95 transition-all duration-300">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between relative">
+                <div class="flex items-center gap-6">
+                    <div id="modal-icon-bg" class="w-16 h-16 rounded-[24px] flex items-center justify-center shadow-inner"><i id="modal-icon" data-lucide="file-text" class="w-7 h-7"></i></div>
+                    <div class="flex flex-col gap-2">
+                        <div>
+                            <h3 id="modal-title" class="text-2xl font-black uppercase tracking-tighter leading-none">Report Details</h3>
+                            <p class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold mt-1">Extrusion Section</p>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                                <i data-lucide="calendar" class="w-3 h-3 text-white/30"></i>
+                                <input type="date" id="report-date" class="bg-transparent text-white text-[11px] font-bold focus:outline-none cursor-pointer uppercase appearance-none" onchange="refreshReportData()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleModal('report-modal')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 hover:rotate-90 transition-all duration-300 cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4 text-white/40"></i>
+                </button>
             </div>
-            <div class="modal-controls">
-                <input type="date" id="reportDate" onchange="filterDataByDate()">
-                <div id="modalSummary" style="font-weight:bold; color:var(--accent-green);">Total: 0</div>
+            <div id="modal-body-table" class="p-8 flex-1 flex flex-col min-h-0">
+                <div class="report-table-container flex-1 overflow-auto">
+                    <table class="report-table">
+                        <thead id="report-thead"></thead>
+                        <tbody id="report-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="report-summary" class="mt-4 text-right font-bold text-xs uppercase tracking-widest text-white/50"></div>
             </div>
-            <div class="table-container">
-                <table class="statement-table">
-                    <thead id="tableHead"></thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+
+            <div class="p-8 pt-0 flex gap-4">
+                <button onclick="toggleModal('export-modal')" class="flex-1 py-4 bg-white/5 border border-white/10 text-white font-extrabold rounded-2xl hover:bg-white/10 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i> EXPORT
+                </button>
+                <button onclick="toggleModal('report-modal')" class="flex-1 py-4 bg-white text-black font-extrabold rounded-2xl hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer">
+                    CLOSE VIEW
+                </button>
             </div>
         </div>
     </div>
 
-<script>
-    window.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 z-[4000] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/95 backdrop-blur-xl" onclick="toggleModal('export-modal')"></div>
+        <div class="relative w-full max-w-md dark-charcoal-bg border border-white/10 rounded-[32px] p-8 opacity-0 scale-95 transition-all duration-300">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center"><i data-lucide="share-2" class="w-6 h-6 text-white/40"></i></div>
+                <div>
+                    <h3 class="text-xl font-black uppercase tracking-tighter">Export Parameters</h3>
+                    <p class="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold mt-1">Configure Output Format</p>
+                </div>
+            </div>
 
-    function toggleMenu() { 
-        document.getElementById('sidebar').classList.toggle('active'); 
-        document.getElementById('overlay').classList.toggle('active'); 
-    }
+            <div class="space-y-6">
+                <!-- Date Range -->
+                <div class="space-y-3">
+                    <label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Date Range Selection</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-black/40 border border-white/5 rounded-2xl p-3">
+                            <span class="text-[8px] uppercase text-white/20 block mb-1">From</span>
+                            <input type="date" id="export-from" class="bg-transparent text-white text-xs font-bold w-full focus:outline-none">
+                        </div>
+                        <div class="bg-black/40 border border-white/5 rounded-2xl p-3">
+                            <span class="text-[8px] uppercase text-white/20 block mb-1">To</span>
+                            <input type="date" id="export-to" class="bg-transparent text-white text-xs font-bold w-full focus:outline-none">
+                        </div>
+                    </div>
+                </div>
 
-    function toggleDrop(contentId, chevronId) {
-        const content = document.getElementById(contentId);
-        const chevron = document.getElementById(chevronId);
-        content.classList.toggle('show');
-        chevron.classList.toggle('rotate');
-    }
-    
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwJWZTzeRmiX32zsOURa-2fldWAzONez5EAsA7B_J9sW_32Sj0BYSXpEnUfJ__nVDz1/exec";
-    let globalData = [], activeType = '';
+                <!-- File Type -->
+                <div class="space-y-3">
+                    <label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Select File Format</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setFileType('xlsm')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                            <div class="text-[10px] font-black group-hover:text-green-400 transition-colors">EXCEL</div>
+                            <div class="text-[8px] text-white/20">.xlsm format</div>
+                        </button>
+                        <button onclick="setFileType('csv')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all text-left group active-file-type">
+                            <div class="text-[10px] font-black group-hover:text-blue-400 transition-colors">CSV</div>
+                            <div class="text-[8px] text-white/20">.csv format</div>
+                        </button>
+                        <button onclick="setFileType('pdf')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                            <div class="text-[10px] font-black group-hover:text-red-400 transition-colors">PDF</div>
+                            <div class="text-[8px] text-white/20">.pdf format</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-    window.onload = () => {
-        document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
-        fetchData();
-    };
+            <div class="mt-10 space-y-3">
+                <button onclick="processExport()" class="w-full py-5 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer">
+                    Initiate Download
+                </button>
+                <button onclick="toggleModal('export-modal')" class="w-full py-4 text-white/30 font-bold uppercase text-[10px] tracking-widest hover:text-white transition-all cursor-pointer">
+                    Cancel Operation
+                </button>
+            </div>
+        </div>
+    </div>
 
-    async function fetchData() {
-        try {
-            const res = await fetch(SHEET_URL);
-            globalData = await res.json();
-            updateDashboard();
-        } catch (e) { console.error(e); }
-    }
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzwq3LHsJqkWQK3tWdBeDl-Tyqq5zQNA4ehw9nWJK2zlBVc0Yk3RTB5OM_Y-2XGJDdM/exec';
+        let cachedData = null;
+        let currentReportState = { title: '', color: '', icon: '' };
 
-    function updateDashboard() {
-        const today = new Date().toLocaleDateString();
-        const pSum = globalData.filter(r => r.category === "profile" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.outputWeight) || 0), 0);
-        const bCnt = globalData.filter(r => r.category === "bucket" && new Date(r.date).toLocaleDateString() === today).length;
-        const aSum = globalData.filter(r => r.category === "aging" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.weight) || 0), 0);
-        const dSum = globalData.filter(r => r.category === "damage" && new Date(r.date).toLocaleDateString() === today).reduce((s, r) => s + (parseFloat(r.damageWeight) || 0), 0);
+        lucide.createIcons();
 
-        document.getElementById('profileTon').innerText = (pSum/1000).toFixed(3) + " Ton";
-        document.getElementById('bucketCount').innerText = bCnt + " Items";
-        document.getElementById('agingTon').innerText = (aSum/1000).toFixed(3) + " Ton";
-        document.getElementById('damageTon').innerText = (dSum/1000).toFixed(3) + " Ton";
-    }
+        window.onload = async () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('report-date').value = today;
+            
+            // Initial data fetch to populate button tons
+            const data = await fetchData();
+            if (data) {
+                updateDashboardLabels(data, today);
+            }
+        };
 
-    function openReport(title, color, type) {
-        activeType = type;
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalTitle').style.color = color.includes('var') ? color : `var(--${color})`;
-        document.getElementById('reportModal').classList.add('active');
-        filterDataByDate();
-    }
+        const toggleModal = (id) => {
+            const m = document.getElementById(id);
+            const c = m.querySelector('.relative');
+            if (m.classList.contains('hidden')) {
+                m.classList.remove('hidden');
+                setTimeout(() => c.classList.remove('opacity-0', 'scale-95'), 10);
+            } else {
+                c.classList.add('opacity-0', 'scale-95');
+                setTimeout(async () => {
+                    m.classList.add('hidden');
+                    
+                    // Reset date to today when closing the modal
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('report-date').value = today;
+                    
+                    // Refresh main dashboard tonnage labels to current date
+                    const data = await fetchData();
+                    if (data) {
+                        updateDashboardLabels(data, today);
+                    }
+                }, 300);
+            }
+        };
 
-    function formatTime(timeStr) {
-        if (!timeStr) return '-';
-        const date = new Date(timeStr);
-        return isNaN(date.getTime()) ? timeStr : date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
+        const toggleDrop = (cid, chid) => {
+            document.getElementById(cid).classList.toggle('show');
+            document.getElementById(chid).classList.toggle('rotate');
+        };
 
-    function filterDataByDate() {
-        const dateInput = document.getElementById('reportDate').value;
-        const date = new Date(dateInput).toLocaleDateString();
-        const head = document.getElementById('tableHead');
-        const body = document.getElementById('tableBody');
-        const summary = document.getElementById('modalSummary');
-        body.innerHTML = '';
-        let total = 0;
+        let selectedExportType = 'csv';
 
-        const filtered = globalData.filter(r => new Date(r.date).toLocaleDateString() === date && r.category === activeType);
-
-        if (activeType === 'profile') {
-            head.innerHTML = '<tr><th>Profile</th><th>Type</th><th>Length</th><th>Qty</th></tr>';
-            filtered.forEach(row => {
-                total += (parseFloat(row.outputWeight) || 0);
-                const pairs = [{l:"3.65", q:row.valK}, {l:"6.10", q:row.valL}, {l:"6.50", q:row.valM}, {l:row.valN, q:row.valO}];
-                pairs.forEach(p => { if(p.q > 0) body.innerHTML += `<tr><td>${row.profile}</td><td>ULR</td><td>${p.l}m</td><td>${p.q}</td></tr>`; });
+        function setFileType(type) {
+            selectedExportType = type;
+            document.querySelectorAll('.file-type-btn').forEach(btn => {
+                btn.classList.remove('active-file-type');
             });
-            summary.innerText = "Total: " + (total/1000).toFixed(3) + " Ton";
-        } 
-        else if (activeType === 'bucket') {
-            head.innerHTML = '<tr><th>Bucket No</th><th>Profile</th><th>Length</th><th>Qty</th></tr>';
-            filtered.forEach(row => { 
-                body.innerHTML += `<tr><td style="color:var(--accent-green)">#${row.bucketNo}</td><td>${row.profile}</td><td>${row.length}m</td><td>${row.qty}</td></tr>`; 
-            });
-            summary.innerText = "Count: " + filtered.length + " Buckets";
-        } 
-        else if (activeType === 'aging') {
-            head.innerHTML = '<tr><th>Bucket No</th><th>IN Time</th><th>OUT Time</th><th>Weight (kg)</th></tr>';
-            filtered.forEach(row => {
-                const w = parseFloat(row.weight) || 0;
-                total += w;
-                body.innerHTML += `<tr><td style="color:var(--accent-yellow)">#${row.bucketNo}</td><td>${formatTime(row.inTime)}</td><td>${formatTime(row.outTime)}</td><td>${w.toFixed(2)}</td></tr>`;
-            });
-            summary.innerText = "Count: " + filtered.length + " | Total: " + (total/1000).toFixed(3) + " Ton";
+            event.currentTarget.classList.add('active-file-type');
         }
-        else if (activeType === 'damage') {
-            head.innerHTML = '<tr><th>Profile</th><th>Length</th><th>Dmg Qty</th><th>Dmg Weight (kg)</th></tr>';
-            filtered.forEach(row => {
-                const dw = parseFloat(row.damageWeight) || 0;
-                total += dw;
-                body.innerHTML += `<tr><td style="color:var(--accent-red); font-weight:bold;">${row.profile}</td><td>${row.length}m</td><td>${row.damageQty}</td><td>${dw.toFixed(2)}</td></tr>`;
-            });
-            summary.innerText = "Total Damage: " + (total/1000).toFixed(3) + " Ton";
+
+        async function processExport() {
+            const fromDate = document.getElementById('export-from').value;
+            const toDate = document.getElementById('export-to').value;
+            const title = document.getElementById('modal-title').textContent;
+            
+            if (!fromDate || !toDate) {
+                alert('Please select a valid date range.');
+                return;
+            }
+
+            const downloadBtn = event.currentTarget;
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> GENERATING...';
+            lucide.createIcons();
+            downloadBtn.disabled = true;
+
+            try {
+                const allData = await fetchData();
+                const typeMap = { 'Profile Income': 'profile', 'Bucket Income': 'bucket', 'Damage Reports': 'damage', 'Aging Details': 'aging' };
+                const category = typeMap[title];
+                
+                const rawRows = Array.isArray(allData) ? allData.filter(r => r.category === category) : [];
+                const filtered = rawRows.filter(r => {
+                    const d = parseDate(r.date);
+                    return d >= fromDate && d <= toDate;
+                });
+
+                if (filtered.length === 0) {
+                    alert('No data found for the selected range.');
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.disabled = false;
+                    return;
+                }
+
+                // Prepare export data with a Date column
+                let exportData = [];
+                if (category === 'profile') {
+                    filtered.forEach(r => {
+                        const types = ['C','D','E'].filter(t => r['type'+t]).map(t => ({C:'ULR',D:'PRM',E:'ULR PRM'}[t])).join(', ');
+                        [{l:"3.65", q:r.valK}, {l:"6.10", q:r.valL}, {l:"6.50", q:r.valM}, {l:r.valN, q:r.valO}].forEach(p => {
+                            if (p.q > 0) exportData.push({ Date: parseDate(r.date), Profile: r.profile, 'Unit Weight': r.unitweight, Type: types, Input: r.inputweight, Output: r.outputWeight, Length: p.l + 'm', Qty: p.q, 'Off Cut': r.offcut, Yield: r.yeild, Status: r.diestatus });
+                        });
+                    });
+                } else if (category === 'bucket') {
+                    filtered.forEach(r => exportData.push({ Date: parseDate(r.date), 'Bucket No': r.bucketNo, Profile: r.profile, Length: r.length + 'm', Qty: r.qty }));
+                } else if (category === 'aging') {
+                    filtered.forEach(r => exportData.push({ Date: parseDate(r.date), 'Bucket No': r.bucketNo, 'IN Time': formatTime(r.inTime), 'OUT Time': formatTime(r.outTime), 'Weight (kg)': r.weight }));
+                } else if (category === 'damage') {
+                    filtered.forEach(r => exportData.push({ Date: parseDate(r.date), Profile: r.profile, Length: r.length + 'm', 'Dmg Qty': r.damageQty, 'Dmg Weight (kg)': r.damageWeight }));
+                }
+
+                const fileName = `${title}_${fromDate}_to_${toDate}`;
+
+                if (selectedExportType === 'xlsm' || selectedExportType === 'csv') {
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Report");
+                    XLSX.writeFile(wb, `${fileName}.${selectedExportType}`);
+                } 
+                else if (selectedExportType === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('l', 'mm', 'a4');
+                    doc.setFontSize(14);
+                    doc.text(`${title} INDUSTRIAL REPORT`, 14, 15);
+                    doc.setFontSize(8);
+                    doc.text(`PERIOD: ${fromDate} TO ${toDate}`, 14, 22);
+                    
+                    const headers = Object.keys(exportData[0]);
+                    const body = exportData.map(row => headers.map(h => row[h]));
+                    
+                    doc.autoTable({ head: [headers], body: body, margin: { top: 30 }, styles: { fontSize: 7 } });
+                    doc.save(`${fileName}.pdf`);
+                }
+
+                downloadBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> SUCCESS';
+                lucide.createIcons();
+                setTimeout(() => {
+                    downloadBtn.innerHTML = originalText;
+                    lucide.createIcons();
+                    downloadBtn.disabled = false;
+                    toggleModal('export-modal');
+                }, 1000);
+
+            } catch (err) {
+                console.error(err);
+                alert('Export failed.');
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }
         }
-    }
-    
-    function closeAll() { document.getElementById('reportModal').classList.remove('active'); }
-</script>
+
+        async function fetchData() {
+            if (cachedData) return cachedData;
+            try {
+                // Google Apps Script requires a redirect-friendly fetch
+                const r = await fetch(API_URL);
+                if (!r.ok) throw new Error('Network response was not ok');
+                const data = await r.json();
+                console.log("Data fetched successfully:", data);
+                cachedData = data;
+                return cachedData;
+            } catch (e) { 
+                console.error('Fetch error:', e);
+                return null; 
+            }
+        }
+
+        async function refreshReportData() {
+            cachedData = null; // Reset cache
+            const title = currentReportState.title;
+            if (title) {
+                openReportModal(title, currentReportState.color, currentReportState.icon);
+            }
+        }
+
+        function parseDate(dateInput) {
+            if (!dateInput) return null;
+            try {
+                const d = new Date(dateInput);
+                if (isNaN(d.getTime())) return null;
+                return d.toISOString().split('T')[0];
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function updateDashboardLabels(data, selectedDate) {
+            if (!data || !Array.isArray(data)) return;
+
+            const cats = ['profile', 'bucket', 'aging', 'damage'];
+            cats.forEach(cat => {
+                const filtered = data.filter(r => {
+                    if (r.category !== cat) return false;
+                    const rowDate = parseDate(r.date);
+                    return rowDate === selectedDate;
+                });
+
+                let totalWeight = 0;
+                let count = filtered.length;
+
+                filtered.forEach(r => {
+                    if (cat === 'profile') totalWeight += (parseFloat(r.outputWeight) || 0);
+                    else if (cat === 'aging') totalWeight += (parseFloat(r.weight) || 0);
+                    else if (cat === 'damage') totalWeight += (parseFloat(r.damageWeight) || 0);
+                });
+
+                const labelEl = document.getElementById(`dash-ton-${cat}`);
+                if (labelEl) {
+                    if (cat === 'bucket') {
+                        labelEl.textContent = `${count} Buckets`;
+                    } else {
+                        labelEl.textContent = `${(totalWeight / 1000).toFixed(3)} Ton`;
+                    }
+                }
+            });
+        }
+
+        async function openReportModal(title, color, icon) {
+            currentReportState = { title, color, icon };
+            const m = document.getElementById('report-modal');
+            const mc = m.querySelector('.relative');
+            const h = document.getElementById('report-thead');
+            const b = document.getElementById('report-tbody');
+            const s = document.getElementById('report-summary');
+            
+            const modalTitleEl = document.getElementById('modal-title');
+            modalTitleEl.textContent = title;
+            modalTitleEl.classList.remove('text-xl', 'text-2xl');
+            if (title === 'Profile Income') {
+                modalTitleEl.classList.add('text-2xl');
+            } else {
+                modalTitleEl.classList.add('text-xl');
+            }
+            document.getElementById('modal-icon').setAttribute('data-lucide', icon);
+            document.getElementById('modal-icon-bg').style.backgroundColor = color + '20';
+            document.getElementById('modal-icon').style.color = color;
+            lucide.createIcons();
+
+            if (title === 'Profile Income') mc.className = mc.className.replace(/max-w-\w+/, 'max-w-5xl');
+            else mc.className = mc.className.replace(/max-w-\w+/, 'max-w-2xl');
+
+            if (m.classList.contains('hidden')) toggleModal('report-modal');
+
+            s.innerHTML = `
+                <div class="flex flex-col items-center gap-4 py-12">
+                    <div class="relative">
+                        <i data-lucide="cloud" class="w-12 h-12 text-white/10"></i>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i data-lucide="refresh-cw" class="w-6 h-6 electric-blue-text sync-icon-animation"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 animate-pulse">Syncing Production Cloud</span>
+                        <span class="text-[9px] uppercase tracking-widest text-white/10">Establishing Secure Connection</span>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            const data = await fetchData();
+            if (!data) { s.textContent = 'Error loading data.'; return; }
+
+            const selectedDate = document.getElementById('report-date').value;
+            
+            // Update Dashboard Labels
+            updateDashboardLabels(data, selectedDate);
+
+            // Map title to the category names used in your Google Script
+            const typeMap = {
+                'Profile Income': 'profile',
+                'Bucket Income': 'bucket',
+                'Damage Reports': 'damage',
+                'Aging Details': 'aging'
+            };
+            const category = typeMap[title];
+            
+            // Your script returns a flat array. Filter by category first.
+            const rawRows = Array.isArray(data) ? data.filter(r => r.category === category) : [];
+            
+            // Filter by date
+            const rows = rawRows.filter(r => {
+                const rowDate = parseDate(r.date);
+                return rowDate === selectedDate;
+            });
+
+            // Set Headers based on category immediately
+            const headers = {
+                'profile': '<tr><th>Profile</th><th>Unit Weight</th><th>Type</th><th>Input</th><th>Output</th><th>Length</th><th>Qty</th><th>Off Cut</th><th>Yield</th><th>Status</th></tr>',
+                'bucket': '<tr><th>Bucket No</th><th>Profile</th><th>Length</th><th>Qty</th></tr>',
+                'aging': '<tr><th>Bucket No</th><th>IN Time</th><th>OUT Time</th><th>Weight (kg)</th></tr>',
+                'damage': '<tr><th>Profile</th><th>Length</th><th>Qty</th><th>Weight (kg)</th></tr>'
+            };
+            h.innerHTML = headers[category] || '';
+
+            let total = 0;
+            b.innerHTML = '';
+
+            if (rows.length === 0) {
+                const colSpan = category === 'profile' ? 10 : 4;
+                b.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-20 text-white/20 italic tracking-widest uppercase">No production records found for ${selectedDate}</td></tr>`;
+                s.innerText = "Status: NULL";
+                return;
+            }
+
+            if (category === 'profile') {
+                rows.forEach(r => {
+                    total += (parseFloat(r.outputWeight) || 0);
+                    const types = ['C','D','E'].filter(t => r['type'+t]).map(t => ({C:'ULR',D:'PRM',E:'ULR PRM'}[t])).join(', ');
+                    [{l:"3.65", q:r.valK}, {l:"6.10", q:r.valL}, {l:"6.50", q:r.valM}, {l:r.valN, q:r.valO}].forEach(p => {
+                        if (p.q > 0) b.innerHTML += `<tr><td>${r.profile}</td><td>${r.unitweight}</td><td>${types}</td><td>${r.inputweight}</td><td>${r.outputWeight}</td><td>${p.l}m</td><td>${p.q}</td><td>${r.offcut}</td><td>${r.yeild}</td><td class="pl-12">${r.diestatus}</td></tr>`;
+                    });
+                });
+                s.innerText = `Total: ${(total/1000).toFixed(3)} Ton`;
+            } else if (category === 'bucket') {
+                rows.forEach(r => b.innerHTML += `<tr><td style="color:#15ff00">#${r.bucketNo}</td><td>${r.profile}</td><td>${r.length}m</td><td>${r.qty}</td></tr>`);
+                s.innerText = `Count: ${rows.length} Buckets`;
+            } else if (category === 'aging') {
+                rows.forEach(r => {
+                    const w = parseFloat(r.weight) || 0; total += w;
+                    b.innerHTML += `<tr><td style="color:#f59e0b">#${r.bucketNo}</td><td>${new Date(r.inTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${new Date(r.outTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td>${w.toFixed(2)}</td></tr>`;
+                });
+                s.innerText = `Total: ${(total/1000).toFixed(3)} Ton`;
+            } else if (category === 'damage') {
+                rows.forEach(r => {
+                    const w = parseFloat(r.damageWeight) || 0; total += w;
+                    b.innerHTML += `<tr><td style="color:#ef4444; font-weight:bold;">${r.profile}</td><td>${r.length}m</td><td>${r.damageQty}</td><td>${w.toFixed(2)}</td></tr>`;
+                });
+                s.innerText = `Total Damage: ${(total/1000).toFixed(3)} Ton`;
+            }
+        }
+
+        document.querySelectorAll('.hover-fill-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', (e) => {
+                const rect = btn.getBoundingClientRect();
+                btn.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                btn.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+            });
+        });
+
+        document.getElementById('menu-toggle').onclick = () => {
+            const bt = document.getElementById('menu-toggle');
+            const s = document.getElementById('sidebar');
+            const o = document.getElementById('sidebar-overlay');
+            const isO = s.classList.contains('translate-x-0');
+            
+            bt.classList.toggle('menu-open', !isO);
+            s.classList.toggle('translate-x-0', !isO);
+            s.classList.toggle('-translate-x-full', isO);
+            o.classList.toggle('opacity-100', !isO);
+            o.classList.toggle('pointer-events-auto', !isO);
+            o.classList.toggle('opacity-0', isO);
+            o.classList.toggle('pointer-events-none', isO);
+        };
+    </script>
 </body>
 </html>
