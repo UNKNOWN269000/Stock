@@ -459,7 +459,7 @@
             document.getElementById(cid).classList.toggle('show');
             document.getElementById(chid).classList.toggle('rotate');
         };
-localStorage.getItem(exportTypeKey) || 'csv';
+        let selectedExportType = localStorage.getItem(exportTypeKey) || 'csv';
 
         function setFileType(type, ev) {
             selectedExportType = type;
@@ -470,8 +470,7 @@ localStorage.getItem(exportTypeKey) || 'csv';
             if (ev?.currentTarget) ev.currentTarget.classList.add('active-file-type');
         }
 
-        async function processExport(event
-        async function processExport() {
+        async function processExport(event) {
             const fromDate = document.getElementById('export-from').value;
             const toDate = document.getElementById('export-to').value;
             const title = document.getElementById('modal-title').textContent;
