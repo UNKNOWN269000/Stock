@@ -311,7 +311,7 @@
         <div class="relative w-full max-w-lg dark-charcoal-bg border border-white/10 rounded-[32px] max-h-[85vh] flex flex-col opacity-0 scale-95 transition-all duration-300">
             <div class="p-8 border-b border-white/5 flex items-center justify-between relative">
                 <div class="flex items-center gap-6">
-                    <div id="modal-icon-bg" class="w-16 h-16 rounded-[24px] flex items-center justify-center shadow-inner"><i id="modal-icon" data-lucide="file-text" class="w-7 h-7"></i></div>
+                    <div id="modal-icon-bg" class="w-16 h-16 rounded-[24px] flex items-center justify-center shadow-inner"><i id="modal-icon" data-lucide="file-text" class="w-5 h-5"></i></div>
                     <div class="flex flex-col gap-2">
                         <div>
                             <h3 id="modal-title" class="text-2xl font-black uppercase tracking-tighter leading-none">Report Details</h3>
@@ -396,6 +396,13 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Download Folder</label>
+                    <div class="bg-black/40 border border-white/5 rounded-2xl p-3">
+                        <input id="download-folder" type="text" placeholder="Folder name for download" class="bg-transparent text-white text-xs font-bold w-full focus:outline-none placeholder:text-white/30">
+                    </div>
+                </div>
             </div>
 
             <div class="mt-10 space-y-3">
@@ -413,12 +420,15 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbzwq3LHsJqkWQK3tWdBeDl-Tyqq5zQNA4ehw9nWJK2zlBVc0Yk3RTB5OM_Y-2XGJDdM/exec';
         let cachedData = null;
         let currentReportState = { title: '', color: '', icon: '' };
+        const downloadFolderKey = 'reportDownloadFolder';
+        let savedDownloadFolder = localStorage.getItem(downloadFolderKey) || '';
 
         lucide.createIcons();
 
         window.onload = async () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('report-date').value = today;
+            document.getElementById('download-folder').value = savedDownloadFolder;
             
             // Initial data fetch to populate button tons
             const data = await fetchData();
