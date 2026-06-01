@@ -124,6 +124,7 @@
             font-size: 1.875rem;
             font-weight: 800;
             background: linear-gradient(135deg, #ffffff 0%, #56de4a 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.75rem;
@@ -382,31 +383,23 @@
                 <div class="space-y-3">
                     <label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Select File Format</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="setFileType('xlsm')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                        <button data-type="xlsm" onclick="setFileType('xlsm', event)" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
                             <div class="text-[10px] font-black group-hover:text-green-400 transition-colors">EXCEL</div>
                             <div class="text-[8px] text-white/20">.xlsm format</div>
                         </button>
-                        <button onclick="setFileType('csv')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all text-left group active-file-type">
+                        <button data-type="csv" onclick="setFileType('csv', event)" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all text-left group active-file-type">
                             <div class="text-[10px] font-black group-hover:text-blue-400 transition-colors">CSV</div>
                             <div class="text-[8px] text-white/20">.csv format</div>
                         </button>
-                        <button onclick="setFileType('pdf')" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                        <button data-type="pdf" onclick="setFileType('pdf', event)" class="file-type-btn p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
                             <div class="text-[10px] font-black group-hover:text-red-400 transition-colors">PDF</div>
                             <div class="text-[8px] text-white/20">.pdf format</div>
                         </button>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Download Folder</label>
-                    <div class="bg-black/40 border border-white/5 rounded-2xl p-3">
-                        <input id="download-folder" type="text" placeholder="Folder name for download" class="bg-transparent text-white text-xs font-bold w-full focus:outline-none placeholder:text-white/30">
-                    </div>
-                </div>
-            </div>
-
             <div class="mt-10 space-y-3">
-                <button onclick="processExport()" class="w-full py-5 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer">
+                <button onclick="processExport(event)" class="w-full py-5 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-white/90 active:scale-[0.98] transition-all cursor-pointer">
                     Initiate Download
                 </button>
                 <button onclick="toggleModal('export-modal')" class="w-full py-4 text-white/30 font-bold uppercase text-[10px] tracking-widest hover:text-white transition-all cursor-pointer">
@@ -420,15 +413,16 @@
         const API_URL = 'https://script.google.com/macros/s/AKfycbzwq3LHsJqkWQK3tWdBeDl-Tyqq5zQNA4ehw9nWJK2zlBVc0Yk3RTB5OM_Y-2XGJDdM/exec';
         let cachedData = null;
         let currentReportState = { title: '', color: '', icon: '' };
-        const downloadFolderKey = 'reportDownloadFolder';
-        let savedDownloadFolder = localStorage.getItem(downloadFolderKey) || '';
+        const exportTypeKey = 'selectedExportType';
 
         lucide.createIcons();
 
         window.onload = async () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('report-date').value = today;
-            document.getElementById('download-folder').value = savedDownloadFolder;
+            document.querySelectorAll('.file-type-btn').forEach(btn => {
+                btn.classList.toggle('active-file-type', btn.dataset.type === selectedExportType);
+            });
             
             // Initial data fetch to populate button tons
             const data = await fetchData();
@@ -465,17 +459,18 @@
             document.getElementById(cid).classList.toggle('show');
             document.getElementById(chid).classList.toggle('rotate');
         };
+localStorage.getItem(exportTypeKey) || 'csv';
 
-        let selectedExportType = 'csv';
-
-        function setFileType(type) {
+        function setFileType(type, ev) {
             selectedExportType = type;
+            localStorage.setItem(exportTypeKey, type);
             document.querySelectorAll('.file-type-btn').forEach(btn => {
                 btn.classList.remove('active-file-type');
             });
-            event.currentTarget.classList.add('active-file-type');
+            if (ev?.currentTarget) ev.currentTarget.classList.add('active-file-type');
         }
 
+        async function processExport(event
         async function processExport() {
             const fromDate = document.getElementById('export-from').value;
             const toDate = document.getElementById('export-to').value;
